@@ -22,6 +22,236 @@ let appData = {
     selectedTickets: [], 
     winners: [], 
 };
+let currentLang = 'es'; // Estado del idioma (es | en)
+
+// --- DICCIONARIO DE IDIOMAS (I18N) ---
+const texts = {
+    es: {
+        'docTitle': 'Gran Rifa – Moto CR4 Repotenciada Y 1M semanal',
+        'headerTitle': '🏆 Rifa Épica | Moto CR4',
+        'videoBtn': 'Video',
+        'myTicketsBtn': 'Mis Boletas',
+        'toggleThemeBtn': 'Tema',
+        'langBtn': 'Idioma',
+        'loginBtn': 'Ingresar',
+        'adminBtn': 'Admin',
+        'totalStat': 'Total',
+        'availStat': 'Disponibles',
+        'resStat': 'Reservadas',
+        'paidStat': '¡Pagadas!',
+        'countdownWeeklyTitle': 'Próximo Sorteo Semanal (1M COP)',
+        'countdownFinalTitle': 'Sorteo Final (Moto CR4)',
+        'searchTicketPlaceholder': 'Buscar Boleta (Ej: 005)',
+        'filterSelectOptions': { 'all': 'Ver Todos', 'available': 'Disponibles', 'reserved': 'Reservadas', 'paid': 'Pagadas' },
+        'verifyTicketBtn': 'Verificar Boleta',
+        'refreshDataBtn': 'Refrescar Datos',
+        'reserveBtn': 'Reservar',
+        'legendTitle': 'Significado de Colores:',
+        'legendAvailable': 'Disponible',
+        'legendReserved': 'Reservado',
+        'legendPaid': 'Pagado',
+        'legendMine': 'Mío (Parpadeo)',
+        'footerResponsible': 'Responsable: Óscar Fidel Flórez Tami | 📞 321 963 7388',
+        'footerDelayWarning': 'Entre mas te demores menos oportunidades, hazlo ya para mas oportunidades',
+        'checksumTitle': '🔒 Código de Integridad (Transparencia)',
+        'checksumInfo': 'Código oficial:',
+        'verifyChecksumBtn': 'Verificar Autenticidad',
+        'generateChecksumBtn': 'Generar Checksum (Admin)',
+        'exportPaidTicketsBtn': 'Descargar Listado de Boletas Pagadas',
+        // Modals
+        'loginModalTitle': '👤 Identifícate',
+        'placeholderName': 'Nombre Completo',
+        'placeholderEmail': 'Correo Electrónico (Para tu ID)',
+        'placeholderPhone': 'Celular (Ej: 300 123 4567)',
+        'loginModalSubmit': 'Ingresar / Actualizar Datos',
+        'adminPanelTitle': 'Panel de Administración 🛡️',
+        'adminRefreshListsBtn': 'Refrescar Listas',
+        'adminNotificationsBtn': 'Revisar Reservas por Vencer (Automatización)',
+        'adminManualAssignBtn': 'Asignar Boleta Manual',
+        'adminWinnerManagementBtn': 'Registrar Ganador Lotería',
+        'adminReservedTitle': 'Reservadas (Pendientes de Pago)',
+        'adminPaidTitle': 'Pagadas (Aseguradas)',
+        'adminUserTitle': 'Gestión de Clientes',
+        'adminSearchPlaceholder': 'Buscar cliente por nombre o teléfono',
+        'adminResetBtn': 'RESET COMPLETO DE RIFA',
+        'verifyModalTitle': 'Verificar Boleta',
+        'placeholderTicketNum': 'Número de 3 dígitos (Ej: 045)',
+        'verifyInitialText': 'Escribe un número para verificar...',
+        'verifyCloseBtn': 'Listo',
+        'manualAssignTitle': 'Asignación Manual',
+        'placeholderPhoneUnique': 'Teléfono Cliente (ID Único)',
+        'manualAssignSubmit': 'Asignar y Marcar como PAGADA',
+        'winnerManagementTitle': 'Registrar Ganador',
+        'placeholderWinnerNum': 'Número Ganador (3 dígitos)',
+        'winnerSubmitBtn': 'Confirmar y Registrar Ganador',
+        'notificationModalTitle': '🔔 Reservas Próximas a Expirar',
+        'notificationModalInfo': 'Boletas que expiran en las próximas 3 horas. Notifique al cliente para asegurar el pago.',
+        'videoModalTitle': '🎥 Video de Ganadores (ganadores.mp4)',
+        'videoModalFallback': 'Tu navegador no soporta el video.',
+        'videoModalFooter': 'Revive la emoción de los sorteos anteriores.',
+        'closeBtn': 'Cerrar',
+        // Table Headers
+        'tableTicketHeader': 'Boleta',
+        'tableClientHeader': 'Cliente (Dueño)',
+        'tableActionsHeader': 'Acciones',
+        'tableUserHeader': 'Nombre',
+        'tablePhoneHeader': 'Celular',
+        'tableTicketsHeader': 'Boletas',
+        'tableExpiresInHeader': 'Expira en',
+        // Toast Messages
+        'toastThemeDark': 'Tema Oscuro activado.',
+        'toastThemeLight': 'Tema Claro activado.',
+        'toastNoOwnerPaid': 'No se puede marcar como pagada sin un dueño. Use la opción de Asignación Manual.',
+    },
+    en: {
+        'docTitle': 'Grand Raffle – CR4 Motorbike and 1M weekly',
+        'headerTitle': '🏆 Epic Raffle | CR4 Motorbike',
+        'videoBtn': 'Video',
+        'myTicketsBtn': 'My Tickets',
+        'toggleThemeBtn': 'Theme',
+        'langBtn': 'Language',
+        'loginBtn': 'Login',
+        'adminBtn': 'Admin',
+        'totalStat': 'Total',
+        'availStat': 'Available',
+        'resStat': 'Reserved',
+        'paidStat': 'Paid!',
+        'countdownWeeklyTitle': 'Next Weekly Draw (1M COP)',
+        'countdownFinalTitle': 'Final Draw (CR4 Motorbike)',
+        'searchTicketPlaceholder': 'Search Ticket (Ex: 005)',
+        'filterSelectOptions': { 'all': 'View All', 'available': 'Available', 'reserved': 'Reserved', 'paid': 'Paid' },
+        'verifyTicketBtn': 'Verify Ticket',
+        'refreshDataBtn': 'Refresh Data',
+        'reserveBtn': 'Reserve',
+        'legendTitle': 'Color Meaning:',
+        'legendAvailable': 'Available',
+        'legendReserved': 'Reserved',
+        'legendPaid': 'Paid',
+        'legendMine': 'Mine (Blink)',
+        'footerResponsible': 'Responsible: Óscar Fidel Flórez Tami | 📞 321 963 7388',
+        'footerDelayWarning': 'The longer you wait, the fewer chances you have, do it now for more opportunities',
+        'checksumTitle': '🔒 Integrity Code (Transparency)',
+        'checksumInfo': 'Official Code:',
+        'verifyChecksumBtn': 'Verify Authenticity',
+        'generateChecksumBtn': 'Generate Checksum (Admin)',
+        'exportPaidTicketsBtn': 'Download Paid Tickets List',
+        // Modals
+        'loginModalTitle': '👤 Identify Yourself',
+        'placeholderName': 'Full Name',
+        'placeholderEmail': 'Email (For your ID)',
+        'placeholderPhone': 'Mobile (Ex: 300 123 4567)',
+        'loginModalSubmit': 'Login / Update Data',
+        'adminPanelTitle': 'Admin Panel 🛡️',
+        'adminRefreshListsBtn': 'Refresh Lists',
+        'adminNotificationsBtn': 'Review Expiring Reservations (Automation)',
+        'adminManualAssignBtn': 'Manual Ticket Assignment',
+        'adminWinnerManagementBtn': 'Register Raffle Winner',
+        'adminReservedTitle': 'Reserved (Pending Payment)',
+        'adminPaidTitle': 'Paid (Secured)',
+        'adminUserTitle': 'Client Management',
+        'adminSearchPlaceholder': 'Search client by name or phone',
+        'adminResetBtn': 'FULL RAFFLE RESET',
+        'verifyModalTitle': 'Verify Ticket',
+        'placeholderTicketNum': '3-digit number (Ex: 045)',
+        'verifyInitialText': 'Type a number to verify...',
+        'verifyCloseBtn': 'Done',
+        'manualAssignTitle': 'Manual Assignment',
+        'placeholderPhoneUnique': 'Client Phone (Unique ID)',
+        'manualAssignSubmit': 'Assign and Mark as PAID',
+        'winnerManagementTitle': 'Register Winner',
+        'placeholderWinnerNum': 'Winning Number (3 digits)',
+        'winnerSubmitBtn': 'Confirm and Register Winner',
+        'notificationModalTitle': '🔔 Reservations Near Expiry',
+        'notificationModalInfo': 'Tickets expiring in the next 3 hours. Notify the client to secure the payment.',
+        'videoModalTitle': '🎥 Winners Video (ganadores.mp4)',
+        'videoModalFallback': 'Your browser does not support the video.',
+        'videoModalFooter': 'Relive the excitement of previous draws.',
+        'closeBtn': 'Close',
+        // Table Headers
+        'tableTicketHeader': 'Ticket',
+        'tableClientHeader': 'Client (Owner)',
+        'tableActionsHeader': 'Actions',
+        'tableUserHeader': 'Name',
+        'tablePhoneHeader': 'Mobile',
+        'tableTicketsHeader': 'Tickets',
+        'tableExpiresInHeader': 'Expires In',
+        // Toast Messages
+        'toastThemeDark': 'Dark Theme activated.',
+        'toastThemeLight': 'Light Theme activated.',
+        'toastNoOwnerPaid': 'Cannot mark as paid without an owner. Use the Manual Assignment option.',
+    }
+};
+
+// --- FUNCIONES DE IDIOMA ---
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    updateText();
+}
+
+function toggleLanguage() {
+    const newLang = currentLang === 'es' ? 'en' : 'es';
+    setLanguage(newLang);
+}
+
+function updateText() {
+    // 1. Elementos con data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const text = texts[currentLang][key];
+        if (text) {
+            el.textContent = text;
+        }
+    });
+
+    // 2. Elementos con data-i18n-placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (texts[currentLang][key]) {
+            el.placeholder = texts[currentLang][key];
+        }
+    });
+
+    // 3. Casos especiales (con iconos o formatos)
+    document.getElementById('headerTitle').innerHTML = texts[currentLang]['headerTitle'].replace('Moto CR4', `<span style="color: var(--accent); font-size: 1rem;">| Moto CR4</span>`);
+    document.querySelector('[data-i18n="videoBtn"]').innerHTML = `<i class="fas fa-video"></i> ${texts[currentLang]['videoBtn']}`;
+    document.querySelector('[data-i18n="myTicketsBtn"]').innerHTML = `<i class="fas fa-ticket-alt"></i> ${texts[currentLang]['myTicketsBtn']}`;
+    document.querySelector('[data-i18n="toggleThemeBtn"]').innerHTML = `<i class="fas fa-moon"></i>`;
+    document.querySelector('[data-i18n="langBtn"]').innerHTML = `<i class="fas fa-globe"></i> ${texts[currentLang]['langBtn']}`;
+    document.querySelector('[data-i18n="adminBtn"]').innerHTML = `<i class="fas fa-lock"></i> ${texts[currentLang]['adminBtn']}`;
+
+    // 4. Select de Filtro
+    const filterSelect = document.getElementById('filterSelect');
+    if (filterSelect) {
+        filterSelect.innerHTML = '';
+        const options = texts[currentLang]['filterSelectOptions'];
+        for (const key in options) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = options[key];
+            filterSelect.appendChild(option);
+        }
+    }
+
+    // 5. Select de Ganadores
+    const winnerTypeSelect = document.getElementById('winnerType');
+    if (winnerTypeSelect) {
+        winnerTypeSelect.innerHTML = '';
+        const optionsData = [
+            { value: 'weekly', text: currentLang === 'es' ? 'Sorteo Semanal (1M)' : 'Weekly Draw (1M)' },
+            { value: 'final', text: currentLang === 'es' ? 'Sorteo Final (Moto CR4)' : 'Final Draw (CR4 Motorbike)' }
+        ];
+        optionsData.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.text;
+            winnerTypeSelect.appendChild(option);
+        });
+    }
+
+    renderInteractiveLegend(); // Actualizar leyenda
+}
 
 // --- FUNCIONES DE UTILIDAD Y UX ---
 
@@ -50,26 +280,23 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('open'); 
     if (id === 'verifyModal') {
         document.getElementById('verifyNum').value = '';
-        document.getElementById('verifyResult').innerHTML = '<p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>';
+        document.getElementById('verifyResult').innerHTML = `<p style="color:var(--text-muted); margin:0;" data-i18n="verifyInitialText">${texts[currentLang]['verifyInitialText']}</p>`;
     }
 }
+
 function toggleTheme() { 
     document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    renderInteractiveLegend(); // Refrescar leyenda por si cambia color
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    
+    // El tema es lo único que no se traduce
+    toast(isDark ? texts.es.toastThemeDark : texts.es.toastThemeLight, 'accent');
+    
+    renderInteractiveLegend(); // Refrescar leyenda
 }
 
 function showLoading() { document.getElementById('loading-spinner').classList.remove('hidden'); }
 function hideLoading() { document.getElementById('loading-spinner').classList.add('hidden'); }
-
-function applyPhoneMask(input) {
-    let value = input.value.replace(/\D/g, ''); 
-    let formatted = '';
-    if (value.length > 0) { formatted += value.substring(0, 3); }
-    if (value.length > 3) { formatted += ' ' + value.substring(3, 6); }
-    if (value.length > 6) { formatted += ' ' + value.substring(6, 10); }
-    input.value = formatted.trim();
-}
 
 // --- PERSISTENCIA Y CARGA / LIMPIEZA AUTOMÁTICA ---
 
@@ -89,13 +316,17 @@ function getWeeklyCutoffTime() {
 function load() {
     showLoading(); 
     
-    // 1. Cargar Tema (Dark/Light)
+    // 1. Cargar Idioma
+    const savedLang = localStorage.getItem('lang');
+    setLanguage(savedLang || 'es');
+    
+    // 2. Cargar Tema
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
     }
 
-    // 2. Recuperación y Carga de Datos
+    // 3. Recuperación y Carga de Datos
     let saved = localStorage.getItem(STORAGE_KEY);
     
     // INTENTO DE RECUPERACIÓN DE DATOS ANTERIORES
@@ -103,9 +334,8 @@ function load() {
         const oldSaved = localStorage.getItem(OLD_STORAGE_KEY_V11);
         if (oldSaved) {
             saved = oldSaved;
-            // MIGRAR A LA NUEVA CLAVE
             localStorage.setItem(STORAGE_KEY, oldSaved);
-            localStorage.removeItem(OLD_STORAGE_KEY_V11); // Limpiar por si acaso
+            localStorage.removeItem(OLD_STORAGE_KEY_V11);
             toast("✅ ¡Datos de boletas anteriores recuperados y migrados!", 'accent');
         }
     }
@@ -116,19 +346,16 @@ function load() {
         if (!appData.selectedTickets) appData.selectedTickets = [];
         if (!appData.winners) appData.winners = [];
         if (!appData.tickets || appData.tickets.length !== TOTAL_TICKETS) {
-            // Si el array de tickets está corrupto o es de tamaño incorrecto, forzar reinicio solo de tickets (manteniendo users y winners)
             initializeTickets();
-            toast("⚠️ Error: Se detectó corrupción en los tickets. Recargando boletas.", 'error');
+            toast(currentLang === 'es' ? "⚠️ Error: Se detectó corrupción en los tickets. Recargando boletas." : "⚠️ Error: Ticket corruption detected. Reloading tickets.", 'error');
         }
     } else {
-        // Inicialización si no hay datos guardados
         initializeTickets();
     }
     
-    // 3. Aplicar Limpieza Automática (Semanal y por Expiración)
+    // 4. Aplicar Limpieza Automática (Semanal y por Expiración)
     const nowTimestamp = Date.now();
     
-    // Limpieza Semanal (Viernes 5 PM)
     const WEEKLY_CLEARANCE_KEY = "last_weekly_clearance_timestamp";
     let lastWeeklyClearanceTime = localStorage.getItem(WEEKLY_CLEARANCE_KEY);
     lastWeeklyClearanceTime = lastWeeklyClearanceTime ? parseInt(lastWeeklyClearanceTime) : 0;
@@ -146,12 +373,11 @@ function load() {
                 weeklyClearedCount++;
             }
         });
-        if (weeklyClearedCount > 0) { toast(`¡Corte Semanal! ${weeklyClearedCount} reservas liberadas.`, 'accent'); }
+        if (weeklyClearedCount > 0) { toast(currentLang === 'es' ? `¡Corte Semanal! ${weeklyClearedCount} reservas liberadas.` : `Weekly Cut! ${weeklyClearedCount} reservations released.`, 'accent'); }
         localStorage.setItem(WEEKLY_CLEARANCE_KEY, nowTimestamp.toString()); 
         appData.selectedTickets = []; 
     }
     
-    // Expiración Estándar (24 Horas)
     let reservationsExpired = 0;
     appData.tickets.forEach(t => {
         if (t.state === 'reserved' && t.reservedAt && (nowTimestamp - t.reservedAt > RESERVATION_DURATION_MS)) {
@@ -161,15 +387,14 @@ function load() {
             reservationsExpired++;
         }
     });
-    if (reservationsExpired > 0) { toast(`Se liberaron ${reservationsExpired} reservas expiradas por tiempo (24h).`, 'warning'); }
+    if (reservationsExpired > 0) { toast(currentLang === 'es' ? `Se liberaron ${reservationsExpired} reservas expiradas por tiempo (24h).` : `${reservationsExpired} expired reservations released (24h).`, 'warning'); }
 
-    // 4. Renderizar UI
+    // 5. Renderizar UI
     renderGrid();
     updateUI();
     startCountdown();
-    renderInteractiveLegend();
     
-    // 5. Setup Listeners
+    // 6. Setup Listeners
     document.getElementById('searchInput').addEventListener('input', renderGrid);
     document.getElementById('filterSelect').addEventListener('change', renderGrid);
     document.getElementById('verifyNum').addEventListener('input', verifyTicketStatus);
@@ -179,7 +404,7 @@ function load() {
     if (userNameInput && loginTitle) {
         userNameInput.addEventListener('input', () => {
             const name = userNameInput.value.trim();
-            loginTitle.textContent = name.length > 0 ? `👋 Hola, ${name}` : `👤 Identifícate`;
+            loginTitle.textContent = name.length > 0 ? `👋 ${currentLang === 'es' ? 'Hola' : 'Hello'}, ${name}` : texts[currentLang]['loginModalTitle'];
         });
     }
 
@@ -201,7 +426,7 @@ function save() {
 
 function refreshData() {
     load(); 
-    toast("Datos y contadores actualizados", 'success');
+    toast(currentLang === 'es' ? "Datos y contadores actualizados" : "Data and counters updated", 'success');
 }
 
 
@@ -243,15 +468,18 @@ function startCountdown() {
                 document.getElementById(elementId).innerHTML = defaultText;
             }
         };
-
+        
+        const weeklyDrawText = currentLang === 'es' ? "¡HOY, A LAS 10 PM!" : "TODAY, AT 10 PM!";
+        const finishedText = currentLang === 'es' ? "FINALIZADO" : "FINISHED";
+        
         if (nextDrawTime < FINAL_RAFFLE_DATE.getTime() && nextDrawTime > now) {
-            updateTimeDisplay("nextDrawTime", distance, "¡HOY, A LAS 10 PM!");
+            updateTimeDisplay("nextDrawTime", distance, weeklyDrawText);
         } else {
-            updateTimeDisplay("nextDrawTime", nextDrawTime - now, nextDrawTime < FINAL_RAFFLE_DATE.getTime() ? "¡HOY, A LAS 10 PM!" : "FINALIZADO");
+            updateTimeDisplay("nextDrawTime", nextDrawTime - now, nextDrawTime < FINAL_RAFFLE_DATE.getTime() ? weeklyDrawText : finishedText);
         }
         
         distance = FINAL_RAFFLE_DATE.getTime() - now;
-        updateTimeDisplay("finalDrawTime", distance, "¡RIFA TERMINADA!");
+        updateTimeDisplay("finalDrawTime", distance, currentLang === 'es' ? "¡RIFA TERMINADA!" : "RAFFLE ENDED!");
 
         if (distance <= 0) {
             clearInterval(timer);
@@ -262,31 +490,20 @@ function startCountdown() {
 // --- LÓGICA DE INTERFAZ Y GRID ---
 
 function renderInteractiveLegend() {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const bgCardColor = getCssVar('--bg-card');
-    
     const legendData = [
-        { color: getCssVar('--primary'), text: 'Disponible' },
-        { color: getCssVar('--warning'), text: 'Reservado' },
-        { color: getCssVar('--accent'), text: 'Pagado' },
-        { color: getCssVar('--secondary'), text: 'Mío (Parpadeo)' }
+        { color: getCssVar('--primary'), text: texts[currentLang]['legendAvailable'] },
+        { color: getCssVar('--warning'), text: texts[currentLang]['legendReserved'] },
+        { color: getCssVar('--accent'), text: texts[currentLang]['legendPaid'] },
+        { color: getCssVar('--secondary'), text: texts[currentLang]['legendMine'] }
     ];
 
     const container = document.getElementById('interactiveLegend');
-    container.innerHTML = '<h4>Significado de Colores:</h4>';
+    container.innerHTML = `<h4 data-i18n="legendTitle">${texts[currentLang]['legendTitle']}</h4>`;
 
     legendData.forEach(item => {
         const div = document.createElement('div');
         div.className = 'legend-item';
-        // Ajuste para que el color de la leyenda "Disponible" se vea bien en modo oscuro.
-        let colorStyle = item.color;
-        if (item.text === 'Disponible' && isDarkMode) {
-             // El color primario en dark mode es neón, que se ve bien.
-        } else if (item.text === 'Disponible' && !isDarkMode) {
-            // En light mode, se usa el verde, que se ve bien.
-        }
-        
-        div.innerHTML = `<div class="legend-color" style="background-color: ${colorStyle}; border-color: ${item.text === 'Mío (Parpadeo)' ? getCssVar('--secondary') : getCssVar('--border')}"></div><span>${item.text}</span>`;
+        div.innerHTML = `<div class="legend-color" style="background-color: ${item.color}; border-color: ${item.text.includes('Mío') || item.text.includes('Mine') ? getCssVar('--secondary') : getCssVar('--border')}"></div><span>${item.text}</span>`;
         container.appendChild(div);
     });
 }
@@ -294,13 +511,13 @@ function renderInteractiveLegend() {
 
 function toggleTicketSelection(num) {
     if (!appData.currentUser) {
-        toast("Debes identificarte para seleccionar números.", 'error');
+        toast(currentLang === 'es' ? "Debes identificarte para seleccionar números." : "You must identify yourself to select numbers.", 'error');
         return openModal('loginModal');
     }
 
     const ticket = appData.tickets.find(t => t.num === num);
     if (!ticket || ticket.state !== 'available') {
-        toast(`El número ${num} no está disponible.`, 'error');
+        toast(currentLang === 'es' ? `El número ${num} no está disponible.` : `Number ${num} is not available.`, 'error');
         return;
     }
 
@@ -310,7 +527,7 @@ function toggleTicketSelection(num) {
     } else {
         const userReservations = appData.tickets.filter(t => t.owner === appData.currentUser.email && t.state === 'reserved').length;
         if (appData.selectedTickets.length + userReservations >= MAX_RESERVATIONS_PER_USER) {
-            toast(`Solo puedes tener un máximo de ${MAX_RESERVATIONS_PER_USER} reservas activas (seleccionadas + reservadas pendientes).`, 'error');
+            toast(currentLang === 'es' ? `Solo puedes tener un máximo de ${MAX_RESERVATIONS_PER_USER} reservas activas (seleccionadas + reservadas pendientes).` : `You can only have a maximum of ${MAX_RESERVATIONS_PER_USER} active reservations (selected + pending reserved).`, 'error');
             return;
         }
         appData.selectedTickets.push(num);
@@ -325,6 +542,12 @@ function renderGrid() {
     const filterValue = document.getElementById('filterSelect').value;
     grid.innerHTML = '';
     
+    const statusMap = {
+        'available': currentLang === 'es' ? 'DISPONIBLE' : 'AVAILABLE',
+        'reserved': currentLang === 'es' ? 'RESERVADA' : 'RESERVED',
+        'paid': currentLang === 'es' ? 'PAGADA' : 'PAID'
+    };
+    
     const filteredTickets = appData.tickets.filter(t => {
         const matchesSearch = searchInput ? t.num.includes(searchInput) : true;
         const matchesFilter = filterValue === 'all' || t.state === filterValue;
@@ -334,13 +557,13 @@ function renderGrid() {
     filteredTickets.forEach(ticket => {
         const card = document.createElement('div');
         card.className = `card ${ticket.state}`;
-        card.innerHTML = `<div class="num">${ticket.num}</div><div class="status-text">${ticket.state === 'available' ? 'DISPONIBLE' : (ticket.state === 'reserved' ? 'RESERVADA' : 'PAGADA')}</div>`;
+        card.innerHTML = `<div class="num">${ticket.num}</div><div class="status-text">${statusMap[ticket.state] || ''}</div>`;
         card.setAttribute('data-num', ticket.num);
 
         let ownerInfo = "";
         if (ticket.owner) {
             const user = getUserByEmail(ticket.owner);
-            ownerInfo = user ? `Dueño: ${user.name} (${user.phone})` : `Owner: ${ticket.owner}`;
+            ownerInfo = user ? `${currentLang === 'es' ? 'Dueño' : 'Owner'}: ${user.name} (${user.phone})` : `${currentLang === 'es' ? 'Dueño' : 'Owner'}: ${ticket.owner}`;
             card.title = ownerInfo;
         }
 
@@ -348,11 +571,13 @@ function renderGrid() {
             card.onclick = () => toggleTicketSelection(ticket.num);
             if (appData.selectedTickets.includes(ticket.num)) {
                 card.classList.add('selected');
-                card.title = "Seleccionado para reservar";
+                card.title = currentLang === 'es' ? "Seleccionado para reservar" : "Selected for reservation";
             }
         } else if (appData.currentUser && ticket.owner === appData.currentUser.email) {
             card.classList.add('mine');
-            card.title = `¡Tu boleta! ${ticket.state === 'reserved' ? 'PAGO PENDIENTE' : 'PAGADA'}`;
+            card.title = currentLang === 'es' ? 
+                `¡Tu boleta! ${ticket.state === 'reserved' ? 'PAGO PENDIENTE' : 'PAGADA'}` : 
+                `Your ticket! ${ticket.state === 'reserved' ? 'PENDING PAYMENT' : 'PAID'}`;
         }
 
         grid.appendChild(card);
@@ -370,9 +595,20 @@ function updateUI() {
     document.getElementById('statPaid').textContent = stats.paid;
     document.getElementById('statTotal').textContent = TOTAL_TICKETS; 
 
+    // Re-render Stat texts for language
+    document.getElementById('statTotalP').textContent = texts[currentLang]['totalStat'];
+    document.getElementById('statAvailP').textContent = texts[currentLang]['availStat'];
+    document.getElementById('statResP').textContent = texts[currentLang]['resStat'];
+    document.getElementById('statPaidP').textContent = texts[currentLang]['paidStat'];
+
     const selectedCount = appData.selectedTickets.length;
     const btn = document.getElementById('multiReserveBtn');
     document.getElementById('selectedCount').textContent = selectedCount;
+    
+    // Update Reserve Button Text
+    const reserveText = texts[currentLang]['reserveBtn'];
+    btn.innerHTML = `${reserveText} <span id="selectedCount">${selectedCount}</span> ${currentLang === 'es' ? 'Boleta(s)' : 'Ticket(s)'}`;
+    
     btn.style.display = selectedCount > 0 ? 'block' : 'none';
 
     const btnAuth = document.getElementById('btnAuth');
@@ -382,7 +618,7 @@ function updateUI() {
         btnAuth.classList.remove('primary');
         btnAuth.classList.add('secondary');
     } else {
-        btnAuth.textContent = 'Ingresar';
+        btnAuth.textContent = texts[currentLang]['loginBtn'];
         btnAuth.onclick = () => openModal('loginModal');
         btnAuth.classList.remove('secondary');
         btnAuth.classList.add('primary');
@@ -398,7 +634,7 @@ function handleLogin(event) {
     const phone = document.getElementById('userPhone').value.trim().replace(/\s/g, ''); 
 
     if (!name || !email || !phone) {
-        return toast('Por favor, completa todos los campos.', 'error');
+        return toast(currentLang === 'es' ? 'Por favor, completa todos los campos.' : 'Please fill in all fields.', 'error');
     }
 
     let user = getUserByEmail(email);
@@ -406,19 +642,18 @@ function handleLogin(event) {
     if (user) {
         user.name = name;
         user.phone = phone;
-        toast(`Datos actualizados: ${user.name}`, 'success');
+        toast(currentLang === 'es' ? `Datos actualizados: ${user.name}` : `Data updated: ${user.name}`, 'success');
     } else {
         user = { name, email, phone };
         appData.users.push(user);
         newUser = true;
-        toast(`¡Bienvenido, ${user.name}!`, 'success');
+        toast(currentLang === 'es' ? `¡Bienvenido, ${user.name}!` : `Welcome, ${user.name}!`, 'success');
     }
     
     appData.currentUser = user;
     save();
     closeModal('loginModal');
     
-    // Si es un usuario que regresa, mostrarle sus tickets.
     if (!newUser) {
         checkMyTickets();
     }
@@ -432,35 +667,45 @@ function checkMyTickets() {
     const reserved = myTickets.filter(t => t.state === 'reserved').map(t => t.num).join(', ');
     const paid = myTickets.filter(t => t.state === 'paid').map(t => t.num).join(', ');
 
-    let msg = `Tus Datos:\nNombre: ${appData.currentUser.name}\nTeléfono: ${appData.currentUser.phone}\n\n`;
-    msg += `⏳ RESERVADAS (PAGO PENDIENTE): ${reserved || 'Ninguna. ¡Aprovecha el tiempo!'}\n\n`;
-    msg += `✅ PAGADAS (ASEGURADAS): ${paid || 'Ninguna. ¡Asegura tu boleta!'}`;
+    let msg = currentLang === 'es' ? 
+        `Tus Datos:\nNombre: ${appData.currentUser.name}\nTeléfono: ${appData.currentUser.phone}\n\n` :
+        `Your Data:\nName: ${appData.currentUser.name}\nPhone: ${appData.currentUser.phone}\n\n`;
+        
+    msg += currentLang === 'es' ? 
+        `⏳ RESERVADAS (PAGO PENDIENTE): ${reserved || 'Ninguna. ¡Aprovecha el tiempo!'}\n\n` :
+        `⏳ RESERVED (PENDING PAYMENT): ${reserved || 'None. Make sure you pay on time!'}\n\n`;
+        
+    msg += currentLang === 'es' ? 
+        `✅ PAGADAS (ASEGURADAS): ${paid || 'Ninguna. ¡Asegura tu boleta!'}` :
+        `✅ PAID (SECURED): ${paid || 'None. Secure your ticket!'}`;
     
-    alert(myTickets.length ? msg : "Aún no tienes números reservados o comprados. ¡Es tu momento!");
+    alert(myTickets.length ? msg : currentLang === 'es' ? "Aún no tienes números reservados o comprados. ¡Es tu momento!" : "You don't have reserved or purchased numbers yet. It's your time!");
 }
 
 
 function confirmReservation() {
-    if (appData.selectedTickets.length === 0) return toast("Selecciona al menos una boleta.", 'warning');
+    if (appData.selectedTickets.length === 0) return toast(currentLang === 'es' ? "Selecciona al menos una boleta." : "Select at least one ticket.", 'warning');
     if (!appData.currentUser) return openModal('loginModal');
     
     const count = appData.selectedTickets.length;
-    
-    if (!confirm(`¿Confirmas la reserva de ${count} boleta(s)? Tienes 24 horas para pagar y enviar el comprobante al WhatsApp 321 963 7388.`)) {
+    const confirmMessage = currentLang === 'es' ? 
+        `¿Confirmas la reserva de ${count} boleta(s)? Tienes 24 horas para pagar y enviar el comprobante al WhatsApp 321 963 7388.` :
+        `Do you confirm the reservation of ${count} ticket(s)? You have 24 hours to pay and send the proof to WhatsApp 321 963 7388.`;
+        
+    if (!confirm(confirmMessage)) {
         return;
     }
     
     const now = Date.now();
     let reservedCount = 0;
     
-    // Contar las reservas que ya tiene el usuario
     const currentReserved = appData.tickets.filter(t => t.owner === appData.currentUser.email && t.state === 'reserved').length;
     const maxAllowed = MAX_RESERVATIONS_PER_USER - currentReserved;
     
     const numbersToReserve = appData.selectedTickets.slice(0, maxAllowed);
     
     if (numbersToReserve.length < appData.selectedTickets.length) {
-        toast(`Solo pudiste reservar ${numbersToReserve.length} boleta(s) debido al límite de ${MAX_RESERVATIONS_PER_USER} por persona.`, 'warning');
+        toast(currentLang === 'es' ? `Solo pudiste reservar ${numbersToReserve.length} boleta(s) debido al límite de ${MAX_RESERVATIONS_PER_USER} por persona.` : `You could only reserve ${numbersToReserve.length} ticket(s) due to the limit of ${MAX_RESERVATIONS_PER_USER} per person.`, 'warning');
     }
 
     numbersToReserve.forEach(num => {
@@ -473,14 +718,16 @@ function confirmReservation() {
         }
     });
 
-    appData.selectedTickets = []; // Limpiar selección
+    appData.selectedTickets = [];
     
     if (reservedCount > 0) {
         save();
-        toast(`Reservaste ${reservedCount} boleta(s). ¡Tienes 24h para pagar!`, 'accent');
-        alert(`¡Reserva Exitosa!\n\nBoletas: ${numbersToReserve.join(', ')}\n\nRecuerda enviar el comprobante de pago al WhatsApp 321 963 7388 para que se marquen como "Pagadas".`);
+        toast(currentLang === 'es' ? `Reservaste ${reservedCount} boleta(s). ¡Tienes 24h para pagar!` : `You reserved ${reservedCount} ticket(s). You have 24h to pay!`, 'accent');
+        alert(currentLang === 'es' ? 
+            `¡Reserva Exitosa!\n\nBoletas: ${numbersToReserve.join(', ')}\n\nRecuerda enviar el comprobante de pago al WhatsApp 321 963 7388 para que se marquen como "Pagadas".` :
+            `Successful Reservation!\n\nTickets: ${numbersToReserve.join(', ')}\n\nRemember to send the proof of payment to WhatsApp 321 963 7388 to have them marked as "Paid".`);
     } else {
-        toast("No se pudo reservar ninguna boleta. Revisa si están disponibles o tu límite.", 'error');
+        toast(currentLang === 'es' ? "No se pudo reservar ninguna boleta. Revisa si están disponibles o tu límite." : "Could not reserve any ticket. Check availability or your limit.", 'error');
     }
 }
 
@@ -492,26 +739,26 @@ function verifyTicketStatus() {
     const resultDiv = document.getElementById('verifyResult');
     
     if (input.value.length === 0) {
-        resultDiv.innerHTML = '<p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>';
+        resultDiv.innerHTML = `<p style="color:var(--text-muted); margin:0;">${texts[currentLang]['verifyInitialText']}</p>`;
         return;
     }
     
-    if (input.value.length > 3) return; // Validación básica
+    if (input.value.length > 3) return;
     
     const ticket = appData.tickets.find(t => t.num === num);
     
     if (!ticket) {
-        resultDiv.innerHTML = `<p style="color:${getCssVar('--error')}; font-weight: bold;">Error: Boleta ${num} no existe.</p>`;
+        resultDiv.innerHTML = `<p style="color:${getCssVar('--error')}; font-weight: bold;">${currentLang === 'es' ? 'Error: Boleta' : 'Error: Ticket'} ${num} ${currentLang === 'es' ? 'no existe.' : 'does not exist.'}</p>`;
         return;
     }
 
-    let statusHtml = `<h4>Boleta N° ${num}</h4>`;
+    let statusHtml = `<h4>${currentLang === 'es' ? 'Boleta N°' : 'Ticket No.'} ${num}</h4>`;
     let user = ticket.owner ? getUserByEmail(ticket.owner) : null;
     
     switch (ticket.state) {
         case 'available':
-            statusHtml += `<p style="color:${getCssVar('--primary')}; font-weight: bold;">ESTADO: ¡DISPONIBLE!</p>`;
-            statusHtml += `<p style="color:${getCssVar('--text-muted')}">¡Resérvala ahora!</p>`;
+            statusHtml += `<p style="color:${getCssVar('--primary')}; font-weight: bold;">${currentLang === 'es' ? 'ESTADO: ¡DISPONIBLE!' : 'STATUS: AVAILABLE!'}</p>`;
+            statusHtml += `<p style="color:${getCssVar('--text-muted')}">${currentLang === 'es' ? '¡Resérvala ahora!' : 'Reserve it now!'}</p>`;
             break;
         case 'reserved':
             const expiresAt = new Date(ticket.reservedAt + RESERVATION_DURATION_MS);
@@ -519,14 +766,14 @@ function verifyTicketStatus() {
             const hours = Math.floor(timeLeft / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             
-            statusHtml += `<p style="color:${getCssVar('--warning')}; font-weight: bold;">ESTADO: RESERVADA (Pendiente de Pago)</p>`;
-            statusHtml += `<p>Dueño: ${user ? user.name : 'N/A'}</p>`;
-            statusHtml += `<p>Expira en: ${hours}h ${minutes}m</p>`;
+            statusHtml += `<p style="color:${getCssVar('--warning')}; font-weight: bold;">${currentLang === 'es' ? 'ESTADO: RESERVADA (Pendiente de Pago)' : 'STATUS: RESERVED (Pending Payment)'}</p>`;
+            statusHtml += `<p>${currentLang === 'es' ? 'Dueño' : 'Owner'}: ${user ? user.name : 'N/A'}</p>`;
+            statusHtml += `<p>${currentLang === 'es' ? 'Expira en' : 'Expires in'}: ${hours}h ${minutes}m</p>`;
             break;
         case 'paid':
-            statusHtml += `<p style="color:${getCssVar('--accent')}; font-weight: bold;">ESTADO: ¡PAGADA Y ASEGURADA!</p>`;
-            statusHtml += `<p>Dueño: ${user ? user.name : 'N/A'}</p>`;
-            statusHtml += `<p style="color:${getCssVar('--text-muted')}">¡Mucha suerte!</p>`;
+            statusHtml += `<p style="color:${getCssVar('--accent')}; font-weight: bold;">${currentLang === 'es' ? 'ESTADO: ¡PAGADA Y ASEGURADA!' : 'STATUS: PAID AND SECURED!'}</p>`;
+            statusHtml += `<p>${currentLang === 'es' ? 'Dueño' : 'Owner'}: ${user ? user.name : 'N/A'}</p>`;
+            statusHtml += `<p style="color:${getCssVar('--text-muted')}">${currentLang === 'es' ? '¡Mucha suerte!' : 'Good luck!'}</p>`;
             break;
     }
     
@@ -536,18 +783,22 @@ function verifyTicketStatus() {
 // --- LÓGICA DE ADMINISTRACIÓN (Admin Panel, Checksum, Ganadores) ---
 
 function adminLock(action) {
-    const password = prompt(`🛡️ ACCESO DE ADMINISTRADOR: Ingresa la contraseña para "${action}":`);
+    const passwordPrompt = currentLang === 'es' ? 
+        `🛡️ ACCESO DE ADMINISTRADOR: Ingresa la contraseña para "${action}":` :
+        `🛡️ ADMINISTRATOR ACCESS: Enter the password for "${action}":`;
+        
+    const password = prompt(passwordPrompt);
     const encodedPass = btoa(password || '');
     if (encodedPass === ADMIN_PASS_ENCODED) {
         return true;
     } else {
-        toast("Contraseña incorrecta.", 'error');
+        toast(currentLang === 'es' ? "Contraseña incorrecta." : "Incorrect password.", 'error');
         return false;
     }
 }
 
 function openAdminAuth() {
-    if (adminLock('Abrir Panel')) {
+    if (adminLock(texts[currentLang]['adminPanelTitle'])) {
         openModal('adminModal');
         renderAdminLists();
     }
@@ -556,7 +807,6 @@ function openAdminAuth() {
 function renderAdminLists() {
     const reservedBody = document.getElementById('reservedTicketListBody');
     const paidBody = document.getElementById('paidTicketListBody');
-    const userListBody = document.getElementById('userListBody');
     
     reservedBody.innerHTML = '';
     paidBody.innerHTML = '';
@@ -570,10 +820,10 @@ function renderAdminLists() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${t.num}</td>
-            <td>${user ? formatUser(user) : 'Usuario desconocido'}</td>
+            <td>${user ? formatUser(user) : (currentLang === 'es' ? 'Usuario desconocido' : 'Unknown user')}</td>
             <td>
-                <button onclick="adminSetState('${t.num}', 'paid')" class="btn primary" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-check"></i> Marcar Pagado</button>
-                <button onclick="adminSetState('${t.num}', 'available')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-times"></i> Liberar</button>
+                <button onclick="adminSetState('${t.num}', 'paid')" class="btn primary" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-check"></i> ${currentLang === 'es' ? 'Pagar' : 'Pay'}</button>
+                <button onclick="adminSetState('${t.num}', 'available')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-times"></i> ${currentLang === 'es' ? 'Liberar' : 'Release'}</button>
             </td>
         `;
         reservedBody.appendChild(tr);
@@ -585,9 +835,9 @@ function renderAdminLists() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${t.num}</td>
-            <td>${user ? formatUser(user) : 'Usuario desconocido'}</td>
+            <td>${user ? formatUser(user) : (currentLang === 'es' ? 'Usuario desconocido' : 'Unknown user')}</td>
             <td>
-                <button onclick="adminSetState('${t.num}', 'available')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-undo"></i> Devolver</button>
+                <button onclick="adminSetState('${t.num}', 'available')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-undo"></i> ${currentLang === 'es' ? 'Devolver' : 'Revert'}</button>
             </td>
         `;
         paidBody.appendChild(tr);
@@ -608,18 +858,17 @@ function renderUserList() {
         const userTickets = appData.tickets.filter(t => t.owner === user.email);
         const reservedCount = userTickets.filter(t => t.state === 'reserved').length;
         const paidCount = userTickets.filter(t => t.state === 'paid').length;
-        const ticketNums = userTickets.map(t => `<span class="${t.state}">${t.num}</span>`).join(', ');
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${user.name}</td>
             <td>${user.phone}</td>
             <td>
-                Pagadas (${paidCount}), Reservadas (${reservedCount})
+                ${currentLang === 'es' ? 'Pagadas' : 'Paid'} (${paidCount}), ${currentLang === 'es' ? 'Reservadas' : 'Reserved'} (${reservedCount})
                 <div style="font-size: 0.7rem; color: var(--text-muted);">${userTickets.map(t => t.num).join(', ')}</div>
             </td>
             <td>
-                <button onclick="adminTransferTicket('${user.email}')" class="btn warning" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-exchange-alt"></i> Mover Boleta</button>
+                <button onclick="adminTransferTicket('${user.email}')" class="btn warning" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fas fa-exchange-alt"></i> ${currentLang === 'es' ? 'Mover Boleta' : 'Move Ticket'}</button>
             </td>
         `;
         userListBody.appendChild(tr);
@@ -627,19 +876,23 @@ function renderUserList() {
 }
 
 function adminTransferTicket(sourceEmail) {
-    if (!adminLock('Transferir Boleta')) return;
+    if (!adminLock(currentLang === 'es' ? 'Transferir Boleta' : 'Transfer Ticket')) return;
 
     const sourceUser = getUserByEmail(sourceEmail);
-    if (!sourceUser) return toast('Usuario origen no encontrado.', 'error');
+    if (!sourceUser) return toast(currentLang === 'es' ? 'Usuario origen no encontrado.' : 'Source user not found.', 'error');
 
-    const ticketNum = prompt(`Transferir Boleta(s) de ${sourceUser.name}:\n\nIngresa los números de boleta a transferir (separados por coma, ej: 010, 045):`);
+    const ticketNum = prompt(currentLang === 'es' ? 
+        `Transferir Boleta(s) de ${sourceUser.name}:\n\nIngresa los números de boleta a transferir (separados por coma, ej: 010, 045):` :
+        `Transfer Ticket(s) from ${sourceUser.name}:\n\nEnter the ticket numbers to transfer (separated by comma, ex: 010, 045):`);
     if (!ticketNum) return;
 
-    const targetPhone = prompt(`Ingresa el NÚMERO DE CELULAR del cliente destino (Ej: 3001234567):`);
+    const targetPhone = prompt(currentLang === 'es' ? 
+        `Ingresa el NÚMERO DE CELULAR del cliente destino (Ej: 3001234567):` :
+        `Enter the MOBILE NUMBER of the destination client (Ex: 3001234567):`);
     if (!targetPhone) return;
 
     const targetUser = getUserByPhone(targetPhone.trim().replace(/\s/g, ''));
-    if (!targetUser) return toast('Cliente destino no encontrado por celular. Pídele que se registre primero.', 'error');
+    if (!targetUser) return toast(currentLang === 'es' ? 'Cliente destino no encontrado por celular. Pídele que se registre primero.' : 'Destination client not found by mobile. Ask them to register first.', 'error');
     
     const nums = ticketNum.split(',').map(n => formatNum(n.trim()));
     let transferCount = 0;
@@ -654,35 +907,31 @@ function adminTransferTicket(sourceEmail) {
 
     if (transferCount > 0) {
         save();
-        toast(`✅ Se transfirieron ${transferCount} boleta(s) de ${sourceUser.name} a ${targetUser.name}.`, 'success');
+        toast(currentLang === 'es' ? `✅ Se transfirieron ${transferCount} boleta(s) de ${sourceUser.name} a ${targetUser.name}.` : `✅ ${transferCount} ticket(s) transferred from ${sourceUser.name} to ${targetUser.name}.`, 'success');
     } else {
-        toast("No se encontró ninguna boleta de ese usuario con esos números.", 'warning');
+        toast(currentLang === 'es' ? "No se encontró ninguna boleta de ese usuario con esos números." : "No ticket found for that user with those numbers.", 'warning');
     }
     renderAdminLists();
 }
 
 
 function adminSetState(num, state) {
-    if (!adminLock(`Cambiar estado de ${num} a ${state}`)) return;
+    if (!adminLock(currentLang === 'es' ? `Cambiar estado de ${num} a ${state}` : `Change status of ${num} to ${state}`)) return;
     
     const ticket = appData.tickets.find(t => t.num === num);
-    if (!ticket) return toast(`Boleta ${num} no encontrada.`, 'error');
+    if (!ticket) return toast(currentLang === 'es' ? `Boleta ${num} no encontrada.` : `Ticket ${num} not found.`, 'error');
 
     if (state === 'available') {
         ticket.state = 'available';
         ticket.owner = null;
         ticket.reservedAt = null;
-        toast(`Boleta ${num} liberada.`, 'success');
+        toast(currentLang === 'es' ? `Boleta ${num} liberada.` : `Ticket ${num} released.`, 'success');
     } else if (state === 'paid') {
-        if (ticket.state !== 'reserved') {
-             // Si el admin marca como pagada una disponible, también debe asignarle dueño.
-             const user = getUserByEmail(ticket.owner);
-             if (!user) {
-                return toast('No se puede marcar como pagada sin un dueño. Use la opción de Asignación Manual.', 'error');
-             }
+        if (!ticket.owner) {
+             return toast(texts[currentLang].toastNoOwnerPaid, 'error');
         }
         ticket.state = 'paid';
-        toast(`Boleta ${num} marcada como ¡PAGADA!`, 'accent');
+        toast(currentLang === 'es' ? `Boleta ${num} marcada como ¡PAGADA!` : `Ticket ${num} marked as PAID!`, 'accent');
     }
 
     save();
@@ -691,18 +940,21 @@ function adminSetState(num, state) {
 
 function handleManualAssign(event) {
     event.preventDefault();
-    if (!adminLock('Asignación Manual')) return;
+    if (!adminLock(texts[currentLang]['manualAssignTitle'])) return;
     
     const num = formatNum(document.getElementById('manualNum').value);
     const name = document.getElementById('manualName').value.trim();
     const phone = document.getElementById('manualPhone').value.trim().replace(/\s/g, ''); 
-    const email = `${phone}@temp.com`; // Usar teléfono como ID único para el email.
+    const email = `${phone}@temp.com`;
 
     const ticket = appData.tickets.find(t => t.num === num);
-    if (!ticket) return toast(`Boleta ${num} no existe.`, 'error');
+    if (!ticket) return toast(currentLang === 'es' ? `Boleta ${num} no existe.` : `Ticket ${num} does not exist.`, 'error');
 
     if (ticket.state !== 'available') {
-        if (!confirm(`ADVERTENCIA: La boleta ${num} está como ${ticket.state}. ¿Deseas sobreescribir la asignación?`)) {
+        const confirmMsg = currentLang === 'es' ? 
+            `ADVERTENCIA: La boleta ${num} está como ${ticket.state}. ¿Deseas sobreescribir la asignación?` :
+            `WARNING: Ticket ${num} is currently ${ticket.state}. Do you want to overwrite the assignment?`;
+        if (!confirm(confirmMsg)) {
             return;
         }
     }
@@ -712,26 +964,29 @@ function handleManualAssign(event) {
         user = { name, email, phone };
         appData.users.push(user);
     } else {
-        // Actualizar el nombre si ya existe
         user.name = name;
-        user.email = email; // Asegurar que el email está en formato de ID
+        user.email = email;
     }
 
     ticket.state = 'paid';
     ticket.owner = user.email;
-    ticket.reservedAt = Date.now(); // Marca de tiempo de asignación
+    ticket.reservedAt = Date.now();
 
     save();
     closeModal('manualAssignModal');
-    toast(`✅ Boleta ${num} asignada y marcada como PAGADA a ${name}.`, 'success');
+    toast(currentLang === 'es' ? `✅ Boleta ${num} asignada y marcada como PAGADA a ${name}.` : `✅ Ticket ${num} assigned and marked as PAID to ${name}.`, 'success');
     renderAdminLists();
 }
 
 function adminResetRaffle() {
-    if (!adminLock('RESET COMPLETO DE RIFA')) return;
+    if (!adminLock(texts[currentLang]['adminResetBtn'])) return;
 
-    if (!confirm('ADVERTENCIA CRÍTICA: ¿Estás ABSOLUTAMENTE SEGURO de que deseas RESTABLECER COMPLETAMENTE LA RIFA? Esto pondrá TODAS las boletas como disponibles, eliminará usuarios y ganadores.')) {
-        toast('Restablecimiento cancelado.', 'warning');
+    const confirmMsg = currentLang === 'es' ? 
+        'ADVERTENCIA CRÍTICA: ¿Estás ABSOLUTAMENTE SEGURO de que deseas RESTABLECER COMPLETAMENTE LA RIFA? Esto pondrá TODAS las boletas como disponibles, eliminará usuarios y ganadores.' :
+        'CRITICAL WARNING: Are you ABSOLUTELY SURE you want to FULLY RESET THE RAFFLE? This will set ALL tickets to available, delete users and winners.';
+        
+    if (!confirm(confirmMsg)) {
+        toast(currentLang === 'es' ? 'Restablecimiento cancelado.' : 'Reset cancelled.', 'warning');
         return;
     }
 
@@ -739,7 +994,6 @@ function adminResetRaffle() {
     localStorage.removeItem(STORAGE_KEY_CHECKSUM);
     localStorage.removeItem("last_weekly_clearance_timestamp");
 
-    // Reinicializar appData
     appData = {
         tickets: [],
         users: [],
@@ -749,32 +1003,30 @@ function adminResetRaffle() {
     };
     initializeTickets();
 
-    save(); // Guardar el estado limpio
-    load(); // Recargar la UI
-    toast('¡RIFA RESTABLECIDA COMPLETAMENTE!', 'error');
+    save();
+    load();
+    toast(currentLang === 'es' ? '¡RIFA RESTABLECIDA COMPLETAMENTE!' : 'RAFFLE FULLY RESET!', 'error');
     closeModal('adminModal');
 }
 
 // --- LÓGICA DE NOTIFICACIONES AUTOMÁTICAS ---
 
 function openNotificationModal() {
-    if (!adminLock('Revisar Notificaciones')) return;
+    if (!adminLock(texts[currentLang]['adminNotificationsBtn'])) return;
     
     const now = Date.now();
     const warningTime = now + WARNING_BEFORE_EXPIRY_MS;
-    const expiryTime = now + RESERVATION_DURATION_MS;
 
     const nearExpiryTickets = appData.tickets.filter(t => 
         t.state === 'reserved' && 
         t.reservedAt && 
-        (t.reservedAt + RESERVATION_DURATION_MS <= warningTime) && // Expira en las próximas 3h
-        (t.reservedAt + RESERVATION_DURATION_MS > now) // Aún no ha expirado
-    ).sort((a, b) => (a.reservedAt + RESERVATION_DURATION_MS) - (b.reservedAt + RESERVATION_DURATION_MS)); // Ordenar por fecha de expiración
+        (t.reservedAt + RESERVATION_DURATION_MS <= warningTime) &&
+        (t.reservedAt + RESERVATION_DURATION_MS > now)
+    ).sort((a, b) => (a.reservedAt + RESERVATION_DURATION_MS) - (b.reservedAt + RESERVATION_DURATION_MS));
 
     const notificationListBody = document.getElementById('notificationListBody');
     notificationListBody.innerHTML = '';
 
-    // Agrupar por usuario
     const groupedByUser = nearExpiryTickets.reduce((acc, t) => {
         const user = getUserByEmail(t.owner);
         if (user) {
@@ -786,7 +1038,6 @@ function openNotificationModal() {
         return acc;
     }, {});
     
-    // Renderizar la tabla agrupada
     let rowCount = 0;
     for (const email in groupedByUser) {
         const { user, tickets } = groupedByUser[email];
@@ -803,7 +1054,7 @@ function openNotificationModal() {
             <td>${tickets.map(t => t.num).join(', ')}</td>
             <td>${hours}h ${minutes}m</td>
             <td>
-                <a href="https://wa.me/57${user.phone.replace(/\s/g, '')}?text=Hola%20${user.name.split(' ')[0]}%2C%20te%20escribo%20por%20la%20rifa.%20Tus%20boletas%20${tickets.map(t => t.num).join(',%20')}%20están%20por%20vencer.%20Envía%20el%20comprobante%20de%20pago%20para%20asegurarlas." target="_blank" class="btn primary" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> Notificar</a>
+                <a href="https://wa.me/57${user.phone.replace(/\s/g, '')}?text=${currentLang === 'es' ? `Hola%20${user.name.split(' ')[0]}%2C%20te%20escribo%20por%20la%20rifa.%20Tus%20boletas%20${tickets.map(t => t.num).join(',%20')}%20están%20por%20vencer.%20Envía%20el%20comprobante%20de%20pago%20para%20asegurarlas.` : `Hi%20${user.name.split(' ')[0]}%2C%20this%20is%20about%20the%20raffle.%20Your%20tickets%20${tickets.map(t => t.num).join(',%20')}%20are%20about%20to%20expire.%20Please%20send%20proof%20of%20payment%20to%20secure%20them.`}" target="_blank" class="btn primary" style="padding: 5px 10px; font-size: 0.7rem;"><i class="fab fa-whatsapp"></i> ${currentLang === 'es' ? 'Notificar' : 'Notify'}</a>
             </td>
         `;
         notificationListBody.appendChild(tr);
@@ -811,7 +1062,7 @@ function openNotificationModal() {
     }
 
     if (rowCount === 0) {
-        notificationListBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--primary);">No hay reservas próximas a expirar en las siguientes 3 horas. ¡Todo bajo control!</td></tr>';
+        notificationListBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--primary);">${currentLang === 'es' ? 'No hay reservas próximas a expirar en las siguientes 3 horas. ¡Todo bajo control!' : 'No reservations near expiry in the next 3 hours. Everything under control!'}</td></tr>`;
     }
 
     openModal('notificationModal');
@@ -820,17 +1071,16 @@ function openNotificationModal() {
 // --- LÓGICA DE GANADORES ---
 
 function openWinnerManagement() {
-    if (!adminLock('Registrar Ganador')) return;
+    if (!adminLock(texts[currentLang]['winnerManagementTitle'])) return;
     
-    // Pre-seleccionar la fecha de hoy
     document.getElementById('winnerDate').valueAsDate = new Date();
-    document.getElementById('winnerInfo').textContent = "Ingresa el número ganador y selecciona el tipo de sorteo.";
+    document.getElementById('winnerInfo').textContent = currentLang === 'es' ? "Ingresa el número ganador y selecciona el tipo de sorteo." : "Enter the winning number and select the draw type.";
     
     openModal('winnerManagementModal');
 }
 
 function checkAndAddWinner() {
-    if (!adminLock('Confirmar Ganador')) return;
+    if (!adminLock(texts[currentLang]['winnerSubmitBtn'])) return;
 
     const date = document.getElementById('winnerDate').value;
     const type = document.getElementById('winnerType').value;
@@ -839,14 +1089,14 @@ function checkAndAddWinner() {
     const infoDiv = document.getElementById('winnerInfo');
 
     if (!date || !num) {
-        infoDiv.textContent = "Por favor, completa la fecha y el número.";
+        infoDiv.textContent = currentLang === 'es' ? "Por favor, completa la fecha y el número." : "Please fill in the date and number.";
         return;
     }
 
     const ticket = appData.tickets.find(t => t.num === num);
     
     if (!ticket) {
-        infoDiv.textContent = `Error: La boleta ${num} no existe.`;
+        infoDiv.textContent = currentLang === 'es' ? `Error: La boleta ${num} no existe.` : `Error: Ticket ${num} does not exist.`;
         return;
     }
 
@@ -859,9 +1109,11 @@ function checkAndAddWinner() {
     };
     
     if (ticket.state !== 'paid') {
-        const confirmResult = confirm(`ADVERTENCIA: La boleta ${num} está en estado "${ticket.state}". ¿Deseas registrarla como ganadora A PESAR DE NO ESTAR PAGADA?`);
+        const confirmResult = confirm(currentLang === 'es' ? 
+            `ADVERTENCIA: La boleta ${num} está en estado "${ticket.state}". ¿Deseas registrarla como ganadora A PESAR DE NO ESTAR PAGADA?` :
+            `WARNING: Ticket ${num} is currently "${ticket.state}". Do you want to register it as a winner DESPITE IT NOT BEING PAID?`);
         if (!confirmResult) {
-            infoDiv.textContent = "Registro cancelado. El ganador debe tener la boleta pagada.";
+            infoDiv.textContent = currentLang === 'es' ? "Registro cancelado. El ganador debe tener la boleta pagada." : "Registration cancelled. The winner must have a paid ticket.";
             return;
         }
     }
@@ -869,11 +1121,7 @@ function checkAndAddWinner() {
     appData.winners.push(winnerInfo);
     save();
     
-    // Opcional: Marcar como "claimed" o "winner" si se desea un estado final, pero por ahora se deja en "paid"
-    // ticket.state = 'winner'; 
-    // save();
-
-    toast(`¡Ganador ${num} (${winnerInfo.owner ? winnerInfo.owner.name : 'sin dueño registrado'}) registrado para sorteo ${type}!`, 'success');
+    toast(currentLang === 'es' ? `¡Ganador ${num} (${winnerInfo.owner ? winnerInfo.owner.name : 'sin dueño registrado'}) registrado para sorteo ${type}!` : `Winner ${num} (${winnerInfo.owner ? winnerInfo.owner.name : 'no owner registered'}) registered for ${type} draw!`, 'success');
     closeModal('winnerManagementModal');
 }
 
@@ -882,23 +1130,22 @@ function checkAndAddWinner() {
 function calculateChecksum() {
     const paidTickets = appData.tickets.filter(t => t.state === 'paid').map(t => t.num).sort();
     const dataString = JSON.stringify(paidTickets);
-    // Usar un hash simple para el ejemplo (en un entorno real se usaría SHA-256)
     let hash = 0;
     if (dataString.length === 0) return '0000000000';
     for (let i = 0; i < dataString.length; i++) {
         const char = dataString.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash |= 0; // Convertir a entero de 32bit
+        hash |= 0;
     }
     return Math.abs(hash).toString(16).toUpperCase().padStart(10, '0');
 }
 
 function adminGenerateAndSetChecksum() {
-    if (!adminLock('Generar Checksum')) return;
+    if (!adminLock(texts[currentLang]['generateChecksumBtn'])) return;
     const newChecksum = calculateChecksum();
     localStorage.setItem(STORAGE_KEY_CHECKSUM, newChecksum);
     document.getElementById('checksumStatus').textContent = newChecksum;
-    toast(`Checksum generado y guardado: ${newChecksum}`, 'warning');
+    toast(currentLang === 'es' ? `Checksum generado y guardado: ${newChecksum}` : `Checksum generated and saved: ${newChecksum}`, 'warning');
 }
 
 function verifyPublicChecksum() {
@@ -909,15 +1156,15 @@ function verifyPublicChecksum() {
     checksumDisplay.textContent = calculatedChecksum;
     
     if (!savedChecksum) {
-        toast('El código de integridad oficial aún no ha sido publicado.', 'warning');
+        toast(currentLang === 'es' ? 'El código de integridad oficial aún no ha sido publicado.' : 'The official integrity code has not been published yet.', 'warning');
         return;
     }
 
     if (savedChecksum === calculatedChecksum) {
-        toast('✅ ¡Verificación Exitosa! El código de integridad es auténtico.', 'success');
+        toast(currentLang === 'es' ? '✅ ¡Verificación Exitosa! El código de integridad es auténtico.' : '✅ Verification Successful! The integrity code is authentic.', 'success');
         checksumDisplay.style.color = getCssVar('--primary');
     } else {
-        toast('❌ ¡ADVERTENCIA! El código de integridad NO COINCIDE. Los datos han sido manipulados.', 'error');
+        toast(currentLang === 'es' ? '❌ ¡ADVERTENCIA! El código de integridad NO COINCIDE. Los datos han sido manipulados.' : '❌ WARNING! The integrity code DOES NOT MATCH. Data has been manipulated.', 'error');
         checksumDisplay.style.color = getCssVar('--accent');
     }
 }
@@ -928,10 +1175,10 @@ function exportPaidTickets() {
     const paidTickets = appData.tickets.filter(t => t.state === 'paid');
     
     if (paidTickets.length === 0) {
-        return toast('No hay boletas pagadas para exportar.', 'warning');
+        return toast(currentLang === 'es' ? 'No hay boletas pagadas para exportar.' : 'No paid tickets to export.', 'warning');
     }
     
-    let csvContent = "Boleta,Estado,Nombre Cliente,Telefono\n";
+    let csvContent = currentLang === 'es' ? "Boleta,Estado,Nombre Cliente,Telefono\n" : "Ticket,Status,Client Name,Phone\n";
     paidTickets.forEach(t => {
         const user = getUserByEmail(t.owner);
         const name = user ? user.name : 'N/A';
@@ -949,5 +1196,5 @@ function exportPaidTickets() {
     link.click();
     document.body.removeChild(link);
     
-    toast(`Exportadas ${paidTickets.length} boletas pagadas.`, 'success');
+    toast(currentLang === 'es' ? `Exportadas ${paidTickets.length} boletas pagadas.` : `Exported ${paidTickets.length} paid tickets.`, 'success');
 }

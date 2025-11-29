@@ -80,6 +80,21 @@
         }
         .raffle-banner img { width: 100%; height: auto; max-height: 400px; object-fit: cover; display: block; }
 
+        /* CRONÓMETRO */
+        #countdown {
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            color: white; padding: 15px; border-radius: 10px;
+            text-align: center; margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            font-size: 1.1rem; font-weight: 700;
+        }
+        #countdown .timer { 
+            font-size: 1.8rem; font-weight: 900; 
+            margin-top: 5px; 
+            letter-spacing: 2px;
+            display: block;
+        }
+        
         /* ESTRUCTURA */
         .hero { display: grid; grid-template-columns: 1fr 340px; gap: 25px; }
         @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
@@ -175,9 +190,8 @@
         <div class="brand">
             <div class="logo">GR</div>
             <div>
-                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal - Que Esperas</h1>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Sorteo final: 30/01/2026 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Semana Se Rifa 1M Hasta el 23/01/2026 Porque El Gran Sorteo Es El 30/01/2026 </div>
+                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal</h1>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Que Esperas para Ganar.</div>
             </div>
         </div>
         <div class="controls">
@@ -187,6 +201,11 @@
     </header>
 
     <main>
+        <div id="countdown">
+            Sorteo Final: 30/01/2026. ¡Asegura tu boleta ahora!
+            <span id="timer" class="timer">Cargando...</span>
+        </div>
+
         <div class="raffle-banner">
             <img src="Rifa.jpg" alt="Rifa Moto CR4" onerror="this.src='https://via.placeholder.com/1200x400/121212/e74c3c?text=IMAGEN+NO+ENCONTRADA+(Rifa.jpg)';">
         </div>
@@ -194,7 +213,7 @@
         <div class="hero">
             <div class="panel">
                 <div class="toolbar">
-                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu Número, </h2>
+                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu Número</h2>
                     <button onclick="refreshData()" class="btn outline" style="padding: 5px 10px; font-size: 0.8rem;">🔄 Actualizar</button>
                 </div>
                 <div class="toolbar">

@@ -121,11 +121,25 @@
     </main>
 
     <footer>
-        <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
-        <p>Entre mas te demores menos oportunidades, haslo ya para mas oportunidades</p>
-        <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">Descargar Listado de Boletas Pagadas (Transparencia)</button>
-    </footer>
-
+    <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
+    <p>Entre mas te demores menos oportunidades, haslo ya para mas oportunidades</p>
+    
+    <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+        <div style="font-weight: bold; margin-bottom: 8px; color: var(--secondary);">🔒 Código de Integridad (Transparencia)</div>
+        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+            Código actual: <span id="checksumStatus" style="font-family: monospace;">N/A</span>
+        </div>
+        
+        <button onclick="verifyPublicChecksum()" class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px; margin-right: 10px;">
+            🔍 Verificar Autenticidad
+        </button>
+        
+        <button onclick="adminGenerateAndSetChecksum()" class="btn outline warning" style="font-size: 0.8rem; padding: 5px 10px;">
+            🛡️ Generar Checksum (Admin)
+        </button>
+    </div>
+    <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">Descargar Listado de Boletas Pagadas (Transparencia)</button>
+</footer>
     <a href="https://wa.me/573219637388" class="float-wa" target="_blank">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M13.6 2.3A7.9 7.9 0 0 0 8 0a7.9 7.9 0 0 0-7.9 7.9c0 1.4.4 2.8 1 4L0 16l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.1a7.9 7.9 0 0 0 7.9-7.9A7.9 7.9 0 0 0 13.6 2.3zM8 14.5a6.6 6.6 0 0 1-3.4-.9l-.2-.1-2.5.7.7-2.4-.2-.3a6.6 6.6 0 0 1 1-3.5A6.6 6.6 0 0 1 8 1.4a6.6 6.6 0 0 1 6.6 6.6 6.6 6.6 0 0 1-6.6 6.5z"/></svg>
         Contactar Administrador
@@ -276,3 +290,4 @@
     <script defer src="script.js"></script>
 </body>
 </html>
+

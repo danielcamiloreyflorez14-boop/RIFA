@@ -1,7 +1,6 @@
 // --- CONFIGURACIÓN DE LA NUBE (JSONBIN) ---
 // ⚠️ ¡Pega tus códigos de JSONBin aquí!
-const BIN_ID = "692b4082d0ea881f40082dd8"; // Ejemplo: 65a4b7...
-const API_KEY = "$2a$10$btubrp5/k9UZtRxdMXILp.ceTlBBAGY1lM/rZNSEl25bV/O1kbeZi";   // Ejemplo: $2b$10...
+const API_URL = "https://sheetdb.io/api/v1/4iz7axnvdm7dz";
 
 // --- CONFIGURACIÓN GLOBAL ---
 // Nota: 'STORAGE_KEY' ya no es necesaria y fue eliminada.
@@ -888,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyInput.addEventListener('input', verifyTicket);
     }
 });
+
 
 
 

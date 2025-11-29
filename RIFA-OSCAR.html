@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Gran Rifa – Moto CR4 Repotenciada Y 1M Semanal</title>
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
@@ -40,7 +43,7 @@
             
             <div class="rules-content">
                 <div id="interactiveLegend" class="interactive-legend">
-                    </div>
+                </div>
                 
                 <div class="video-placeholder">
                     <iframe width="100%" height="200" src="https://www.youtube.com/embed/5W_N-bQz1I0?autoplay=1&mute=1&loop=1&playlist=5W_N-bQz1I0" title="Video de la Moto" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 12px; border: none; box-shadow: var(--shadow);"></iframe>
@@ -161,7 +164,6 @@
         </div>
     </div>
 
-    
     <div id="winnerHistoryModal" class="modal">
         <div class="dialog" style="max-width: 600px;">
             <h3 style="color:var(--warning);">🏆 Historial de Sorteos</h3>
@@ -273,9 +275,10 @@
         </div>
     </div>
     
-    <script defer src="script.js"></script>
+    <script src="notificaciones.js"></script>
+    <script src="social.js"></script>
+    <script src="admin.js"></script>
+    <script src="script.js"></script>
+
 </body>
 </html>
-
-
-

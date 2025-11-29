@@ -1,17 +1,19 @@
-// --- CONFIGURACIÓN DE LA RIFA ---
-const ADMIN_PASS = "000-999"; 
-const STORAGE_KEY = "rifa_data_v8"; 
-const STORAGE_KEY_CHECKSUM = "rifa_checksum"; // NUEVA CLAVE
+// --- CONFIGURACIÓN Y CONSTANTES GLOBALES ---
+const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; // Contraseña "000-999" (Ofuscada para no verla a simple vista en el código)
+const STORAGE_KEY = "rifa_data_v10"; 
+const STORAGE_KEY_CHECKSUM = "rifa_checksum"; 
+const STORAGE_KEY_SOCIAL = "rifa_social_comments"; // Nueva clave para comentarios
 const TOTAL_TICKETS = 1000;
 const MAX_RESERVATIONS_PER_USER = 3; 
+const RESERVATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Horas
+
 const FINAL_RAFFLE_DATE = new Date('2026-01-30T22:00:00'); 
 const WEEKLY_DRAW_DAY = 5; // 0=Domingo, 5=Viernes
 const WEEKLY_DRAW_HOUR = 22; // 10 PM (22:00)
-const RESERVATION_CLEARANCE_HOUR = 17; // 5 PM (17:00) Viernes para la liberación semanal
-const RESERVATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Horas
+const RESERVATION_CLEARANCE_HOUR = 17; // 5 PM (17:00) Viernes
 const LAST_WEEKLY_DRAW = new Date('2026-01-23T22:00:00').getTime(); 
 
-// --- ESTADO GLOBAL ---
+// --- ESTADO GLOBAL (Compartido entre módulos) ---
 let appData = {
     tickets: [],
     users: [],
@@ -20,34 +22,17 @@ let appData = {
     winners: [], 
 };
 
-// --- SEGURIDAD BÁSICA CREATIVA (Anti-Inspección) ---
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
-        console.warn('Advertencia: La manipulación de datos en la consola está restringida.');
-        e.preventDefault();
-        toast('Acceso a herramientas de desarrollo bloqueado.', 'error');
-    }
-});
-
-
 // --- FUNCIONES DE UTILIDAD GENERAL ---
 
-function getCssVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-function formatNum(num) { 
-    return parseInt(num).toString().padStart(3, '0'); 
-}
+function getCssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function formatNum(num) { return parseInt(num).toString().padStart(3, '0'); }
 function formatUser(user) { return `${user.name} (${user.phone})`; }
 function getUserByEmail(email) { return appData.users.find(u => u.email === email); }
 
 function toast(msg, type='success') {
     const box = document.createElement('div');
     box.className = `toast ${type}`;
-    if (type === 'warning' && !document.body.classList.contains('light-mode')) {
-         box.style.color = '#000'; 
-    }
+    if (type === 'warning' && !document.body.classList.contains('light-mode')) { box.style.color = '#000'; }
     box.innerHTML = msg; 
     document.getElementById('toast-container').appendChild(box);
     setTimeout(() => {
@@ -58,31 +43,19 @@ function toast(msg, type='success') {
     }, 4000);
 }
 
-function openModal(id) { 
-    document.getElementById(id).classList.add('open'); 
-    if (id === 'winnerManagementModal') {
-        document.getElementById('winnerNum').value = '';
-        document.getElementById('winnerInfo').textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
-    }
-}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { 
     document.getElementById(id).classList.remove('open'); 
+    // Resetear modales específicos al cerrar
     if (id === 'verifyModal') {
         document.getElementById('verifyNum').value = '';
         document.getElementById('verifyResult').innerHTML = '<p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>';
     }
 }
-
 function toggleTheme() { document.body.classList.toggle('light-mode'); }
 
-// --- FUNCIONES DE GESTIÓN DE CARGA (SPINNER) ---
-function showLoading() {
-    document.getElementById('loading-spinner').classList.remove('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loading-spinner').classList.add('hidden');
-}
+function showLoading() { document.getElementById('loading-spinner').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loading-spinner').classList.add('hidden'); }
 
 
 // --- PERSISTENCIA Y CARGA / LIMPIEZA AUTOMÁTICA ---
@@ -96,7 +69,6 @@ function getWeeklyCutoffTime() {
     if (cutoff.getTime() > now.getTime()) {
         cutoff.setDate(cutoff.getDate() - 7);
     }
-    
     return cutoff.getTime();
 }
 
@@ -164,6 +136,8 @@ async function load() {
     renderGrid();
     updateUI();
     hideLoading();
+    // Inicializar lógica social después de cargar datos
+    if (typeof initSocialModule === 'function') initSocialModule();
 }
 
 function save() {
@@ -176,49 +150,23 @@ function refreshData() {
     toast("Datos y contadores actualizados", 'success');
 }
 
-// --- FUNCIÓN DE MÁSCARA DE TELÉFONO ---
-function applyPhoneMask(input) {
-    let value = input.value.replace(/\D/g, ''); 
-    let formatted = '';
-
-    if (value.length > 0) {
-        formatted += value.substring(0, 3);
-    }
-    if (value.length > 3) {
-        formatted += ' ' + value.substring(3, 6);
-    }
-    if (value.length > 6) {
-        formatted += ' ' + value.substring(6, 10);
-    }
-
-    input.value = formatted.trim();
-}
-
-
-// --- CONTADOR Y FECHAS (No modificado) ---
+// --- LÓGICA DE CONTADOR Y FECHAS (No modificado) ---
 
 function getNextWeeklyDrawDate() {
+    // Lógica del contador (igual a la versión anterior)
     const today = new Date();
     const nowTime = today.getTime();
     
-    if (nowTime >= FINAL_RAFFLE_DATE.getTime()) {
-        return new Date(0); 
-    }
-
-    if (nowTime > LAST_WEEKLY_DRAW) {
-        return FINAL_RAFFLE_DATE; 
-    }
+    if (nowTime >= FINAL_RAFFLE_DATE.getTime()) { return new Date(0); }
+    if (nowTime > LAST_WEEKLY_DRAW) { return FINAL_RAFFLE_DATE; }
     
     let nextDraw = new Date(today);
     let daysToAdd = (WEEKLY_DRAW_DAY + 7 - today.getDay()) % 7;
 
-    if (daysToAdd === 0 && today.getHours() >= WEEKLY_DRAW_HOUR) {
-        daysToAdd = 7;
-    }
+    if (daysToAdd === 0 && today.getHours() >= WEEKLY_DRAW_HOUR) { daysToAdd = 7; }
     
     nextDraw.setDate(today.getDate() + daysToAdd);
     nextDraw.setHours(WEEKLY_DRAW_HOUR, 0, 0, 0);
-    
     return nextDraw;
 }
 
@@ -235,7 +183,6 @@ function startCountdown() {
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
             const s = Math.floor((distance % (1000 * 60)) / (1000)).toString().padStart(2, '0');
-            
             document.getElementById("nextDrawTime").innerHTML = `${d}D ${h}:${m}:${s}`;
         } else if (nextDrawTime < FINAL_RAFFLE_DATE.getTime()) {
             document.getElementById("nextDrawTime").innerHTML = "¡HOY, A LAS 10 PM!";
@@ -258,14 +205,23 @@ function startCountdown() {
 }
 
 
-// --- RENDERIZADO UX (GRID Y LEYENDA) (No modificado) ---
+// --- LÓGICA DE INTERFAZ Y GRID ---
+
+function applyPhoneMask(input) {
+    let value = input.value.replace(/\D/g, ''); 
+    let formatted = '';
+    if (value.length > 0) { formatted += value.substring(0, 3); }
+    if (value.length > 3) { formatted += ' ' + value.substring(3, 6); }
+    if (value.length > 6) { formatted += ' ' + value.substring(6, 10); }
+    input.value = formatted.trim();
+}
 
 function renderInteractiveLegend() {
     const legendData = [
-        { color: getCssVar('--primary'), text: 'Disponible: Puedes seleccionarlo y reservarlo.' },
-        { color: getCssVar('--warning'), text: 'Reservado: Alguien lo seleccionó. Paga pronto o se libera.' },
-        { color: getCssVar('--accent'), text: 'Pagado: Boleta asegurada para el sorteo final y semanal.' },
-        { color: getCssVar('--secondary'), text: 'Mío (Blink): Número reservado/pagado por ti.' }
+        { color: getCssVar('--primary'), text: 'Disponible: Puedes seleccionarlo.' },
+        { color: getCssVar('--warning'), text: 'Reservado: Alguien lo seleccionó. Paga pronto.' },
+        { color: getCssVar('--accent'), text: 'Pagado: Boleta asegurada.' },
+        { color: getCssVar('--secondary'), text: 'Mío (Blink): Reservado/Pagado por ti.' }
     ];
 
     const container = document.getElementById('interactiveLegend');
@@ -274,10 +230,7 @@ function renderInteractiveLegend() {
     legendData.forEach(item => {
         const div = document.createElement('div');
         div.className = 'legend-item';
-        div.innerHTML = `
-            <div class="legend-color" style="background-color: ${item.color};"></div>
-            <span>${item.text}</span>
-        `;
+        div.innerHTML = `<div class="legend-color" style="background-color: ${item.color};"></div><span>${item.text}</span>`;
         container.appendChild(div);
     });
 }
@@ -371,13 +324,13 @@ function updateUI() {
         btnAuth.onclick = () => openModal('loginModal');
     }
     
-    // NUEVO: Mostrar el Checksum de transparencia en el footer (solo si existe)
     const currentChecksum = localStorage.getItem(STORAGE_KEY_CHECKSUM) || 'N/A';
     document.getElementById('checksumStatus').textContent = currentChecksum.substring(0, 30) + (currentChecksum.length > 30 ? '...' : '');
 
 }
 
-// --- LÓGICA DE COMPRA Y RESERVA (No modificado) ---
+
+// --- LÓGICA DE USUARIO Y RESERVA ---
 
 function handleLogin(event) {
     event.preventDefault();
@@ -434,31 +387,6 @@ function confirmReservation() {
     renderGrid(); 
 }
 
-function quickBuy(count) {
-    if (!appData.currentUser) {
-        toast("Debes identificarte para comprar números.", 'error');
-        return openModal('loginModal');
-    }
-
-    if (count > MAX_RESERVATIONS_PER_USER) count = MAX_RESERVATIONS_PER_USER;
-    
-    appData.selectedTickets = []; 
-    const availableTickets = appData.tickets.filter(t => t.state === 'available');
-    
-    if (availableTickets.length < count) {
-        toast("No hay suficientes boletas disponibles para tu compra.", 'error');
-        return;
-    }
-    
-    for (let i = 0; i < count; i++) {
-        appData.selectedTickets.push(availableTickets[i].num);
-    }
-    
-    renderGrid();
-    updateUI();
-    confirmReservation();
-}
-
 function showInstructions() {
      alert(`PASOS PARA EL PAGO DE BOLETAS RESERVADAS:\n\n1. Valor: $25.000 COP por boleta.\n2. Realiza el pago por Nequi o Daviplata al número:\n   📞 321 963 7388 (Óscar Fidel Flórez Tami)\n3. Envía el comprobante de pago al WhatsApp del administrador (el botón flotante).\n4. Un administrador verificará tu pago y cambiará el estado de tu(s) boleta(s) a 'Pagada' (Color ROJO).\n\n¡Recuerda, tienes 24 horas para asegurar tus números, o serán liberados el viernes a las 5 PM!`);
 }
@@ -480,359 +408,6 @@ function checkMyTickets() {
     
     alert(msg);
 }
-
-// --- FUNCIÓN DE CHECKSUM (NUEVA LÓGICA DE INTEGRIDAD) ---
-
-/** Genera un código de integridad único basado en la lista de números pagados. */
-function generatePaidTicketsChecksum() {
-    // 1. Filtrar solo los números PAGADOS.
-    const paidTickets = appData.tickets
-        .filter(t => t.state === 'paid')
-        .map(t => t.num); 
-        
-    // 2. Ordenar los números para asegurar que el hash sea el mismo sin importar el orden de entrada.
-    paidTickets.sort(); 
-    
-    // 3. Unir los números y el email del dueño (para mayor seguridad) en un solo string.
-    const dataString = paidTickets.map(num => {
-        const ticket = appData.tickets.find(t => t.num === num);
-        // Usa una combinación de número y el hash simple del email/dueño para evitar fraudes
-        return `${num}:${ticket.owner ? ticket.owner.substring(0, 5) : 'manual'}`; 
-    }).join('|');
-    
-    // 4. Calcular un hash simple (suma XOR de caracteres)
-    let hash = 0;
-    if (dataString.length === 0) return '000000'; 
-    for (let i = 0; i < dataString.length; i++) {
-        const char = dataString.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash |= 0; // Convertir a 32bit integer
-    }
-
-    // 5. Convertir el hash a una cadena hexadecimal para un aspecto "oficial"
-    return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
-}
-
-/** [ADMIN] Genera y guarda el código de integridad actual. */
-function adminGenerateAndSetChecksum() {
-    if (!appData.currentUser || appData.currentUser.email !== 'admin@admin.com') return toast("Solo el Admin puede hacer esto.", 'error');
-
-    const newChecksum = generatePaidTicketsChecksum();
-    localStorage.setItem(STORAGE_KEY_CHECKSUM, newChecksum);
-    updateUI(); 
-    toast(`✅ Nuevo Checksum generado y guardado: ${newChecksum}`, 'success');
-    
-    // Opcional: Copiar al portapapeles para publicarlo
-    navigator.clipboard.writeText(newChecksum).then(() => {
-        toast('Checksum copiado al portapapeles!', 'success');
-    });
-}
-
-/** [PÚBLICO] Verifica el Checksum guardado con el actual. */
-function verifyPublicChecksum() {
-    const storedChecksum = localStorage.getItem(STORAGE_KEY_CHECKSUM);
-    const calculatedChecksum = generatePaidTicketsChecksum();
-    
-    if (!storedChecksum || storedChecksum === 'N/A') {
-        toast("❌ Aún no se ha generado el código de integridad de transparencia.", 'warning');
-        return;
-    }
-    
-    if (storedChecksum === calculatedChecksum) {
-        toast("✅ ¡VERIFICACIÓN EXITOSA! Los datos de boletas pagadas son auténticos.", 'success');
-        const checksumDisplay = document.getElementById('checksumStatus');
-        checksumDisplay.style.color = getCssVar('--primary');
-        checksumDisplay.style.fontWeight = 'bold';
-    } else {
-        toast("⚠️ ¡ALERTA! EL CÓDIGO DE INTEGRIDAD NO COINCIDE. Contacte al administrador. (Datos manipulados o corruptos)", 'error');
-        const checksumDisplay = document.getElementById('checksumStatus');
-        checksumDisplay.style.color = getCssVar('--accent');
-        checksumDisplay.style.fontWeight = 'bold';
-    }
-}
-
-// --- LÓGICA DE ADMINISTRACIÓN (Con integración de Checksum) ---
-
-function openAdminAuth() {
-    const pass = prompt("Ingrese la contraseña de administrador:");
-    if (pass === ADMIN_PASS) {
-        appData.currentUser = { name: 'Admin', email: 'admin@admin.com', phone: 'N/A' }; 
-        renderAdminLists();
-        openModal('adminModal');
-    } else if (pass !== null) {
-        toast("Contraseña incorrecta.", 'error');
-    }
-}
-
-// El resto de funciones de Admin (renderAdminLists, adminRemoveUser, adminSetState, etc.) se mantienen igual.
-// Solo necesitas asegurarte de que estén presentes. Si tu script.js anterior las tenía, solo reemplaza el archivo.
-
-function renderAdminLists() {
-    const reservedBody = document.getElementById('reservedTicketListBody');
-    const paidBody = document.getElementById('paidTicketListBody');
-    reservedBody.innerHTML = '';
-    paidBody.innerHTML = '';
-    
-    const reserved = appData.tickets.filter(t => t.state === 'reserved');
-    reserved.forEach(t => {
-        const user = getUserByEmail(t.owner);
-        const remainingMs = t.reservedAt + RESERVATION_DURATION_MS - Date.now();
-        const timeText = remainingMs > 0 
-            ? `(${Math.ceil(remainingMs / (1000 * 60 * 60))}h restantes)`
-            : `(EXPIRADA)`;
-        
-        const row = reservedBody.insertRow();
-        row.innerHTML = `
-            <td>${t.num}</td>
-            <td>${user ? formatUser(user) : t.owner} ${timeText}</td>
-            <td>
-                <button onclick="adminSetState('${t.num}', 'paid')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;">Pagar</button>
-                <button onclick="adminSetState('${t.num}', 'available')" class="btn outline" style="padding: 5px 10px; font-size: 0.7rem;">Liberar</button>
-            </td>
-        `;
-    });
-
-    const paid = appData.tickets.filter(t => t.state === 'paid');
-    paid.forEach(t => {
-        const user = getUserByEmail(t.owner);
-        const row = paidBody.insertRow();
-        row.innerHTML = `
-            <td>${t.num}</td>
-            <td>${user ? formatUser(user) : t.owner}</td>
-            <td>
-                <button onclick="adminSetState('${t.num}', 'available')" class="btn warning" style="padding: 5px 10px; font-size: 0.7rem;">Liberar</button>
-            </td>
-        `;
-    });
-    renderUserList();
-    
-    document.getElementById('btnAdminDeleteWinner').style.display = appData.currentUser && appData.currentUser.email === 'admin@admin.com' ? 'block' : 'none';
-}
-
-function renderUserList() {
-    const body = document.getElementById('userListBody');
-    const search = document.getElementById('adminUserSearch').value.toLowerCase();
-    body.innerHTML = '';
-
-    const filteredUsers = appData.users.filter(u => 
-        u.name.toLowerCase().includes(search) || u.phone.includes(search)
-    );
-
-    filteredUsers.forEach(user => {
-        const tickets = appData.tickets.filter(t => t.owner === user.email);
-        const status = tickets.length > 0 ? `(${tickets.length} boletas)` : 'Sin boletas';
-        const row = body.insertRow();
-        row.innerHTML = `
-            <td>${user.name}</td>
-            <td>${user.phone}</td>
-            <td>${status}</td>
-            <td>
-                <button onclick="adminRemoveUser('${user.email}')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;">Eliminar</button>
-            </td>
-        `;
-    });
-}
-
-function adminRemoveUser(email) {
-    if (confirm(`¿Estás seguro de ELIMINAR al cliente con email ${email}? Sus boletas NO se liberarán automáticamente; asegúrese de liberarlas manualmente en la lista de 'Pagadas'/'Reservadas' primero.`)) {
-        appData.users = appData.users.filter(u => u.email !== email);
-        save();
-        renderAdminLists();
-        toast("Cliente eliminado.", 'warning');
-    }
-}
-
-function adminSetState(num, newState) {
-    const ticket = appData.tickets.find(t => t.num === num);
-    if (!ticket) return;
-
-    if (newState === 'available') {
-        ticket.state = 'available';
-        ticket.owner = null;
-        ticket.reservedAt = null;
-    } else if (newState === 'paid') {
-        ticket.state = 'paid';
-        if (!ticket.owner) {
-            return toast("Error: Esta boleta no tiene dueño asignado. Use 'Asignar Manual' primero.", 'error');
-        }
-        if (!ticket.reservedAt) ticket.reservedAt = Date.now(); 
-    }
-    
-    save();
-    renderAdminLists(); 
-    renderGrid(); 
-    toast(`Boleta ${num} cambiada a ${newState.toUpperCase()}`, 'success');
-    // IMPORTANTE: Si el estado cambia a 'paid', se recomienda generar un nuevo checksum.
-    if (newState === 'paid' && appData.currentUser && appData.currentUser.email === 'admin@admin.com') {
-         adminGenerateAndSetChecksum();
-    }
-}
-
-function openManualAssignModal() {
-    closeModal('adminModal');
-    document.getElementById('manualNum').value = '';
-    document.getElementById('manualName').value = '';
-    document.getElementById('manualPhone').value = '';
-    openModal('manualAssignModal');
-    const manualPhoneInput = document.getElementById('manualPhone');
-    manualPhoneInput.oninput = () => applyPhoneMask(manualPhoneInput);
-}
-
-function handleManualAssign(event, state) {
-    event.preventDefault();
-    const num = document.getElementById('manualNum').value.padStart(3, '0');
-    const name = document.getElementById('manualName').value.trim();
-    const phone = document.getElementById('manualPhone').value.trim();
-    
-    const uniqueEmail = `manual_${phone.replace(/\D/g, '')}@riffa.com`; 
-
-    const ticket = appData.tickets.find(t => t.num === num);
-
-    if (!ticket) return toast("Número de boleta inválido.", 'error');
-    if (ticket.state !== 'available') return toast(`El número ${num} ya está ${ticket.state}.`, 'error');
-
-    let user = getUserByEmail(uniqueEmail);
-    if (!user) {
-        user = { name, email: uniqueEmail, phone };
-        appData.users.push(user);
-    } else {
-         user.name = name; 
-    }
-
-    ticket.state = state;
-    ticket.owner = uniqueEmail;
-    ticket.reservedAt = Date.now();
-
-    save();
-    closeModal('manualAssignModal');
-    toast(`Asignación manual de ${num} como ${state.toUpperCase()} exitosa.`, 'success');
-    openModal('adminModal'); 
-}
-
-// --- GESTIÓN DE SORTEOS (No modificado) ---
-function previewWinnerInfo() {
-    const numInput = document.getElementById('winnerNum');
-    const num = numInput.value.padStart(3, '0');
-    const info = document.getElementById('winnerInfo');
-    
-    const primaryColor = getCssVar('--primary');
-    const accentColor = getCssVar('--accent');
-    const warningColor = getCssVar('--warning');
-    
-    if (num.length !== 3) {
-        info.textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
-        return;
-    }
-    
-    const ticket = appData.tickets.find(t => t.num === num);
-    if (!ticket) {
-        info.innerHTML = `⚠️ El número <span style="color: ${accentColor};">${num}</span> no existe.`;
-        return;
-    }
-
-    const status = ticket.state;
-    if (status === 'available') {
-        info.innerHTML = `🚫 El número <span style="color: ${primaryColor};">${num}</span> está **LIBRE**. No hay un ganador pagado.`;
-    } else if (status === 'reserved') {
-        const user = getUserByEmail(ticket.owner);
-        info.innerHTML = `⏳ El número <span style="color: ${warningColor};">${num}</span> está **RESERVADO** por **${user ? user.name : ticket.owner}**. ¡Aún no está PAGADO!`;
-    } else if (status === 'paid') {
-        const user = getUserByEmail(ticket.owner);
-        info.innerHTML = `✅ ¡GANADOR! El número <span style="color: ${accentColor};">${num}</span> está **PAGADO** por **${user ? user.name : ticket.owner}**.`;
-    }
-}
-
-function openWinnerManagement() {
-    closeModal('adminModal');
-    document.getElementById('winnerDate').valueAsDate = new Date();
-    document.getElementById('winnerNum').value = '';
-    document.getElementById('winnerInfo').textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
-    openModal('winnerManagementModal');
-    
-    const winnerNumInput = document.getElementById('winnerNum');
-    winnerNumInput.removeEventListener('input', previewWinnerInfo);
-    winnerNumInput.addEventListener('input', previewWinnerInfo);
-}
-
-function checkAndAddWinner() {
-    const num = document.getElementById('winnerNum').value.padStart(3, '0');
-    const date = document.getElementById('winnerDate').value;
-    const type = document.getElementById('winnerType').value;
-    
-    const ticket = appData.tickets.find(t => t.num === num);
-    if (!ticket) return toast("Número ganador inválido (debe ser 3 cifras).", 'error');
-
-    const ownerInfo = ticket.owner ? getUserByEmail(ticket.owner) : null;
-    const winnerName = ownerInfo ? ownerInfo.name : "Nadie (Boleta Libre)";
-    const ownerEmail = ticket.owner || "available";
-
-    if (ticket.state !== 'paid') {
-        if (!confirm(`ADVERTENCIA: El ganador de la lotería es ${num}, pero la boleta está como ${ticket.state.toUpperCase()} (${winnerName}). ¿Desea registrarlo como ganador de todos modos? Esto es solo para fines de registro histórico, no confirma el premio si no está pagado.`)) {
-            if (!confirm("Si cancela, el sorteo no se registrará. ¿Desea continuar?")) return;
-        }
-    } else {
-        if (!confirm(`CONFIRMAR: Registrar a ${winnerName} con el número ${num} como ganador del Sorteo ${type.toUpperCase()} del ${date}?`)) {
-            return;
-        }
-    }
-
-    const exists = appData.winners.some(w => w.date === date && w.type === type);
-    if (exists && !confirm(`ADVERTENCIA: Ya existe un ganador registrado para el sorteo ${type.toUpperCase()} de la fecha ${date}. ¿Desea registrar este nuevo resultado y duplicar el registro?`)) {
-        return;
-    }
-
-    const newWinner = { date, num, winnerName, type, ownerEmail };
-    appData.winners.unshift(newWinner); 
-
-    if (type === 'final' && ticket.state !== 'available') {
-        adminSetState(num, 'available');
-    }
-
-    save();
-    closeModal('winnerManagementModal');
-    toast(`Ganador ${winnerName} registrado para ${num}.`, 'success');
-}
-
-function openWinnerHistory() {
-    renderWinnerHistory();
-    openModal('winnerHistoryModal');
-}
-
-function renderWinnerHistory() {
-    const body = document.getElementById('winnerListBody');
-    body.innerHTML = '';
-    
-    const totalWeeklyDraws = 18; 
-    const completedWeeklyDraws = appData.winners.filter(w => w.type === 'weekly').length;
-    const weeklyDrawsLeft = Math.max(0, totalWeeklyDraws - completedWeeklyDraws);
-    const finalDrawn = appData.winners.some(w => w.type === 'final');
-
-    appData.winners.forEach(w => {
-        const row = body.insertRow();
-        row.style.color = w.type === 'final' ? getCssVar('--accent') : getCssVar('--warning');
-        row.innerHTML = `
-            <td>${w.date}</td>
-            <td>${w.type === 'final' ? 'FINAL' : 'Semanal (1M)'}</td>
-            <td><strong style="font-size: 1.1rem;">${w.num}</strong></td>
-            <td>${w.winnerName}</td>
-        `;
-    });
-
-
-    const remainingText = `Sorteos semanales registrados: ${completedWeeklyDraws}. Estimados restantes: ${weeklyDrawsLeft}. Sorteo Final: ${finalDrawn ? 'Realizado' : 'PENDIENTE'}.`;
-    document.getElementById('drawsRemaining').textContent = remainingText;
-}
-
-function deleteWinnerHistory() {
-    if (confirm("ADVERTENCIA: ¿Estás seguro de ELIMINAR TODO el historial de ganadores? Esta acción no se puede deshacer.")) {
-        appData.winners = [];
-        save();
-        renderWinnerHistory();
-        toast("Historial de ganadores eliminado.", 'warning');
-    }
-}
-
-// --- OTRAS FUNCIONES DE UTILIDAD (No modificado) ---
 
 function verifyTicket() {
     const numInput = document.getElementById('verifyNum');
@@ -873,49 +448,8 @@ function verifyTicket() {
     resultBox.innerHTML = `<p style="margin:0; font-weight: bold; color: ${color};">Número: ${num} | Estado: ${statusText}${ownerName}</p>`;
 }
 
-function adminResetRaffle() {
-    if (confirm("ADVERTENCIA CRÍTICA: ¿Estás ABSOLUTAMENTE SEGURO de que deseas restablecer la Rifa? Esto eliminará todos los datos de tickets, usuarios, reservas y ganadores de forma permanente.")) {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem("last_weekly_clearance_timestamp"); 
-        localStorage.removeItem(STORAGE_KEY_CHECKSUM); // NUEVO: Limpiar checksum
-        location.reload();
-    }
-}
 
-function exportData(data, filename) {
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast(`Exportando ${filename}...`, 'success');
-}
-
-function exportAllData() {
-    exportData(appData, `Rifa_Data_Completa_${new Date().toISOString().slice(0, 10)}.json`);
-}
-
-function exportPaidTickets() {
-    const paid = appData.tickets.filter(t => t.state === 'paid').map(t => {
-        const user = getUserByEmail(t.owner);
-        return {
-            numero: t.num,
-            estado: 'PAGADO',
-            nombre: user ? user.name : 'N/A',
-            celular: user ? user.phone : 'N/A',
-            email: t.owner
-        };
-    });
-    exportData(paid, `Rifa_Boletas_Pagadas_${new Date().toISOString().slice(0, 10)}.json`);
-}
-
-
-// --- INICIALIZACIÓN AL CARGAR LA PÁGINA (No modificado) ---
+// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
     load();
     startCountdown();
@@ -942,4 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (verifyInput) {
         verifyInput.addEventListener('input', verifyTicket);
     }
+    
+    // Inicializar el renderizado de lista de comentarios
+    if (typeof renderComments === 'function') renderComments();
 });

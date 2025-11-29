@@ -3,291 +3,444 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M Semanal</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M semanal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        // --- Seguridad Anti-Inspección (BÁSICA) ---
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
+                console.warn('Advertencia: La manipulación de datos en la consola está restringida.');
+                e.preventDefault();
+            }
+        });
+    </script>
+    <style>
+        /* --- TEMA OSCURO (NATIVO Y FIXED) --- */
+        :root {
+            --primary: #00ff84; /* Verde Neón */
+            --secondary: #004bce; /* Azul Eléctrico */
+            --accent: #ff0033; /* Rojo Intenso */
+            --warning: #ffea00; /* Amarillo Brillante */
+            --bg-body: #050505; /* Negro Puro */
+            --bg-card: #141414; /* Gris Muy Oscuro */
+            --text-main: #9ddbff;
+            --text-muted: #968f8f;
+            --border: #7e5c5c;
+            --shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+
+        /* --- TEMA CLARO (OPCIONAL) --- */
+        .light-mode {
+            --primary: #2ecc71;
+            --secondary: #2d9cdb;
+            --accent: #e74c3c;
+            --warning: #f1c40f;
+            --bg-body: #f7f8fa;
+            --bg-card: #ffffff;
+            --text-main: #111;
+            --text-muted: #666;
+            --border: #ddd;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Base */
+        *{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
+        body{margin:0;background:var(--bg-body);color:var(--text-main);transition:background .3s, color .3s; min-height: 100vh;}
+        
+        /* Header y Botones */
+        header{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:var(--bg-card); box-shadow: var(--shadow);}
+        header h1{font-size:1.5rem;margin:0;color:var(--primary);}
+        .actions{display:flex;gap:10px;align-items:center}
+        .btn{padding:8px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:background .3s, color .3s, border-color .3s; display: flex; align-items: center; gap: 5px; justify-content: center;}
+        .btn:hover{filter:brightness(1.1)}
+        
+        .btn.primary{background:var(--primary);color:var(--bg-body)}
+        .btn.secondary{background:var(--secondary);color:#fff}
+        .btn.accent{background:var(--accent);color:#fff}
+        .btn.warning{background:var(--warning);color:#111}
+        .btn.outline{background:transparent;border:2px solid var(--border);color:var(--text-main)}
+
+        /* Stats y Contadores */
+        .stats{display:flex;justify-content:space-around;padding:15px 10px;background:var(--bg-card);box-shadow:var(--shadow);border-radius:10px;margin:20px 0}
+        .stat-item{text-align:center}
+        .stat-item h3{margin:0;font-size:1.5rem}
+        .stat-item p{margin:0;color:var(--text-muted)}
+
+        /* Cronómetro */
+        .countdown{text-align:center;padding:15px 0;background:var(--bg-card);border-radius:10px;box-shadow:var(--shadow);margin-bottom:20px}
+        .countdown h2{margin:5px 0 10px;font-size:1.2rem;color:var(--accent)}
+        .countdown p{font-size:2.5rem;font-weight:700;margin:0;color:var(--primary)}
+        
+        /* Contenedor Principal */
+        main{max-width:1200px;margin:auto;padding:20px}
+        
+        /* Filtros y Búsqueda */
+        .controls{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+        .controls input,.controls select{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);color:var(--text-main);transition:border-color .3s; font-size: 1rem;}
+        
+        /* Grid de Boletas */
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:5px}
+        .card{padding:5px;border-radius:5px;text-align:center;font-size:.75rem;font-weight:700;cursor:pointer;transition:transform .1s,box-shadow .1s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50px;}
+        .card:hover{transform:scale(1.05);box-shadow:0 0 10px rgba(0,0,0,0.5)}
+        .card .num{font-size:1rem;font-weight:900;}
+        .card .status-text{font-size:0.6rem;opacity:0.8; margin-top: -2px;}
+
+        /* Estados de Boletas */
+        .card.available{background:var(--primary);color:var(--bg-body)}
+        .card.reserved{background:var(--warning);color:#111}
+        .card.paid{background:var(--accent);color:#fff}
+        
+        /* Selección/Mi Boleta (Efecto Básico) */
+        .card.selected{border:3px solid var(--secondary); transform: scale(1.1); box-shadow: 0 0 15px var(--secondary);}
+        .card.mine{border:3px solid var(--secondary); animation: blink-mine 1.5s infinite;}
+        
+        @keyframes blink-mine {
+            0%, 100% {opacity: 1; box-shadow: 0 0 10px var(--secondary);}
+            50% {opacity: 0.8; box-shadow: none;}
+        }
+
+        /* Botón de Reserva Flotante */
+        #multiReserveBtn{position:fixed;bottom:80px;right:20px;z-index:90;padding:15px 25px;font-size:1.1rem;box-shadow:0 5px 20px rgba(0,0,0,0.8); display:none}
+
+        /* Footer */
+        footer{text-align:center;padding:20px;color:var(--text-muted);border-top:1px solid var(--border);margin-top:40px}
+
+        /* Toast Messages */
+        #toast-container{position:fixed;top:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:10px}
+        .toast{padding:10px 15px;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,0.3);opacity:1;transition:opacity .4s,transform .4s}
+        .toast.success{background:#2ecc71;color:#fff}
+        .toast.warning{background:#f1c40f;color:#111}
+        .toast.error{background:#e74c3c;color:#fff}
+        .toast.accent{background:var(--secondary);color:#fff}
+
+        /* Modales Generales */
+        .modal{display:none;position:fixed;z-index:150;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.8);backdrop-filter:blur(5px);transition:opacity 0.3s}
+        .modal.open{display:flex;align-items:center;justify-content:center}
+        .modal-content{background:var(--bg-card);padding:30px;border-radius:10px;box-shadow:var(--shadow);width:90%;max-width:500px;position:relative}
+        .close-btn{color:var(--text-main);float:right;font-size:28px;font-weight:bold;cursor:pointer;position:absolute;top:10px;right:20px}
+        .modal-content h2{color:var(--primary);margin-top:0}
+        .modal-content input, .modal-content select{width:100%;padding:10px;margin:10px 0 20px 0;border:1px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text-main)}
+
+        /* Listas de Admin */
+        .admin-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.9rem}
+        .admin-table th,.admin-table td{padding:10px;border:1px solid var(--border);text-align:left}
+        .admin-table th{background:var(--secondary);color:#fff}
+        .admin-list-container{max-height:400px;overflow-y:auto; margin-bottom: 10px;}
+
+        /* Video Modal */
+        #videoModal .modal-content { max-width: 800px; }
+        #videoContainer { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; }
+        #videoContainer video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        /* Social/Chat Modal */
+        #chatContent {max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px;}
+        .chat-message { border-bottom: 1px dotted var(--border); padding: 8px 0; }
+        .chat-message strong { color: var(--secondary); }
+        .chat-message small { color: var(--text-muted); display: block; font-size: 0.75rem;}
+        .chat-message .rating i { color: var(--warning); margin-right: 5px; }
+
+        .star-rating i { cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
+        .star-rating i.selected { color: var(--warning); }
+        .star-rating { font-size: 1.5rem; margin-bottom: 10px; }
+        
+        /* Loading Spinner */
+        #loading-spinner{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+        .spinner{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--primary);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite}
+        .hidden{opacity:0;pointer-events:none}
+        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    </style>
 </head>
 <body>
-
-    <div id="loading-spinner">
-        <div class="loader"></div>
-        <p>Cargando datos de la rifa...</p>
-    </div>
-
+    <div id="loading-spinner"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+    <a href="https://wa.me/3219637388" target="_blank" class="btn primary" style="position:fixed;bottom:20px;right:20px;z-index:100;padding:15px;border-radius:50%;box-shadow:0 5px 20px var(--primary); font-size: 1.5rem;">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    
     <header>
-        <div class="brand">
-            <div class="logo">GR</div>
-            <div>
-                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal - Que Esperas</h1>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Sorteo final: 30/01/2026 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. **Lotería Santander 10:00 PM**</div>
-            </div>
+        <h1>🏆 Rifa Épica <span style="color: var(--accent); font-size: 1rem;">| Moto CR4</span></h1>
+        <div class="actions">
+            <button onclick="openModal('socialModal')" class="btn outline secondary" title="Opiniones y Chat">
+                <i class="fas fa-comments"></i> Chat
+            </button>
+            <button onclick="openModal('videoModal')" class="btn accent" title="Video de Ganadores">
+                <i class="fas fa-video"></i> Video
+            </button>
+            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">
+                <i class="fas fa-sun"></i>
+            </button>
+            <button id="btnAuth" class="btn primary">Ingresar</button>
+            <button onclick="openAdminAuth()" class="btn secondary" title="Panel de Administración">
+                <i class="fas fa-lock"></i>
+            </button>
         </div>
-        <div class="controls">
-            <button onclick="openWinnerHistory()" class="btn secondary" style="font-size: 0.8rem; padding: 8px 12px;">🏆 Ganadores</button>
-            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">🌗</button>
-            <button id="btnAuth" onclick="openModal('loginModal')" class="btn secondary">Ingresar</button>
-            <button id="btnAdmin" onclick="openAdminAuth()" class="btn accent">Admin</button> </div>
     </header>
 
     <main>
-        <div class="raffle-banner">
-            <img src="Rifa.jpg" alt="Rifa Moto CR4" onerror="this.src='https://via.placeholder.com/1200x400/121212/e74c3c?text=IMAGEN+NO+ENCONTRADA+(Rifa.jpg)';">
+        <div class="stats">
+            <div class="stat-item">
+                <h3 id="statTotal">0</h3><p>Total</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="statAvail" style="color: var(--primary);">0</h3><p>Disponibles</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="statRes" style="color: var(--warning);">0</h3><p>Reservadas</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="statPaid" style="color: var(--accent);">0</h3><p>¡Pagadas!</p>
+            </div>
+        </div>
+
+        <div class="countdown">
+            <h2>Próximo Sorteo Semanal (1M COP)</h2>
+            <p id="nextDrawTime">Cargando...</p>
+            <h2 style="color: var(--secondary); margin-top: 15px;">Sorteo Final (Moto CR4)</h2>
+            <p id="finalDrawTime" style="color: var(--secondary);">Cargando...</p>
+        </div>
+
+        <div class="controls">
+            <div id="interactiveLegend"></div>
         </div>
         
-        <div class="rules-section">
-            <h2 class="section-title">¿Cómo Funciona el Sorteo?</h2>
-            <p class="rules-text">Conoce el estado de cada boleta y los premios. La transparencia es nuestra prioridad.</p>
-            
-            <div class="rules-content">
-                <div id="interactiveLegend" class="interactive-legend">
-                    </div>
-                
-                <div class="video-placeholder">
-                    <iframe width="100%" height="200" src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=0" title="Video de la Moto" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 12px; border: none; box-shadow: var(--shadow);"></iframe>
-                    <p style="text-align:center; font-size:0.85rem; margin-top:10px; color:var(--text-muted);">🎥 Revisa aquí el estado actual de la moto CR4.</p>
-                </div>
-            </div>
-        </div>
-        <div class="countdown-box">
-            <div style="text-align: center; flex: 1; border-right: 1px solid var(--border);">
-                <div style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">PRÓXIMO SORTEO SEMANAL</div>
-                <div class="countdown-item">
-                    <span id="nextDrawTime" class="countdown-val" style="color:var(--warning);">--:--:--</span>
-                    <div class="countdown-label">Tiempo Restante (Viernes 10 PM)</div>
-                </div>
-            </div>
-            <div style="text-align: center; flex: 1;">
-                <div style="font-weight: 800; color: var(--accent); margin-bottom: 5px;">GRAN SORTEO FINAL (Moto)</div>
-                <div class="countdown-item">
-                    <span id="finalDrawTime" class="countdown-val">--:--:--</span>
-                    <div class="countdown-label">Tiempo Restante</div>
-                </div>
-            </div>
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Buscar Boleta (Ej: 005)">
+            <select id="filterSelect">
+                <option value="all">Ver Todos</option>
+                <option value="available">Disponibles</option>
+                <option value="reserved">Reservadas</option>
+                <option value="paid">Pagadas</option>
+            </select>
+            <button onclick="openModal('verifyModal')" class="btn outline secondary">
+                <i class="fas fa-search"></i> Verificar Boleta
+            </button>
         </div>
 
-        <div class="hero">
-            <div class="panel">
-                <div class="toolbar">
-                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu(s) Número(s) (Máx 3)</h2>
-                    <button onclick="refreshData()" class="btn outline" style="padding: 5px 10px; font-size: 0.8rem;">🔄 Actualizar</button>
-                </div>
-                <div class="toolbar">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar número (000 - 999)...">
-                    <select id="filterSelect" class="search-input" style="flex: 0 0 140px;">
-                        <option value="all">Todos</option>
-                        <option value="available">Disponibles</option>
-                        <option value="reserved">Reservados</option>
-                        <option value="paid">Pagados</option>
-                    </select>
-                </div>
-                
-                <div id="grid" class="grid"></div>
+        <div class="grid" id="grid">
             </div>
-
-            <div class="panel">
-                <div class="cta-box">
-                    <div class="cta-title">📊 Estadísticas</div>
-                    <div class="stats-grid">
-                        <div class="stat-item"><span id="statAvail" class="stat-val" style="color:var(--primary)">0</span><span style="font-size:0.7rem">LIBRES</span></div>
-                        <div class="stat-item"><span id="statRes" class="stat-val" style="color:var(--warning)">0</span><span style="font-size:0.7rem">RESERVADOS</span></div>
-                        <div class="stat-item"><span id="statPaid" class="stat-val" style="color:var(--accent)">0</span><span style="font-size:0.7rem">PAGADOS</span></div>
-                        <div class="stat-item"><span id="statTotal" class="stat-val">1000</span><span style="font-size:0.7rem">TOTAL</span></div>
-                    </div>
-                </div>
-
-                <div class="cta-box">
-                    <div class="cta-title">💰 Compra tu Boleta</div>
-                    <div class="price-info">
-                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--primary); text-align: center;">$25.000 COP</div>
-                        <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">Valor por boleta</div>
-                    </div>
-                    
-                    <button id="multiReserveBtn" onclick="confirmReservation()" class="btn accent" style="width:100%; margin-bottom:10px; display: none;">
-                        ✅ Reservar (<span id="selectedCount">0</span>) Números
-                    </button>
-                    
-                    <div class="quick-buy-grid">
-                        <button onclick="quickBuy(1)" class="btn secondary">1 Boleta</button>
-                        <button onclick="quickBuy(2)" class="btn secondary">2 Boletas</button>
-                        <button onclick="quickBuy(3)" class="btn secondary">3 Boletas</button>
-                    </div>
-                    
-                    <button onclick="showInstructions()" class="btn secondary" style="width:100%; margin-bottom:10px;">📄 ¿Cómo pagar?</button>
-                    <button onclick="checkMyTickets()" class="btn outline" style="width:100%">🎟️ Ver Mis Boletas</button>
-                    <button onclick="openModal('verifyModal')" class="btn secondary" style="width:100%; margin-top:10px;">🔍 Verificar Boleta</button>
-                </div>
-            </div>
-        </div>
+        
+        <button id="multiReserveBtn" onclick="confirmReservation()" class="btn secondary">
+            Reservar <span id="selectedCount">0</span> Boleta(s)
+        </button>
     </main>
 
     <footer>
-    <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
-    <p>Entre mas te demores menos oportunidades, haslo ya para mas oportunidades</p>
-    
-    <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-        <div style="font-weight: bold; margin-bottom: 8px; color: var(--secondary);">🔒 Código de Integridad (Transparencia)</div>
-        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
-            Código actual: <span id="checksumStatus" style="font-family: monospace;">N/A</span>
+        <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
+        <p>Entre mas te demores menos oportunidades, hazlo ya para mas oportunidades</p>
+        
+        <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+            <div style="font-weight: bold; margin-bottom: 8px; color: var(--secondary);">🔒 Código de Integridad (Transparencia)</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+                Código oficial: <span id="checksumStatus" style="font-family: monospace;">N/A</span>
+            </div>
+            
+            <button onclick="verifyPublicChecksum()" class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px; margin-right: 10px;">
+                <i class="fas fa-check-shield"></i> Verificar Autenticidad
+            </button>
+            
+            <button onclick="adminGenerateAndSetChecksum()" class="btn outline warning" style="font-size: 0.8rem; padding: 5px 10px;">
+                <i class="fas fa-key"></i> Generar Checksum (Admin)
+            </button>
         </div>
-        
-        <button onclick="verifyPublicChecksum()" class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px; margin-right: 10px;">
-            🔍 Verificar Autenticidad
-        </button>
-        
-        <button onclick="adminGenerateAndSetChecksum()" class="btn outline warning" style="font-size: 0.8rem; padding: 5px 10px;">
-            🛡️ Generar Checksum (Admin)
-        </button>
-    </div>
-    <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">Descargar Listado de Boletas Pagadas (Transparencia)</button>
-</footer>
-    <a href="https://wa.me/573219637388" class="float-wa" target="_blank">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M13.6 2.3A7.9 7.9 0 0 0 8 0a7.9 7.9 0 0 0-7.9 7.9c0 1.4.4 2.8 1 4L0 16l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.1a7.9 7.9 0 0 0 7.9-7.9A7.9 7.9 0 0 0 13.6 2.3zM8 14.5a6.6 6.6 0 0 1-3.4-.9l-.2-.1-2.5.7.7-2.4-.2-.3a6.6 6.6 0 0 1 1-3.5A6.6 6.6 0 0 1 8 1.4a6.6 6.6 0 0 1 6.6 6.6 6.6 6.6 0 0 1-6.6 6.5z"/></svg>
-        Contactar Administrador
-    </a>
 
-    <div id="toast-container"></div>
+        <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">
+            <i class="fas fa-download"></i> Descargar Listado de Boletas Pagadas
+        </button>
+    </footer>
 
     <div id="loginModal" class="modal">
-        <div class="dialog">
-            <h3 id="loginTitle">👤 Identifícate</h3> 
-            <p style="color:var(--text-muted)">Necesitamos tus datos para registrar las boletas a tu nombre.</p>
-            <form onsubmit="handleLogin(event); return false;">
-                <input type="text" id="userName" placeholder="😑 Nombre Completo" required>
-                <input type="email" id="userEmail" placeholder="✉️ Correo Electrónico (Para tracking interno)" required>
-                <input type="tel" id="userPhone" placeholder="📞 Celular / WhatsApp (ej: 321 963 7388)" required>
-                <button type="submit" class="btn secondary" style="width:100%; margin-top:10px;">Guardar y Continuar 👍</button>
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <form onsubmit="handleLogin(event)">
+                <h2 id="loginTitle">👤 Identifícate</h2>
+                <input type="text" id="userName" placeholder="Nombre Completo" required>
+                <input type="email" id="userEmail" placeholder="Correo Electrónico (Para tu ID)" required>
+                <input type="tel" id="userPhone" placeholder="Celular (Ej: 300 123 4567)" required>
+                <button type="submit" class="btn primary" style="width: 100%;">Ingresar / Actualizar Datos</button>
             </form>
-            <button onclick="closeModal('loginModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cancelar</button>
-        </div>
-    </div>
-    
-    <div id="verifyModal" class="modal">
-        <div class="dialog">
-            <h3>🔍 Verificar Estado de Boleta</h3>
-            <p style="color:var(--text-muted)">Ingresa el número de 3 dígitos para ver su estado actual (transparencia).</p>
-            <form onsubmit="return false;">
-                <input type="text" id="verifyNum" placeholder="Número (ej: 045)" pattern="\d{3}" maxlength="3" required>
-                <div id="verifyResult" style="margin-top: 15px; padding: 10px; background: var(--bg-body); border-radius: 8px; border: 1px solid var(--border); min-height: 50px;">
-                    <p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>
-                </div>
-            </form>
-            <button onclick="closeModal('verifyModal')" class="btn outline" style="width:100%; margin-top:15px;">✖️ Cerrar</button>
-        </div>
-    </div>
-
-    
-    <div id="winnerHistoryModal" class="modal">
-        <div class="dialog" style="max-width: 600px;">
-            <h3 style="color:var(--warning);">🏆 Historial de Sorteos</h3>
-            <p id="drawsRemaining" style="color:var(--text-muted); font-weight: bold;"></p>
-            <div style="background:var(--bg-body); max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
-                <table class="admin-table">
-                    <thead style="text-align:left; color: var(--primary); position: sticky; top: -10px; background: var(--bg-body); z-index: 5;">
-                        <tr><th>Fecha</th><th>Sorteo</th><th>Número</th><th>Ganador</th></tr>
-                    </thead>
-                    <tbody id="winnerListBody"></tbody>
-                </table>
-            </div>
-            <button id="btnAdminDeleteWinner" onclick="deleteWinnerHistory()" class="btn accent" style="font-size: 0.8rem; padding: 8px 12px; margin-top: 15px; display: none;">🗑️ Eliminar Historial de Ganadores</button>
-            <button onclick="closeModal('winnerHistoryModal')" class="btn outline" style="width:100%; margin-top:15px;">✖️ Cerrar</button>
         </div>
     </div>
 
     <div id="adminModal" class="modal">
-        <div class="dialog">
-            <h3>🛡️ Panel de Administrador</h3>
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
+            <h2 style="color: var(--secondary);">Panel de Administración 🛡️</h2>
             
-            <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap: wrap;">
-                <button onclick="openManualAssignModal()" class="btn secondary" style="font-size: 0.85rem;">📝 Asignar Manual</button>
-                <button onclick="openWinnerManagement()" class="btn warning" style="font-size: 0.85rem;">🏅 Gestión Sorteos</button>
-                <button onclick="exportAllData()" class="btn secondary" style="font-size: 0.85rem;">📥 Descargar Todo</button>
-                <button onclick="adminResetRaffle()" class="btn accent" style="font-size: 0.85rem;">⚠️ Borrar Todo (Reset)</button>
-            </div>
-            
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 250px;">
-                    <h4>📋 Reservadas (Pendientes)</h4>
-                    <div class="admin-list-container">
-                        <table class="admin-table">
-                            <thead style="text-align:left; color: var(--secondary);">
-                                <tr><th>Num</th><th style="width:60%">Reservado por (Fecha)</th><th>Acción</th></tr>
-                            </thead>
-                            <tbody id="reservedTicketListBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div style="flex: 1; min-width: 250px;">
-                    <h4>🔴 Pagadas (Gestión)</h4>
-                    <div class="admin-list-container">
-                        <table class="admin-table">
-                            <thead style="text-align:left; color: var(--secondary);">
-                                <tr><th>Num</th><th>Dueño</th><th>Acción</th></tr>
-                            </thead>
-                            <tbody id="paidTicketListBody"></tbody>
-                        </table>
-                    </div>
-                </div>
+            <button onclick="renderAdminLists()" class="btn primary" style="width: 100%; margin-bottom: 15px;">
+                <i class="fas fa-sync"></i> Refrescar Listas
+            </button>
+            <button onclick="openNotificationModal()" class="btn accent" style="width: 100%; margin-bottom: 15px;">
+                <i class="fas fa-bell"></i> Revisar Reservas por Vencer (Notificación)
+            </button>
+            <button onclick="openManualAssignModal()" class="btn warning" style="width: 100%; margin-bottom: 15px;">
+                <i class="fas fa-hand-pointer"></i> Asignar Boleta Manual
+            </button>
+            <button onclick="openWinnerManagement()" class="btn secondary" style="width: 100%; margin-bottom: 15px;">
+                <i class="fas fa-trophy"></i> Registrar Ganador Lotería
+            </button>
+            <button onclick="openWinnerHistory()" class="btn outline secondary" style="width: 100%; margin-bottom: 15px;">
+                <i class="fas fa-history"></i> Historial de Sorteos
+            </button>
+
+            <h3>Reservadas (Pendientes de Pago)</h3>
+            <div class="admin-list-container">
+                <table class="admin-table">
+                    <thead><tr><th>Boleta</th><th>Cliente (Dueño)</th><th>Acciones</th></tr></thead>
+                    <tbody id="reservedTicketListBody"></tbody>
+                </table>
             </div>
 
-            <h4>👥 Historial de Clientes</h4>
-            <input type="text" id="adminUserSearch" placeholder="🔍 Buscar cliente por nombre o teléfono..." oninput="renderUserList()" style="width:100%; margin-bottom: 10px;">
-            <div class="admin-list-container" style="height: 150px;">
+            <h3>Pagadas (Aseguradas)</h3>
+            <div class="admin-list-container">
                 <table class="admin-table">
-                    <thead style="text-align:left; color: var(--secondary);">
-                        <tr><th>Nombre</th><th>Celular</th><th>Estado</th><th>Acción</th></tr>
-                    </thead>
+                    <thead><tr><th>Boleta</th><th>Cliente (Dueño)</th><th>Acciones</th></tr></thead>
+                    <tbody id="paidTicketListBody"></tbody>
+                </table>
+            </div>
+            
+            <h3>Gestión de Clientes</h3>
+            <input type="text" id="adminUserSearch" placeholder="Buscar cliente por nombre o teléfono" oninput="renderUserList()" style="margin-bottom: 10px;">
+            <div class="admin-list-container">
+                <table class="admin-table">
+                    <thead><tr><th>Nombre</th><th>Celular</th><th>Boletas</th><th>Acciones</th></tr></thead>
                     <tbody id="userListBody"></tbody>
                 </table>
             </div>
 
-            <button onclick="closeModal('adminModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cerrar Panel</button>
+            <button onclick="adminResetRaffle()" class="btn accent" style="width: 100%; margin-top: 20px;">
+                <i class="fas fa-exclamation-triangle"></i> RESET COMPLETO DE RIFA
+            </button>
+        </div>
+    </div>
+
+    <div id="verifyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('verifyModal')">&times;</span>
+            <h2>Verificar Boleta</h2>
+            <input type="number" id="verifyNum" placeholder="Número de 3 dígitos (Ej: 045)" min="0" max="999">
+            <div id="verifyResult">
+                <p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>
+            </div>
+            <button onclick="closeModal('verifyModal')" class="btn primary" style="margin-top: 20px;">Listo</button>
         </div>
     </div>
 
     <div id="manualAssignModal" class="modal">
-        <div class="dialog">
-            <h3>📝 Asignar Boleta Manualmente</h3>
-            <p style="color:var(--text-muted)">Para ventas directas, se requiere el número, nombre y celular.</p>
-            <form onsubmit="return false;">
-                <input type="text" id="manualNum" placeholder="Número de Boleta (ej: 045)" pattern="\d{3}" maxlength="3" required>
-                <input type="text" id="manualName" placeholder="Nombre Completo del Cliente" required>
-                <input type="tel" id="manualPhone" placeholder="Celular / WhatsApp (ej: 321 963 7388)" required>
-                
-                <button onclick="handleManualAssign(event, 'paid')" type="button" class="btn accent" style="width:100%; margin-top:15px;">
-                    Asignar y Marcar como Pagada ✅
-                </button>
-                
-                <button onclick="handleManualAssign(event, 'reserved')" type="button" class="btn warning" style="width:100%; margin-top:10px;">
-                    Asignar y Marcar como Reservada ⏳
-                </button>
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('manualAssignModal')">&times;</span>
+            <h2>Asignación Manual</h2>
+            <form onsubmit="handleManualAssign(event, 'paid')">
+                <input type="number" id="manualNum" placeholder="Boleta (Ej: 123)" required min="0" max="999">
+                <input type="text" id="manualName" placeholder="Nombre Cliente" required>
+                <input type="tel" id="manualPhone" placeholder="Teléfono Cliente (ID Único)" required>
+                <button type="submit" class="btn accent" style="width: 100%;">Asignar y Marcar como PAGADA</button>
             </form>
-            <button onclick="closeModal('manualAssignModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cancelar</button>
         </div>
     </div>
-    
-    <div id="winnerManagementModal" class="modal">
-        <div class="dialog">
-            <h3>🏅 Registrar Ganador de Sorteo</h3>
-            <p style="color:var(--text-muted)">Registre manualmente el resultado del sorteo de Lotería.</p>
-            <form onsubmit="return false;">
-                <input type="date" id="winnerDate" required>
-                <input type="text" id="winnerNum" placeholder="Número Ganador (ej: 123)" pattern="\d{3}" maxlength="3" required>
-                <select id="winnerType" style="margin-bottom: 0;">
-                    <option value="weekly">Sorteo Semanal (1M)</option>
-                    <option value="final">Gran Sorteo Final (Moto)</option>
-                </select>
-                <p id="winnerInfo" style="font-size: 0.9rem; color: var(--text-main); margin: 5px 0 15px 0;"></p>
 
-                <button onclick="checkAndAddWinner()" type="button" class="btn secondary" style="width:100%;">
-                    Registrar Ganador 🎉
-                </button>
-            </form>
-            <button onclick="closeModal('winnerManagementModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cerrar</button>
+    <div id="winnerManagementModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('winnerManagementModal')">&times;</span>
+            <h2>Registrar Ganador</h2>
+            <input type="date" id="winnerDate" required>
+            <select id="winnerType">
+                <option value="weekly">Sorteo Semanal (1M)</option>
+                <option value="final">Sorteo Final (Moto CR4)</option>
+            </select>
+            <input type="number" id="winnerNum" placeholder="Número Ganador (3 dígitos)" min="0" max="999" required>
+            <div id="winnerInfo" style="margin-bottom: 15px; color: var(--warning);"></div>
+            <button onclick="checkAndAddWinner()" class="btn primary" style="width: 100%;">Confirmar y Registrar Ganador</button>
+        </div>
+    </div>
+
+    <div id="winnerHistoryModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeModal('winnerHistoryModal')">&times;</span>
+            <h2>Historial de Sorteos</h2>
+            <p id="drawsRemaining" style="color: var(--text-muted); font-style: italic;"></p>
+            <div class="admin-list-container">
+                <table class="admin-table">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Número</th><th>Ganador</th></tr></thead>
+                    <tbody id="winnerListBody"></tbody>
+                </table>
+            </div>
+            <button onclick="deleteWinnerHistory()" class="btn accent" style="width: 100%; margin-top: 10px;">Eliminar Historial</button>
         </div>
     </div>
     
+    <div id="notificationModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeModal('notificationModal')">&times;</span>
+            <h2 style="color: var(--accent);">🔔 Reservas Próximas a Expirar</h2>
+            <p style="color: var(--text-muted);">Boletas que expiran en las próximas 3 horas. Notifique al cliente para asegurar el pago.</p>
+            
+            <div class="admin-list-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notificationListBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <button onclick="closeModal('notificationModal')" class="btn secondary" style="margin-top: 20px;">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('videoModal')">&times;</span>
+            <h2 style="color: var(--accent); margin-bottom: 15px;">🎥 Video de Ganadores (ganadores.mp4)</h2>
+            <div id="videoContainer">
+                <video controls autoplay muted style="width: 100%; height: auto;">
+                    <source src="ganadores.mp4" type="video/mp4">
+                    Tu navegador no soporta el video.
+                </video>
+            </div>
+            <p style="text-align: center; margin-top: 15px; color: var(--text-muted);">Revive la emoción de los sorteos anteriores.</p>
+        </div>
+    </div>
+    
+    <div id="socialModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeModal('socialModal')">&times;</span>
+            <h2 style="color: var(--primary);">⭐ Califica y Deja tu Opinión</h2>
+            
+            <form onsubmit="handleRatingSubmit(event)">
+                <label style="display: block; margin-bottom: 5px;">Tu Nombre:</label>
+                <input type="text" id="chatName" placeholder="Tu Nombre o Alias" required>
+                
+                <label style="display: block; margin-bottom: 5px;">Tu Opinión:</label>
+                <input type="text" id="chatMessage" placeholder="Escribe un mensaje o comentario" required>
+                
+                <label style="display: block; margin-bottom: 10px;">Califica la Página:</label>
+                <div id="starRating" class="star-rating">
+                    <i class="fas fa-star" data-rating="1"></i>
+                    <i class="fas fa-star" data-rating="2"></i>
+                    <i class="fas fa-star" data-rating="3"></i>
+                    <i class="fas fa-star" data-rating="4"></i>
+                    <i class="fas fa-star" data-rating="5"></i>
+                </div>
+                
+                <button type="submit" class="btn secondary" style="width: 100%; margin-top: 10px;">Enviar Mensaje y Calificación</button>
+            </form>
+            
+            <h3 style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 15px;">Comentarios de Usuarios</h3>
+            <div id="chatContent">
+                </div>
+        </div>
+    </div>
+
+
     <script defer src="script.js"></script>
+    <script defer src="admin.js"></script>
+    <script defer src="social.js"></script>
 </body>
 </html>
-

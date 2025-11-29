@@ -104,23 +104,31 @@
         </div>
     </div>
 
-    <div id="adminModal" class="modal"><div class="dialog" style="max-width: 700px;">
-        <h3>🛡️ Panel de Administrador</h3>
-        <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap: wrap;">
-            <button onclick="resetSystem()" class="btn accent">⚠️ Borrar Todo</button>
-            <button onclick="exportData()" class="btn secondary">📥 Descargar Historial</button>
-            <button onclick="closeModal('adminModal')" class="btn outline">✖️ Cerrar</button>
+    <div id="adminModal" class="modal">
+        <div class="dialog" style="max-width: 800px;">
+            <h3>🛡️ Panel de Administrador</h3>
+            
+            <div id="adminControls">
+                Cargando Herramientas...
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <button onclick="resetSystem()" class="btn accent">⚠️ Borrar TODO (Reset)</button>
+                <button onclick="exportData()" class="btn secondary">📥 Descargar Historial</button>
+                <button onclick="closeModal('adminModal')" class="btn outline">✖️ Cerrar</button>
+            </div>
+            
+            <h4>👥 Clientes y Boletas Adquiridas</h4>
+            <div style="background:var(--bg-body); height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+                <table style="width:100%; font-size: 0.85rem; border-collapse: collapse;">
+                    <thead style="text-align:left; color: var(--secondary);">
+                        <tr><th>Nombre</th><th>Email</th><th>Boletas</th></tr>
+                    </thead>
+                    <tbody id="userListBody"></tbody>
+                </table>
+            </div>
         </div>
-        
-        <h4>👥 Historial de Clientes</h4>
-        <div style="background:var(--bg-body); height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
-            <table style="width:100%; font-size: 0.85rem; border-collapse: collapse;">
-                <thead style="text-align:left; color: var(--secondary);">
-                    <tr><th>Nombre</th><th>Celular</th><th>Email</th><th>Fecha</th></tr>
-                </thead>
-                <tbody id="userListBody"></tbody>
-            </table>
-        </div>
+    </div>
     </div></div>
     
     <script src="notificaciones.js"></script>
@@ -130,4 +138,5 @@
 
 </body>
 </html>
+
 

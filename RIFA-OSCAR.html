@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M semanal</title>
+    <title data-i18n="docTitle">Gran Rifa – Moto CR4 Repotenciada Y 1M semanal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <script>
@@ -152,25 +152,28 @@
 <body onload="load()">
     <div id="loading-spinner" class="hidden"><div class="spinner"></div></div>
     <div id="toast-container"></div>
-    <a href="https://wa.me/3219637388" target="_blank" class="btn primary" style="position:fixed;bottom:20px;right:20px;z-index:100;padding:15px;border-radius:50%;box-shadow:0 5px 20px var(--primary); font-size: 1.5rem;">
+    <a href="https://wa.me/3219637388" target="_blank" class="btn primary" style="position:fixed;bottom:20px;right:20px;z-index:100;padding:15px;border-radius:50%;box-shadow:0 5px 20px var(--primary); font-size: 1.5rem;" title="WhatsApp Admin">
         <i class="fab fa-whatsapp"></i>
     </a>
     
     <header>
-        <h1>🏆 Rifa Épica <span style="color: var(--accent); font-size: 1rem;">| Moto CR4</span></h1>
+        <h1 data-i18n="headerTitle">🏆 Rifa Épica <span style="color: var(--accent); font-size: 1rem;">| Moto CR4</span></h1>
         <div class="actions">
-            <button onclick="openModal('videoModal')" class="btn accent" title="Video de Ganadores">
+            <button onclick="openModal('videoModal')" class="btn accent" title="Video de Ganadores" data-i18n="videoBtn">
                 <i class="fas fa-video"></i> Video
             </button>
-            <button onclick="checkMyTickets()" class="btn secondary" title="Ver Mis Boletas">
+            <button onclick="checkMyTickets()" class="btn secondary" title="Ver Mis Boletas" data-i18n="myTicketsBtn">
                 <i class="fas fa-ticket-alt"></i> Mis Boletas
             </button>
-            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">
+            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema" data-i18n="toggleThemeBtn">
                 <i class="fas fa-moon"></i>
             </button>
-            <button id="btnAuth" onclick="openModal('loginModal')" class="btn primary">Ingresar</button>
-            <button onclick="openAdminAuth()" class="btn secondary" title="Panel de Administración">
-                <i class="fas fa-lock"></i>
+            <button onclick="toggleLanguage()" class="btn outline" title="Cambiar Idioma" data-i18n="langBtn">
+                <i class="fas fa-globe"></i> Idioma
+            </button>
+            <button id="btnAuth" onclick="openModal('loginModal')" class="btn primary" data-i18n="loginBtn">Ingresar</button>
+            <button onclick="openAdminAuth()" class="btn secondary" title="Panel de Administración" data-i18n="adminBtn">
+                <i class="fas fa-lock"></i> Admin
             </button>
         </div>
     </header>
@@ -178,23 +181,23 @@
     <main>
         <div class="stats">
             <div class="stat-item">
-                <h3 id="statTotal">0</h3><p>Total</p>
+                <h3 id="statTotal">0</h3><p id="statTotalP" data-i18n="totalStat">Total</p>
             </div>
             <div class="stat-item">
-                <h3 id="statAvail" style="color: var(--primary);">0</h3><p>Disponibles</p>
+                <h3 id="statAvail" style="color: var(--primary);">0</h3><p id="statAvailP" data-i18n="availStat">Disponibles</p>
             </div>
             <div class="stat-item">
-                <h3 id="statRes" style="color: var(--warning);">0</h3><p>Reservadas</p>
+                <h3 id="statRes" style="color: var(--warning);">0</h3><p id="statResP" data-i18n="resStat">Reservadas</p>
             </div>
             <div class="stat-item">
-                <h3 id="statPaid" style="color: var(--accent);">0</h3><p>¡Pagadas!</p>
+                <h3 id="statPaid" style="color: var(--accent);">0</h3><p id="statPaidP" data-i18n="paidStat">¡Pagadas!</p>
             </div>
         </div>
 
         <div class="countdown">
-            <h2>Próximo Sorteo Semanal (1M COP)</h2>
+            <h2 id="countdownWeeklyTitle" data-i18n="countdownWeeklyTitle">Próximo Sorteo Semanal (1M COP)</h2>
             <p id="nextDrawTime">Cargando...</p>
-            <h2 style="color: var(--accent); margin-top: 15px;">Sorteo Final (Moto CR4)</h2>
+            <h2 id="countdownFinalTitle" style="color: var(--accent); margin-top: 15px;" data-i18n="countdownFinalTitle">Sorteo Final (Moto CR4)</h2>
             <p id="finalDrawTime" style="color: var(--secondary);">Cargando...</p>
         </div>
 
@@ -203,17 +206,13 @@
         </div>
         
         <div class="controls">
-            <input type="text" id="searchInput" placeholder="Buscar Boleta (Ej: 005)">
-            <select id="filterSelect">
-                <option value="all">Ver Todos</option>
-                <option value="available">Disponibles</option>
-                <option value="reserved">Reservadas</option>
-                <option value="paid">Pagadas</option>
-            </select>
-            <button onclick="openModal('verifyModal')" class="btn outline secondary">
+            <input type="text" id="searchInput" placeholder="Buscar Boleta (Ej: 005)" data-i18n-placeholder="searchTicketPlaceholder">
+            <select id="filterSelect" data-i18n-select="filterSelectOptions">
+                </select>
+            <button onclick="openModal('verifyModal')" class="btn outline secondary" data-i18n="verifyTicketBtn">
                 <i class="fas fa-search"></i> Verificar Boleta
             </button>
-            <button onclick="refreshData()" class="btn outline primary">
+            <button onclick="refreshData()" class="btn outline primary" data-i18n="refreshDataBtn">
                 <i class="fas fa-sync"></i> Refrescar Datos
             </button>
         </div>
@@ -221,31 +220,31 @@
         <div class="grid" id="grid">
             </div>
         
-        <button id="multiReserveBtn" onclick="confirmReservation()" class="btn secondary">
+        <button id="multiReserveBtn" onclick="confirmReservation()" class="btn secondary" data-i18n="reserveBtn">
             Reservar <span id="selectedCount">0</span> Boleta(s)
         </button>
     </main>
 
     <footer>
-        <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
-        <p>Entre mas te demores menos oportunidades, hazlo ya para mas oportunidades</p>
+        <p data-i18n="footerResponsible">Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
+        <p data-i18n="footerDelayWarning">Entre mas te demores menos oportunidades, hazlo ya para mas oportunidades</p>
         
         <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-            <div style="font-weight: bold; margin-bottom: 8px; color: var(--secondary);">🔒 Código de Integridad (Transparencia)</div>
-            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;">
+            <div style="font-weight: bold; margin-bottom: 8px; color: var(--secondary);" data-i18n="checksumTitle">🔒 Código de Integridad (Transparencia)</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="checksumInfo">
                 Código oficial: <span id="checksumStatus" style="font-family: monospace;">N/A</span>
             </div>
             
-            <button onclick="verifyPublicChecksum()" class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px; margin-right: 10px;">
+            <button onclick="verifyPublicChecksum()" class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px; margin-right: 10px;" data-i18n="verifyChecksumBtn">
                 <i class="fas fa-check-shield"></i> Verificar Autenticidad
             </button>
             
-            <button onclick="adminGenerateAndSetChecksum()" class="btn outline warning" style="font-size: 0.8rem; padding: 5px 10px;">
+            <button onclick="adminGenerateAndSetChecksum()" class="btn outline warning" style="font-size: 0.8rem; padding: 5px 10px;" data-i18n="generateChecksumBtn">
                 <i class="fas fa-key"></i> Generar Checksum (Admin)
             </button>
         </div>
 
-        <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">
+        <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;" data-i18n="exportPaidTicketsBtn">
             <i class="fas fa-download"></i> Descargar Listado de Boletas Pagadas
         </button>
     </footer>
@@ -254,11 +253,11 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
             <form onsubmit="handleLogin(event)">
-                <h2 id="loginTitle">👤 Identifícate</h2>
-                <input type="text" id="userName" placeholder="Nombre Completo" required>
-                <input type="email" id="userEmail" placeholder="Correo Electrónico (Para tu ID)" required>
-                <input type="tel" id="userPhone" placeholder="Celular (Ej: 300 123 4567)" required>
-                <button type="submit" class="btn primary" style="width: 100%;">Ingresar / Actualizar Datos</button>
+                <h2 id="loginTitle" data-i18n="loginModalTitle">👤 Identifícate</h2>
+                <input type="text" id="userName" placeholder="Nombre Completo" required data-i18n-placeholder="placeholderName">
+                <input type="email" id="userEmail" placeholder="Correo Electrónico (Para tu ID)" required data-i18n-placeholder="placeholderEmail">
+                <input type="tel" id="userPhone" placeholder="Celular (Ej: 300 123 4567)" required data-i18n-placeholder="placeholderPhone">
+                <button type="submit" class="btn primary" style="width: 100%;" data-i18n="loginModalSubmit">Ingresar / Actualizar Datos</button>
             </form>
         </div>
     </div>
@@ -266,47 +265,47 @@
     <div id="adminModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
             <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
-            <h2 style="color: var(--accent);">Panel de Administración 🛡️</h2>
+            <h2 style="color: var(--accent);" data-i18n="adminPanelTitle">Panel de Administración 🛡️</h2>
             
-            <button onclick="renderAdminLists()" class="btn primary" style="width: 100%; margin-bottom: 15px;">
+            <button onclick="renderAdminLists()" class="btn primary" style="width: 100%; margin-bottom: 15px;" data-i18n="adminRefreshListsBtn">
                 <i class="fas fa-sync"></i> Refrescar Listas
             </button>
-            <button onclick="openNotificationModal()" class="btn accent" style="width: 100%; margin-bottom: 15px;">
+            <button onclick="openNotificationModal()" class="btn accent" style="width: 100%; margin-bottom: 15px;" data-i18n="adminNotificationsBtn">
                 <i class="fas fa-bell"></i> Revisar Reservas por Vencer (Automatización)
             </button>
-            <button onclick="openManualAssignModal()" class="btn warning" style="width: 100%; margin-bottom: 15px;">
+            <button onclick="openManualAssignModal()" class="btn warning" style="width: 100%; margin-bottom: 15px;" data-i18n="adminManualAssignBtn">
                 <i class="fas fa-hand-pointer"></i> Asignar Boleta Manual
             </button>
-            <button onclick="openWinnerManagement()" class="btn secondary" style="width: 100%; margin-bottom: 15px;">
+            <button onclick="openWinnerManagement()" class="btn secondary" style="width: 100%; margin-bottom: 15px;" data-i18n="adminWinnerManagementBtn">
                 <i class="fas fa-trophy"></i> Registrar Ganador Lotería
             </button>
 
-            <h3>Reservadas (Pendientes de Pago)</h3>
+            <h3 data-i18n="adminReservedTitle">Reservadas (Pendientes de Pago)</h3>
             <div class="admin-list-container">
                 <table class="admin-table">
-                    <thead><tr><th>Boleta</th><th>Cliente (Dueño)</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th data-i18n="tableTicketHeader">Boleta</th><th data-i18n="tableClientHeader">Cliente (Dueño)</th><th data-i18n="tableActionsHeader">Acciones</th></tr></thead>
                     <tbody id="reservedTicketListBody"></tbody>
                 </table>
             </div>
 
-            <h3>Pagadas (Aseguradas)</h3>
+            <h3 data-i18n="adminPaidTitle">Pagadas (Aseguradas)</h3>
             <div class="admin-list-container">
                 <table class="admin-table">
-                    <thead><tr><th>Boleta</th><th>Cliente (Dueño)</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th data-i18n="tableTicketHeader">Boleta</th><th data-i18n="tableClientHeader">Cliente (Dueño)</th><th data-i18n="tableActionsHeader">Acciones</th></tr></thead>
                     <tbody id="paidTicketListBody"></tbody>
                 </table>
             </div>
             
-            <h3>Gestión de Clientes</h3>
-            <input type="text" id="adminUserSearch" placeholder="Buscar cliente por nombre o teléfono" oninput="renderUserList()" style="margin-bottom: 10px;">
+            <h3 data-i18n="adminUserTitle">Gestión de Clientes</h3>
+            <input type="text" id="adminUserSearch" placeholder="Buscar cliente por nombre o teléfono" oninput="renderUserList()" style="margin-bottom: 10px;" data-i18n-placeholder="adminSearchPlaceholder">
             <div class="admin-list-container">
                 <table class="admin-table">
-                    <thead><tr><th>Nombre</th><th>Celular</th><th>Boletas</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th data-i18n="tableUserHeader">Nombre</th><th data-i18n="tablePhoneHeader">Celular</th><th data-i18n="tableTicketsHeader">Boletas</th><th data-i18n="tableActionsHeader">Acciones</th></tr></thead>
                     <tbody id="userListBody"></tbody>
                 </table>
             </div>
 
-            <button onclick="adminResetRaffle()" class="btn accent" style="width: 100%; margin-top: 20px;">
+            <button onclick="adminResetRaffle()" class="btn accent" style="width: 100%; margin-top: 20px;" data-i18n="adminResetBtn">
                 <i class="fas fa-exclamation-triangle"></i> RESET COMPLETO DE RIFA
             </button>
         </div>
@@ -315,24 +314,24 @@
     <div id="verifyModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('verifyModal')">&times;</span>
-            <h2>Verificar Boleta</h2>
-            <input type="number" id="verifyNum" placeholder="Número de 3 dígitos (Ej: 045)" min="0" max="999" oninput="verifyTicketStatus()">
+            <h2 data-i18n="verifyModalTitle">Verificar Boleta</h2>
+            <input type="number" id="verifyNum" placeholder="Número de 3 dígitos (Ej: 045)" min="0" max="999" data-i18n-placeholder="placeholderTicketNum" oninput="verifyTicketStatus()">
             <div id="verifyResult">
-                <p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>
+                <p style="color:var(--text-muted); margin:0;" data-i18n="verifyInitialText">Escribe un número para verificar...</p>
             </div>
-            <button onclick="closeModal('verifyModal')" class="btn primary" style="margin-top: 20px;">Listo</button>
+            <button onclick="closeModal('verifyModal')" class="btn primary" style="margin-top: 20px;" data-i18n="verifyCloseBtn">Listo</button>
         </div>
     </div>
 
     <div id="manualAssignModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('manualAssignModal')">&times;</span>
-            <h2>Asignación Manual</h2>
+            <h2 data-i18n="manualAssignTitle">Asignación Manual</h2>
             <form onsubmit="handleManualAssign(event, 'paid')">
-                <input type="number" id="manualNum" placeholder="Boleta (Ej: 123)" required min="0" max="999">
-                <input type="text" id="manualName" placeholder="Nombre Cliente" required>
-                <input type="tel" id="manualPhone" placeholder="Teléfono Cliente (ID Único)" required>
-                <button type="submit" class="btn accent" style="width: 100%;">Asignar y Marcar como PAGADA</button>
+                <input type="number" id="manualNum" placeholder="Boleta (Ej: 123)" required min="0" max="999" data-i18n-placeholder="placeholderTicketNum">
+                <input type="text" id="manualName" placeholder="Nombre Cliente" required data-i18n-placeholder="placeholderName">
+                <input type="tel" id="manualPhone" placeholder="Teléfono Cliente (ID Único)" required data-i18n-placeholder="placeholderPhoneUnique">
+                <button type="submit" class="btn accent" style="width: 100%;" data-i18n="manualAssignSubmit">Asignar y Marcar como PAGADA</button>
             </form>
         </div>
     </div>
@@ -340,33 +339,31 @@
     <div id="winnerManagementModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('winnerManagementModal')">&times;</span>
-            <h2>Registrar Ganador</h2>
+            <h2 data-i18n="winnerManagementTitle">Registrar Ganador</h2>
             <input type="date" id="winnerDate" required>
             <select id="winnerType">
-                <option value="weekly">Sorteo Semanal (1M)</option>
-                <option value="final">Sorteo Final (Moto CR4)</option>
-            </select>
-            <input type="number" id="winnerNum" placeholder="Número Ganador (3 dígitos)" min="0" max="999" required>
+                </select>
+            <input type="number" id="winnerNum" placeholder="Número Ganador (3 dígitos)" min="0" max="999" required data-i18n-placeholder="placeholderWinnerNum">
             <div id="winnerInfo" style="margin-bottom: 15px; color: var(--warning);"></div>
-            <button onclick="checkAndAddWinner()" class="btn primary" style="width: 100%;">Confirmar y Registrar Ganador</button>
+            <button onclick="checkAndAddWinner()" class="btn primary" style="width: 100%;" data-i18n="winnerSubmitBtn">Confirmar y Registrar Ganador</button>
         </div>
     </div>
     
     <div id="notificationModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <span class="close-btn" onclick="closeModal('notificationModal')">&times;</span>
-            <h2 style="color: var(--accent);">🔔 Reservas Próximas a Expirar</h2>
-            <p style="color: var(--text-muted);">Boletas que expiran en las próximas 3 horas. Notifique al cliente para asegurar el pago.</p>
+            <h2 style="color: var(--accent);" data-i18n="notificationModalTitle">🔔 Reservas Próximas a Expirar</h2>
+            <p style="color: var(--text-muted);" data-i18n="notificationModalInfo">Boletas que expiran en las próximas 3 horas. Notifique al cliente para asegurar el pago.</p>
             
             <div class="admin-list-container">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>Cliente</th>
-                            <th>Teléfono</th>
-                            <th>Boletas</th>
-                            <th>Expira en</th>
-                            <th>Acción</th>
+                            <th data-i18n="tableClientHeader">Cliente</th>
+                            <th data-i18n="tablePhoneHeader">Teléfono</th>
+                            <th data-i18n="tableTicketsHeader">Boletas</th>
+                            <th data-i18n="tableExpiresInHeader">Expira en</th>
+                            <th data-i18n="tableActionsHeader">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="notificationListBody">
@@ -374,21 +371,21 @@
                 </table>
             </div>
 
-            <button onclick="closeModal('notificationModal')" class="btn secondary" style="margin-top: 20px;">Cerrar</button>
+            <button onclick="closeModal('notificationModal')" class="btn secondary" style="margin-top: 20px;" data-i18n="closeBtn">Cerrar</button>
         </div>
     </div>
 
     <div id="videoModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('videoModal')">&times;</span>
-            <h2 style="color: var(--accent); margin-bottom: 15px;">🎥 Video de Ganadores (ganadores.mp4)</h2>
+            <h2 style="color: var(--accent); margin-bottom: 15px;" data-i18n="videoModalTitle">🎥 Video de Ganadores (ganadores.mp4)</h2>
             <div id="videoContainer">
                 <video controls style="width: 100%; height: auto;">
                     <source src="ganadores.mp4" type="video/mp4">
-                    Tu navegador no soporta el video.
+                    <span data-i18n="videoModalFallback">Tu navegador no soporta el video.</span>
                 </video>
             </div>
-            <p style="text-align: center; margin-top: 15px; color: var(--text-muted);">Revive la emoción de los sorteos anteriores.</p>
+            <p style="text-align: center; margin-top: 15px; color: var(--text-muted);" data-i18n="videoModalFooter">Revive la emoción de los sorteos anteriores.</p>
         </div>
     </div>
 

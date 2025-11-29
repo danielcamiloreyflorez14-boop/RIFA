@@ -111,76 +111,81 @@ function getWeeklyCutoffTime() {
     return cutoff.getTime();
 }
 
+// --- FUNCIONES DE BASE DE DATOS (SHEETDB) ---
+
 async function load() {
     showLoading(); 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Pequeña espera para UX del spinner
     
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        appData = JSON.parse(saved);
-        if (!appData.users) appData.users = [];
-        if (!appData.selectedTickets) appData.selectedTickets = [];
-        if (!appData.winners) appData.winners = [];
-    } else {
-        appData.tickets = [];
-        for(let i=0; i<TOTAL_TICKETS; i++) {
-            appData.tickets.push({ num: formatNum(i), state: 'available', owner: null, reservedAt: null });
-        }
-    }
-    
-    const nowTimestamp = Date.now();
-    
-    // 1. Limpieza Semanal (Viernes 5 PM)
-    const WEEKLY_CLEARANCE_KEY = "last_weekly_clearance_timestamp";
-    let lastWeeklyClearanceTime = localStorage.getItem(WEEKLY_CLEARANCE_KEY);
-    lastWeeklyClearanceTime = lastWeeklyClearanceTime ? parseInt(lastWeeklyClearanceTime) : 0;
-    
-    const requiredCutoffTime = getWeeklyCutoffTime();
-    let weeklyClearanceNeeded = lastWeeklyClearanceTime < requiredCutoffTime;
+    // Cargar Tema Local
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-    if (weeklyClearanceNeeded) {
-        let weeklyClearedCount = 0;
-        appData.tickets.forEach(t => {
-            if (t.state === 'reserved') {
-                t.state = 'available';
-                t.owner = null;
-                t.reservedAt = null;
-                weeklyClearedCount++;
-            }
-        });
-        
-        if (weeklyClearedCount > 0) {
-            toast(`¡Corte Semanal! ${weeklyClearedCount} reservas liberadas (Viernes 5 PM).`, 'accent');
+    // 1. CARGAR DATOS DE LA NUBE (SHEETDB)
+    try {
+        const [ticketsResponse, usersResponse, winnersResponse] = await Promise.all([
+            fetch(`${API_URL}/tickets`),
+            fetch(`${API_URL}/users`),
+            fetch(`${API_URL}/winners`)
+        ]);
+
+        if (!ticketsResponse.ok || !usersResponse.ok || !winnersResponse.ok) {
+            throw new Error("Error cargando datos de SheetDB.");
         }
-        
-        localStorage.setItem(WEEKLY_CLEARANCE_KEY, nowTimestamp.toString()); 
-        appData.selectedTickets = []; 
+
+        const ticketsData = await ticketsResponse.json();
+        const usersData = await usersResponse.json();
+        const winnersData = await winnersResponse.json();
+
+        // 2. Proceso de Inicialización y Limpieza
+        appData.users = usersData;
+        appData.winners = winnersData;
+
+        // SheetDB devuelve la lista, inicializamos o actualizamos
+        initializeTickets(ticketsData); 
+
+    } catch (error) {
+        console.error("Error cargando:", error);
+        toast("⚠️ Error grave al conectar con la base de datos (SheetDB).", 'error');
+        // Fallback: Si falla la nube, inicializamos vacío
+        initializeTickets();
     }
     
-    // 2. Expiración Estándar (24 Horas)
-    let reservationsExpired = 0;
-    appData.tickets.forEach(t => {
-        if (t.state === 'reserved' && t.reservedAt && (nowTimestamp - t.reservedAt > RESERVATION_DURATION_MS)) {
-            t.state = 'available';
-            t.owner = null;
-            t.reservedAt = null;
-            reservationsExpired++;
-        }
-    });
-    
-    if (reservationsExpired > 0) {
-         toast(`Se liberaron ${reservationsExpired} reservas expiradas por tiempo (24h).`, 'warning');
-    }
-    
-    // Actualizar la grilla y la UI inmediatamente
+    // Lógica de limpieza y renderizado
+    checkExpirations();
     renderGrid();
     updateUI();
     hideLoading();
 }
 
-function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    updateUI(); 
+// ⚠️ Esta función es más compleja porque SheetDB no permite 'guardar todo' de golpe, 
+// solo permite modificar filas individualmente.
+async function save() {
+    updateUI();
+    renderGrid();
+
+    // 1. Guardar copia local por seguridad (BACKUP)
+    localStorage.setItem("rifa_backup_local", JSON.stringify(appData));
+
+    // 2. GUARDAR EN LA NUBE (USERS y TICKETS)
+    try {
+        const updates = appData.tickets.map(t => {
+            // SheetDB requiere un ID único, usamos el número de boleta como ID
+            return fetch(`${API_URL}/tickets/num/${t.num}`, {
+                method: 'PUT', // PUT para actualizar por la columna 'num'
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticket: t }) 
+            }).catch(e => console.error(`Error actualizando boleta ${t.num}:`, e));
+        });
+
+        // Este proceso es lento, es mejor usarlo solo cuando se hace una reserva/pago.
+        await Promise.all(updates);
+
+        toast("Datos guardados en la nube (SheetDB).", 'success');
+
+    } catch (error) {
+        console.error("Error guardando:", error);
+        toast("⚠️ Error de conexión: Los cambios se guardaron localmente pero no en la nube.", 'error');
+    }
 }
 
 function refreshData() {
@@ -887,6 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyInput.addEventListener('input', verifyTicket);
     }
 });
+
 
 
 

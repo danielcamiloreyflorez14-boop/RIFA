@@ -3,9 +3,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M semanal</title>
+    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M Semanal</title>
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
+        // Listener para la verificación de boleta, asegurando que esté disponible desde el inicio
+        document.addEventListener('DOMContentLoaded', () => {
+             const verifyInput = document.getElementById('verifyNum');
+             if (verifyInput) {
+                verifyInput.addEventListener('input', verifyTicket);
+             }
+        });
     </script>
     <style>
         /* --- TEMA OSCURO (NATIVO Y FIXED) --- */
@@ -174,18 +181,22 @@
         }
         .modal.open .dialog { transform: scale(1); }
         .dialog h3 { margin-top: 0; color: var(--secondary); font-size: 1.5rem; }
-        .dialog input, .dialog select { width: 100%; padding: 12px; margin: 10px 0; background: var(--bg-body); border: 1px solid var(--border); color: #fff; border-radius: 8px; }
+        .dialog input, .dialog select { 
+            width: 100%; padding: 12px; margin: 10px 0; background: var(--bg-body); 
+            border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; 
+            font-weight: 600;
+        }
 
-        /* ESTILOS ESPECÍFICOS ADMIN MODAL (Compacto y Scrollable) */
+        /* ESTILOS ESPECÍFICOS ADMIN MODAL */
         #adminModal .dialog { 
-            max-width: 700px; /* Ancho profesional */
-            max-height: 90vh; /* Altura máxima para caber en pantalla */
-            overflow-y: auto; /* Scroll si el contenido es demasiado alto */
+            max-width: 700px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
             padding-bottom: 10px;
         }
         .admin-list-container {
             background:var(--bg-body); 
-            height: 200px; /* Altura fija para el scroll interno */
+            height: 200px; 
             overflow-y: auto; 
             border: 1px solid var(--border); 
             border-radius: 8px; 
@@ -194,16 +205,6 @@
         }
         .admin-table { width:100%; font-size: 0.8rem; border-collapse: collapse; }
         .admin-table th, .admin-table td { padding: 5px; text-align: left;}
-
-
-        /* ANIMACIÓN PARA EL MODAL DE GANADORES */
-        #winnerHistoryModal.open .dialog {
-            animation: fadeInScale 0.5s ease-out;
-        }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
 
 
         /* WHATSAPP FLOTANTE */
@@ -219,13 +220,14 @@
         /* TOAST */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
         .toast {
-            background: var(--bg-card); color: #fff; padding: 15px 20px;
+            background: var(--bg-card); color: var(--text-main); padding: 15px 20px;
             margin-bottom: 10px; border-radius: 8px; border-left: 5px solid var(--primary);
             box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s;
         }
         .toast.success { border-left-color: var(--primary); }
         .toast.warning { border-left-color: var(--warning); color: var(--bg-body); }
         .toast.error { border-left-color: var(--accent); }
+        .toast.accent { border-left-color: var(--accent); color: var(--accent); } /* Added accent color for weekly cuttoff */
         
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
@@ -238,7 +240,7 @@
             <div>
                 <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal - Que Esperas</h1>
                 <div style="font-size: 0.8rem; color: var(--text-muted);">Sorteo final: 30/01/2026 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. **Lotería Santander 10:00 PM**</div>
             </div>
         </div>
         <div class="controls">
@@ -258,7 +260,7 @@
                 <div style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">PRÓXIMO SORTEO SEMANAL</div>
                 <div class="countdown-item">
                     <span id="nextDrawTime" class="countdown-val" style="color:var(--warning);">--:--:--</span>
-                    <div class="countdown-label">Tiempo Restante</div>
+                    <div class="countdown-label">Tiempo Restante (Viernes 10 PM)</div>
                 </div>
             </div>
             <div style="text-align: center; flex: 1;">
@@ -273,7 +275,7 @@
         <div class="hero">
             <div class="panel">
                 <div class="toolbar">
-                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu(s) Número(s)</h2>
+                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu(s) Número(s) (Máx 3)</h2>
                     <button onclick="refreshData()" class="btn outline" style="padding: 5px 10px; font-size: 0.8rem;">🔄 Actualizar</button>
                 </div>
                 <div class="toolbar">
@@ -311,6 +313,11 @@
                         ✅ Reservar (<span id="selectedCount">0</span>) Números
                     </button>
                     
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+                        <button onclick="quickBuy(1)" class="btn secondary" style="font-size: 0.85rem; padding: 10px 5px;">1 Boleta</button>
+                        <button onclick="quickBuy(2)" class="btn secondary" style="font-size: 0.85rem; padding: 10px 5px;">2 Boletas</button>
+                        <button onclick="quickBuy(3)" class="btn secondary" style="font-size: 0.85rem; padding: 10px 5px;">3 Boletas</button>
+                    </div>
                     <button onclick="showInstructions()" class="btn secondary" style="width:100%; margin-bottom:10px;">📄 ¿Cómo pagar?</button>
                     <button onclick="checkMyTickets()" class="btn outline" style="width:100%">🎟️ Ver Mis Boletas</button>
                     <button onclick="openModal('verifyModal')" class="btn secondary" style="width:100%; margin-top:10px;">🔍 Verificar Boleta</button>
@@ -336,7 +343,7 @@
         <div class="dialog">
             <h3 id="loginTitle">👤 Identifícate</h3> 
             <p style="color:var(--text-muted)">Necesitamos tus datos para registrar las boletas a tu nombre.</p>
-            <form onsubmit="handleLogin(event)">
+            <form onsubmit="handleLogin(event); return false;">
                 <input type="text" id="userName" placeholder="😑 Nombre Completo" required>
                 <input type="email" id="userEmail" placeholder="✉️ Correo Electrónico (Para tracking interno)" required>
                 <input type="tel" id="userPhone" placeholder="📞 Celular / WhatsApp" required>
@@ -462,6 +469,7 @@
                     <option value="weekly">Sorteo Semanal (1M)</option>
                     <option value="final">Gran Sorteo Final (Moto)</option>
                 </select>
+                <script>document.getElementById('winnerNum').addEventListener('input', previewWinnerInfo);</script> 
                 <p id="winnerInfo" style="font-size: 0.9rem; color: var(--text-main); margin: 5px 0 15px 0;"></p>
 
                 <button onclick="checkAndAddWinner()" type="button" class="btn secondary" style="width:100%;">
@@ -475,762 +483,35 @@
 
     <script>
         // --- CONFIGURACIÓN ---
-        const ADMIN_PASS = "123"; // 🔑 ¡Contraseña cambiada a '123' según tu solicitud!
+        const ADMIN_PASS = "000-999"; 
         const STORAGE_KEY = "rifa_data_v8"; 
         const TOTAL_TICKETS = 1000;
-        const FINAL_RAFFLE_DATE = new Date('2026-01-30T20:00:00'); // 30 de enero de 2026, 8 PM
+        const MAX_RESERVATIONS_PER_USER = 3; // MAXIMO DE RESERVAS POR USUARIO A LA VEZ
+        const FINAL_RAFFLE_DATE = new Date('2026-01-30T22:00:00'); // 30 de enero de 2026, 10 PM
         const WEEKLY_DRAW_DAY = 5; // 0=Domingo, 5=Viernes
+        const WEEKLY_DRAW_HOUR = 22; // 10 PM (22:00)
+        const RESERVATION_CLEARANCE_HOUR = 17; // 5 PM (17:00) Viernes para la liberación semanal
+        const RESERVATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Horas
+        const LAST_WEEKLY_DRAW = new Date('2026-01-23T22:00:00').getTime(); // Último sorteo semanal
 
         // --- ESTADO INICIAL ---
         let appData = {
-            tickets: [], 
-            users: [],   
+            tickets: [],   // { num, state, owner (email), reservedAt }
+            users: [],     // { name, email, phone }
             currentUser: null,
             selectedTickets: [], 
             winners: [], // { date, num, winnerName, type, ownerEmail }
-            blacklist: [], 
         };
 
-        // --- INICIALIZACIÓN ---
-        window.onload = () => {
-            load();
-            startCountdown();
-            
-            const userNameInput = document.getElementById('userName');
-            const loginTitle = document.getElementById('loginTitle');
-            if (userNameInput && loginTitle) {
-                userNameInput.addEventListener('input', () => {
-                    const name = userNameInput.value.trim();
-                    loginTitle.textContent = name.length > 0 ? `👋 Hola, ${name}` : `👤 Identifícate`; 
-                });
-            }
-            document.getElementById('winnerNum').addEventListener('input', previewWinnerInfo);
-            document.getElementById('verifyNum').addEventListener('input', verifyTicket);
-        };
-        
-        function load() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                appData = JSON.parse(saved);
-            } else {
-                for(let i=0; i<TOTAL_TICKETS; i++) {
-                    appData.tickets.push({ num: i.toString().padStart(3,'0'), state: 'available', owner: null, reservedAt: null });
-                }
-            }
-            if (!appData.selectedTickets) appData.selectedTickets = [];
-            if (!appData.blacklist) appData.blacklist = [];
-            if (!appData.winners) appData.winners = [];
-
-            // Limpieza de datos (Asegurar que las reservas manuales tengan timestamp)
-            appData.tickets.forEach(t => {
-                if (t.state === 'reserved' && t.reservedAt === null) {
-                    t.reservedAt = Date.now(); // Asignar un timestamp para gestión manual
-                }
-            });
-            
-            renderGrid();
-            updateUI();
-        }
-
-        function save() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            updateUI(); 
-        }
-        
-        // --- CONTADOR Y FECHAS --- (Sin cambios)
-        function getNextWeeklyDrawDate() {
-            const today = new Date();
-            let nextFriday = new Date(today);
-            nextFriday.setDate(today.getDate() + (WEEKLY_DRAW_DAY + 7 - today.getDay()) % 7);
-            
-            if (nextFriday.getDay() === WEEKLY_DRAW_DAY && today.getHours() >= 20) { 
-                 nextFriday.setDate(nextFriday.getDate() + 7);
-            }
-            
-            nextFriday.setHours(20, 0, 0, 0); 
-            
-            const lastWeeklyDraw = new Date('2026-01-23T20:00:00');
-            if (nextFriday.getTime() > lastWeeklyDraw.getTime()) {
-                return FINAL_RAFFLE_DATE; 
-            }
-            
-            return nextFriday;
-        }
-
-        function startCountdown() {
-            const timer = setInterval(function() {
-                const now = new Date().getTime();
-                
-                // Contador Semanal
-                const nextDraw = getNextWeeklyDrawDate().getTime();
-                let distance = nextDraw - now;
-                
-                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-                const s = Math.floor((distance % (1000 * 60)) / (1000)).toString().padStart(2, '0');
-                
-                if (distance > 0 && nextDraw < FINAL_RAFFLE_DATE.getTime()) {
-                    document.getElementById("nextDrawTime").innerHTML = `${d}D ${h}:${m}:${s}`;
-                } else if (nextDraw < FINAL_RAFFLE_DATE.getTime()) {
-                     document.getElementById("nextDrawTime").innerHTML = "¡HOY, A LAS 8 PM!";
-                } else {
-                     document.getElementById("nextDrawTime").innerHTML = "FINALIZADO";
-                }
-
-                // Contador Final
-                distance = FINAL_RAFFLE_DATE.getTime() - now;
-                if (distance > 0) {
-                    const d_final = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const h_final = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-                    const m_final = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-                    document.getElementById("finalDrawTime").innerHTML = `${d_final}D ${h_final}H ${m_final}M`;
-                } else {
-                    document.getElementById("finalDrawTime").innerHTML = "¡FINALIZADO!";
-                    clearInterval(timer);
-                }
-            }, 1000);
-        }
-
-        // --- RENDERIZADO (GRID) y LÓGICA DE SELECCIÓN ---
-        function renderGrid() {
-            const grid = document.getElementById('grid');
-            const filter = document.getElementById('filterSelect').value;
-            const search = document.getElementById('searchInput').value;
-            
-            grid.innerHTML = '';
-            const selectedSet = new Set(appData.selectedTickets);
-
-            appData.tickets.forEach(t => {
-                if(filter !== 'all' && t.state !== filter) return;
-                if(search && !t.num.includes(search)) return;
-                
-                const card = document.createElement('div');
-                let className = `card ${t.state}`;
-                let ownerInfo = '';
-                
-                if (t.state === 'available' && selectedSet.has(t.num)) {
-                    className += ' selected';
-                }
-
-                // Check if it's the current user's reserved ticket (for blinking effect)
-                if(t.state === 'reserved' && appData.currentUser && t.owner === appData.currentUser.email) {
-                    className += ' mine';
-                }
-
-                if (t.state !== 'available' && t.owner) {
-                    const user = getOwnerInfo(t.owner);
-                    if (user) {
-                        // Muestra solo el primer nombre y la inicial del segundo (por privacidad)
-                        const nameParts = user.name.split(' ');
-                        const firstName = nameParts[0];
-                        const secondInitial = nameParts.length > 1 ? nameParts[1].charAt(0) + '.' : '';
-                        ownerInfo = `Dueño: ${firstName} ${secondInitial}`;
-                    }
-                }
-
-                card.className = className;
-                card.setAttribute('data-owner-info', ownerInfo);
-                
-                if(t.state !== 'available' && appData.currentUser && t.owner === appData.currentUser.email) {
-                    card.style.borderColor = 'var(--secondary)';
-                    card.style.boxShadow = '0 0 10px var(--secondary)';
-                }
-
-                card.innerHTML = `
-                    <div class="num">${t.num}</div>
-                    <div class="status-text">${t.state === 'available' ? (selectedSet.has(t.num) ? 'SELECCIONADO' : 'LIBRE') : t.state === 'paid' ? 'PAGADO' : 'RESERVADO'}</div>
-                `;
-                
-                card.onclick = () => clickTicket(t);
-                grid.appendChild(card);
-            });
-            
-            const count = appData.selectedTickets.length;
-            document.getElementById('selectedCount').textContent = count;
-            document.getElementById('multiReserveBtn').style.display = count > 0 ? 'block' : 'none';
-        }
-        
-        function clickTicket(ticket) {
-            if (!appData.currentUser) {
-                toast("⚠️ Debes iniciar sesión para seleccionar.", 'warning');
-                openModal('loginModal');
-                return;
-            }
-            if (appData.blacklist.includes(appData.currentUser.email)) {
-                toast("⛔ Tu cuenta ha sido bloqueada. Contacta al administrador.", 'error');
-                return;
-            }
-
-            if (ticket.state === 'available') {
-                const index = appData.selectedTickets.indexOf(ticket.num);
-                if (index > -1) {
-                    appData.selectedTickets.splice(index, 1);
-                    toast(`Número ${ticket.num} deseleccionado.`, 'warning');
-                } else {
-                    appData.selectedTickets.push(ticket.num);
-                    toast(`Número ${ticket.num} seleccionado.`, 'success');
-                }
-                renderGrid();
-            } else if (ticket.owner === appData.currentUser.email) {
-                if(ticket.state === 'reserved') {
-                    alert(`Este es tu número reservado (${ticket.num}). Paga pronto para asegurarlo. Sigue las instrucciones de '¿Cómo pagar?'.`);
-                } else {
-                    alert(`¡Felicidades! El número ${ticket.num} ya es tuyo y está PAGADO.`);
-                }
-            } else {
-                toast("⛔ Este número ya está ocupado.", 'error');
-            }
-        }
-        
-        function confirmReservation() {
-            if (appData.selectedTickets.length === 0) return;
-            
-            const count = appData.selectedTickets.length;
-            const numsReserved = appData.selectedTickets.join(', ');
-            
-            if(!confirm(`¿Confirmas la RESERVA de ${count} número(s) [${numsReserved}]? Por favor, paga lo antes posible.`)) return;
-
-            const userEmail = appData.currentUser.email;
-            const reservationTime = Date.now(); 
-            
-            appData.selectedTickets.forEach(num => {
-                const ticket = appData.tickets.find(t => t.num === num);
-                if (ticket && ticket.state === 'available') {
-                    ticket.state = 'reserved';
-                    ticket.owner = userEmail;
-                    ticket.reservedAt = reservationTime; 
-                }
-            });
-
-            appData.selectedTickets = []; 
-            save();
-            toast(`¡Reserva exitosa de ${count} números! Revisa las instrucciones de pago.`, 'success');
-            renderGrid();
-        }
-
-        // --- VERIFICACIÓN DE BOLETA (NUEVA FUNCIÓN) ---
-        function verifyTicket() {
-            const num = document.getElementById('verifyNum').value.padStart(3, '0');
-            const resultEl = document.getElementById('verifyResult');
-            const ticket = appData.tickets.find(t => t.num === num);
-            
-            if (num.length !== 3) {
-                 resultEl.innerHTML = `<p style="color:var(--text-muted); margin:0;">Escribe un número de 3 dígitos (000-999).</p>`;
-                 return;
-            }
-
-            if (!ticket) {
-                 resultEl.innerHTML = `<p style="color:var(--accent); font-weight: bold; margin:0;">Error: Número ${num} no válido en la rifa.</p>`;
-                 return;
-            }
-
-            let statusText = '';
-            let ownerInfo = '';
-            let statusColor = '';
-
-            if (ticket.state === 'available') {
-                statusText = '¡DISPONIBLE!';
-                statusColor = 'var(--primary)';
-                ownerInfo = 'Puedes reservarlo ahora mismo.';
-            } else {
-                const user = getOwnerInfo(ticket.owner);
-                const nameParts = user.name.split(' ');
-                const firstName = nameParts[0];
-                const secondInitial = nameParts.length > 1 ? nameParts[1].charAt(0) + '.' : '';
-                
-                if (ticket.state === 'reserved') {
-                    statusText = 'RESERVADO';
-                    statusColor = 'var(--warning)';
-                    ownerInfo = `Reservado por: **${firstName} ${secondInitial}**.`;
-                } else if (ticket.state === 'paid') {
-                    statusText = 'PAGADO';
-                    statusColor = 'var(--accent)';
-                    ownerInfo = `Comprado por: **${firstName} ${secondInitial}**. ¡Participación asegurada!`;
-                }
-            }
-            
-            resultEl.innerHTML = `
-                <div style="font-size: 1.2rem; font-weight: 800; color: ${statusColor}; margin-bottom: 5px;">Boleta ${num}: ${statusText}</div>
-                <p style="font-size: 0.9rem; margin: 0; color: var(--text-main);">${ownerInfo}</p>
-            `;
-        }
-
-
-        // --- AUTENTICACIÓN Y UI ---
-        function handleLogin(e) {
-            e.preventDefault();
-            const name = document.getElementById('userName').value;
-            const email = document.getElementById('userEmail').value;
-            const phone = document.getElementById('userPhone').value;
-
-            if (appData.blacklist.includes(email)) {
-                 toast("⛔ Esta cuenta está bloqueada. No se puede iniciar sesión.", 'error');
-                 return;
-            }
-
-            const user = { name, email, phone, date: new Date().toLocaleString() };
-            appData.currentUser = user;
-            
-            const exists = appData.users.find(u => u.email === email);
-            if(!exists) appData.users.push(user);
-
-            save();
-            closeModal('loginModal');
-            toast(`Bienvenido, ${name}`, 'success');
-        }
-
-        function updateUI() {
-            const btn = document.getElementById('btnAuth');
-            if (appData.currentUser) {
-                btn.textContent = "Salir";
-                btn.onclick = () => {
-                    if(confirm("¿Cerrar sesión?")) {
-                        appData.currentUser = null;
-                        appData.selectedTickets = []; 
-                        save();
-                        window.location.reload();
-                    }
-                };
-            } else {
-                btn.textContent = "Ingresar";
-                btn.onclick = () => openModal('loginModal');
-            }
-
-            const counts = { available: 0, reserved: 0, paid: 0 };
-            appData.tickets.forEach(t => counts[t.state]++);
-            document.getElementById('statAvail').textContent = counts.available;
-            document.getElementById('statRes').textContent = counts.reserved;
-            document.getElementById('statPaid').textContent = counts.paid;
-        }
-
-        function getOwnerInfo(email) {
-            return appData.users.find(u => u.email === email) || { name: 'Desconocido', phone: 'N/A', email: email };
-        }
-
-        // --- ADMINISTRACIÓN ---
-        function openAdminAuth() {
-            const pass = prompt("🔑 Ingrese Contraseña de Administrador:");
-            if (pass === ADMIN_PASS) {
-                // Registrar que el admin está logueado en esta sesión para botones de gestión
-                sessionStorage.setItem('isAdminLoggedIn', 'true');
-                renderUserList();
-                renderReservedTicketsList();
-                renderPaidTicketsList();
-                openModal('adminModal');
-            } else {
-                sessionStorage.removeItem('isAdminLoggedIn');
-                toast("⛔ Contraseña Incorrecta", 'error');
-            }
-        }
-        
-        function renderReservedTicketsList() {
-            const tbody = document.getElementById('reservedTicketListBody');
-            tbody.innerHTML = ''; 
-            const reservedTickets = appData.tickets.filter(t => t.state === 'reserved');
-            
-            reservedTickets.sort((a, b) => a.reservedAt - b.reservedAt).forEach(t => {
-                const user = getOwnerInfo(t.owner);
-                
-                // Mostrar la hora de reserva para gestión manual
-                const reservedTimeStr = t.reservedAt 
-                    ? new Date(t.reservedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' ' +
-                      new Date(t.reservedAt).toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }) 
-                    : 'N/A';
-                
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px dotted #333';
-                row.innerHTML = `
-                    <td style="padding:5px; font-weight: bold;">${t.num}</td>
-                    <td style="padding:5px; font-size: 0.8rem;">
-                        ${user.name} (${user.phone})<br>
-                        <span style="color:var(--warning);">Reserva: ${reservedTimeStr}</span>
-                    </td>
-                    <td style="padding:5px; white-space: nowrap;">
-                        <button onclick="markAsPaid('${t.num}')" class="btn accent" style="padding: 5px 8px; font-size: 0.7rem;">PAGADO</button>
-                        <button onclick="revertTicket('${t.num}')" class="btn warning" style="padding: 5px 8px; font-size: 0.7rem; margin-left: 5px;">LIBERAR</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        function renderPaidTicketsList() {
-            const tbody = document.getElementById('paidTicketListBody');
-            tbody.innerHTML = ''; 
-            const paidTickets = appData.tickets.filter(t => t.state === 'paid');
-            
-            paidTickets.forEach(t => {
-                const user = getOwnerInfo(t.owner);
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px dotted #333';
-                row.innerHTML = `
-                    <td style="padding:5px; font-weight: bold;">${t.num}</td>
-                    <td style="padding:5px;">${user.name}</td>
-                    <td style="padding:5px; white-space: nowrap;">
-                        <button onclick="revertTicket('${t.num}')" class="btn warning" style="padding: 5px 8px; font-size: 0.7rem;">LIBERAR</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        function renderUserList() {
-            const tbody = document.getElementById('userListBody');
-            const searchVal = document.getElementById('adminUserSearch').value.toLowerCase();
-            tbody.innerHTML = '';
-            
-            appData.users.forEach(u => {
-                if (searchVal && !u.name.toLowerCase().includes(searchVal) && !u.phone.includes(searchVal)) {
-                    return; 
-                }
-                
-                const isBlocked = appData.blacklist.includes(u.email);
-                const statusText = isBlocked 
-                    ? `<span style="color:var(--accent); font-weight: bold;">🔴 Bloqueado</span>` 
-                    : `<span style="color:var(--primary);">🟢 Activo</span>`;
-                const actionBtn = isBlocked 
-                    ? `<button onclick="toggleBlockUser('${u.email}')" class="btn secondary" style="padding: 5px 8px; font-size: 0.7rem;">Desbloquear</button>`
-                    : `<button onclick="toggleBlockUser('${u.email}')" class="btn accent" style="padding: 5px 8px; font-size: 0.7rem;">Bloquear</button>`;
-                
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px dotted #333';
-                row.innerHTML = `
-                    <td style="padding:5px;">${u.name}</td>
-                    <td style="padding:5px;">${u.phone}</td>
-                    <td style="padding:5px;">${statusText}</td>
-                    <td style="padding:5px; white-space: nowrap;">${actionBtn}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        function markAsPaid(ticketNum) {
-            const ticket = appData.tickets.find(t => t.num === ticketNum);
-            if (ticket && (ticket.state === 'reserved' || ticket.state === 'available')) {
-                ticket.state = 'paid';
-                ticket.reservedAt = null; // Clean up timestamp
-                save();
-                toast(`Boleta ${ticketNum} marcada como PAGADA.`, 'success');
-                renderGrid(); 
-                renderReservedTicketsList(); 
-                renderPaidTicketsList();
-            } else {
-                toast(`Error: Boleta ${ticketNum} no encontrada.`, 'error');
-            }
-        }
-        
-        function revertTicket(ticketNum) {
-            if (!confirm(`¿Estás seguro de LIBERAR la boleta ${ticketNum}? Volverá a estar DISPONIBLE.`)) return;
-            const ticket = appData.tickets.find(t => t.num === ticketNum);
-            
-            if (ticket) {
-                const prevState = ticket.state;
-                ticket.state = 'available';
-                ticket.owner = null;
-                ticket.reservedAt = null; // Clean up timestamp
-                save();
-                toast(`Boleta ${ticketNum} (${prevState.toUpperCase()}) liberada.`, 'warning');
-                renderGrid(); 
-                renderReservedTicketsList();
-                renderPaidTicketsList();
-            } else {
-                toast(`Error: Boleta ${ticketNum} no encontrada.`, 'error');
-            }
-        }
-        
-        function toggleBlockUser(email) {
-            const index = appData.blacklist.indexOf(email);
-            if (index > -1) {
-                appData.blacklist.splice(index, 1);
-                toast(`Usuario ${email} desbloqueado.`, 'success');
-            } else {
-                appData.blacklist.push(email);
-                toast(`Usuario ${email} bloqueado. No podrá reservar.`, 'error');
-            }
-            save();
-            renderUserList(); 
-        }
-
-        // Asignación Manual
-        function openManualAssignModal() {
-            document.getElementById('manualNum').value = '';
-            document.getElementById('manualName').value = '';
-            document.getElementById('manualPhone').value = '';
-            closeModal('adminModal');
-            openModal('manualAssignModal');
-        }
-
-        function handleManualAssign(e, status) {
-            e.preventDefault();
-            const numEl = document.getElementById('manualNum');
-            const nameEl = document.getElementById('manualName');
-            const phoneEl = document.getElementById('manualPhone');
-            
-            if (!numEl.value || !nameEl.value || !phoneEl.value) {
-                return toast('Por favor, rellena todos los campos.', 'error');
-            }
-
-            const num = numEl.value.padStart(3, '0');
-            const name = nameEl.value;
-            const phone = phoneEl.value;
-            const ticket = appData.tickets.find(t => t.num === num);
-
-            if (!ticket) { return toast(`Error: Boleta ${num} no existe.`, 'error'); }
-            if (ticket.state !== 'available') { return toast(`Error: Boleta ${num} ya está ${ticket.state.toUpperCase()}.`, 'error'); }
-
-            const email = `manual_${phone}@manual.com`; // Email interno para tracking
-            
-            ticket.state = status;
-            ticket.owner = email;
-            if (status === 'reserved') {
-                ticket.reservedAt = Date.now(); // Set timestamp for manual reservation
-            } else {
-                ticket.reservedAt = null;
-            }
-
-            const exists = appData.users.find(u => u.email === email);
-            if (!exists) {
-                appData.users.push({ name, email, phone, date: new Date().toLocaleString(), type: 'Manual' });
-            }
-
-            save();
-            closeModal('manualAssignModal');
-            openAdminAuth(); // Reabrir el panel admin
-            
-            toast(`Boleta ${num} asignada y ${status.toUpperCase()} a ${name}.`, status === 'paid' ? 'success' : 'warning');
-            renderGrid();
-        }
-
-        // --- GESTIÓN DE SORTEOS (WINNERS) ---
-        function openWinnerManagement() {
-            closeModal('adminModal');
-            openModal('winnerManagementModal');
-            document.getElementById('winnerDate').valueAsDate = new Date(); 
-            previewWinnerInfo();
-        }
-        
-        function previewWinnerInfo() {
-            const num = document.getElementById('winnerNum').value.padStart(3, '0');
-            const infoEl = document.getElementById('winnerInfo');
-            const ticket = appData.tickets.find(t => t.num === num);
-            
-            if (ticket && ticket.owner) { // Si tiene dueño (reservado o pagado)
-                const user = getOwnerInfo(ticket.owner);
-                infoEl.innerHTML = `Boleta **${num}** está **${ticket.state.toUpperCase()}** a nombre de **${user.name}**.`;
-                infoEl.style.color = 'var(--primary)';
-            } else if (ticket) { // Si está disponible
-                infoEl.innerHTML = `Boleta **${num}** está **DISPONIBLE**. Si este número cae, el premio se declara DESIERTO.`;
-                infoEl.style.color = 'var(--warning)';
-            } else {
-                infoEl.innerHTML = `Ingrese un número de 3 dígitos (000-999).`;
-                infoEl.style.color = 'var(--text-muted)';
-            }
-        }
-
-        function checkAndAddWinner() {
-            const dateStr = document.getElementById('winnerDate').value;
-            const num = document.getElementById('winnerNum').value.padStart(3, '0');
-            const type = document.getElementById('winnerType').value;
-            
-            if (!dateStr || num.length !== 3) {
-                return toast('Por favor, ingresa la fecha y el número ganador.', 'error');
-            }
-            
-            const ticket = appData.tickets.find(t => t.num === num);
-            let ownerName = 'PREMIO DESIERTO (No Vendido)';
-            let ownerEmail = null;
-            let winnerStatus = 'DESIERTO';
-            
-            if (ticket && ticket.owner) {
-                const user = getOwnerInfo(ticket.owner);
-                ownerName = user.name;
-                ownerEmail = user.email;
-                winnerStatus = ticket.state.toUpperCase();
-            }
-
-            if (confirm(`¿Confirmar registro de sorteo?\nFecha: ${dateStr}\nNúmero Ganador: ${num}\nTipo: ${type.toUpperCase()}\nEstado: ${winnerStatus}\nGanador: ${ownerName}`)) {
-                appData.winners.push({
-                    date: dateStr,
-                    num: num,
-                    winnerName: ownerName,
-                    type: type,
-                    ownerEmail: ownerEmail,
-                    status: winnerStatus 
-                });
-                save();
-                closeModal('winnerManagementModal');
-                toast(`Ganador de ${type.toUpperCase()} registrado.`, 'success');
-                openWinnerHistory();
-            }
-        }
-        
-        function deleteWinnerHistory() {
-            // Verificar si el admin está logueado en la sesión
-            if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
-                return toast("⛔ Acceso Denegado. Solo el Admin puede realizar esta acción.", 'error');
-            }
-            
-            if (confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR todo el historial de ganadores? Esta acción es irreversible.")) {
-                appData.winners = [];
-                save();
-                toast('Historial de ganadores eliminado.', 'error');
-                closeModal('winnerHistoryModal');
-            }
-        }
-
-        function openWinnerHistory() {
-            const tbody = document.getElementById('winnerListBody');
-            tbody.innerHTML = '';
-            
-            const totalWeeklyDraws = 9; // Hardcoded max from previous logic
-            const pastWeeklyDraws = appData.winners.filter(w => w.type === 'weekly').length;
-            const remainingWeekly = Math.max(0, totalWeeklyDraws - pastWeeklyDraws);
-            
-            const finalDrawRegistered = appData.winners.some(w => w.type === 'final');
-            const finalStatusText = finalDrawRegistered ? '✅ Realizado' : '⏳ Pendiente';
-
-            let remainingText = `Sorteos Semanales de 1M restantes: **${remainingWeekly}** de **${totalWeeklyDraws}**.<br>`;
-            remainingText += `Gran Sorteo Final (Moto): **${finalStatusText}**.`;
-            document.getElementById('drawsRemaining').innerHTML = remainingText;
-            
-            // Mostrar botón de eliminar si el admin está logueado en la sesión
-            const isAdmin = sessionStorage.getItem('isAdminLoggedIn') === 'true'; 
-            document.getElementById('btnAdminDeleteWinner').style.display = isAdmin ? 'block' : 'none';
-
-            
-            if (appData.winners.length === 0) {
-                 tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-muted);">Aún no hay ganadores registrados.</td></tr>`;
-            } else {
-                appData.winners.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(w => {
-                    const row = document.createElement('tr');
-                    const color = w.type === 'final' ? 'var(--accent)' : 'var(--warning)';
-                    const winnerText = w.status === 'DESIERTO' 
-                        ? `<span style="color:var(--accent); font-weight: bold;">PREMIO DESIERTO</span>` 
-                        : w.winnerName;
-
-                    row.style.borderBottom = '1px dotted #222';
-                    row.innerHTML = `
-                        <td style="padding:8px 5px;">${w.date}</td>
-                        <td style="padding:8px 5px; color:${color};">${w.type === 'final' ? 'FINAL (MOTO)' : 'SEMANAL (1M)'}</td>
-                        <td style="padding:8px 5px; font-weight: 900; color: ${color};">${w.num}</td>
-                        <td style="padding:8px 5px;">${winnerText}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-
-            openModal('winnerHistoryModal');
-        }
-
-        // --- EXPORTACIÓN Y RESET ---
-        function exportPaidTickets() {
-            let csv = "Numero,Estado,Nombre,Telefono,Email,FechaReserva\n";
-            const paidAndReserved = appData.tickets.filter(t => t.state === 'paid' || t.state === 'reserved');
-            
-            paidAndReserved.forEach(t => {
-                if (t.owner) {
-                    const u = getOwnerInfo(t.owner);
-                    const stateText = t.state === 'paid' ? 'PAGADO' : 'RESERVADO';
-                    const resDate = t.reservedAt ? new Date(t.reservedAt).toLocaleString('es-CO') : '';
-                    csv += `${t.num},${stateText},"${u.name}","${u.phone}","${u.email}","${resDate}"\n`;
-                }
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'Boletas_Pagadas_y_Reservadas.csv'; a.click();
-            toast("Listado de boletas PAGADAS y RESERVADAS descargado.", 'success');
-        }
-        
-        function exportAllData() {
-            let csv = "TIPO,VALOR,ESTADO/DETALLE,NOMBRE,CONTACTO,FECHA\n";
-            csv += "\n--- USUARIOS ---\n";
-            appData.users.forEach(u => {
-                const isBlocked = appData.blacklist.includes(u.email) ? 'BLOQUEADO' : 'ACTIVO';
-                csv += `CLIENTE,"${u.name}",${isBlocked},"${u.phone}","${u.email}","${u.date}"\n`;
-            });
-            csv += "\n--- BOLETAS ---\n";
-            appData.tickets.forEach(t => {
-                const owner = t.owner ? appData.users.find(u => u.email === t.owner)?.name || 'Manual' : 'N/A';
-                const reservedAt = t.reservedAt ? new Date(t.reservedAt).toLocaleString('es-CO') : 'N/A';
-                csv += `BOLETA,${t.num},${t.state.toUpperCase()},"${owner}","${t.owner || 'N/A'}","${reservedAt}"\n`;
-            });
-            csv += "\n--- GANADORES ---\n";
-            appData.winners.forEach(w => {
-                csv += `GANADOR,${w.date},${w.type.toUpperCase()},${w.num},"${w.winnerName}","${w.status}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'Datos_Completos_Rifa.csv'; a.click();
-            toast("Datos completos de la rifa descargados.", 'success');
-        }
-
-        function adminResetRaffle() {
-            if(sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
-                return toast("⛔ Acceso Denegado. Debes estar en modo Admin.", 'error');
-            }
-
-            if(confirm("⚠️ ¿ESTÁS SEGURO?\nSe borrarán TODOS los datos (reservas, pagos, usuarios, historial de ganadores).\nEsta acción no se puede deshacer.")) {
-                localStorage.removeItem(STORAGE_KEY);
-                sessionStorage.removeItem('isAdminLoggedIn');
-                window.location.reload();
-            }
-        }
-
-        // --- UTILIDADES ---
-        function showInstructions() {
-            alert(`
-            ✅ PASOS PARA OBTENER TU BOLETA (${TOTAL_TICKETS} OPORTUNIDADES):
-
-            1.  **SELECCIONA:** Elige uno o varios números disponibles (color verde) en el tablero. Haz clic en "Reservar" para ponerlos en estado Reservado (color amarillo). 
-            
-            2.  **PAGA:** Envía el valor de tus boletas ($25.000 COP por cada una) a nuestro medio de pago oficial:
-                💰 **Nequi: 321 963 7388**
-            
-            3.  **CONFIRMA:** Envía el comprobante de pago al WhatsApp del administrador junto con tu nombre y el número(s) reservado(s).
-            
-            4.  **LISTO:** El administrador verificará y cambiará el estado de tu boleta a **PAGADO** (color rojo). ¡Tu participación estará asegurada para todos los sorteos!
-            `);
-        }
-
-        function checkMyTickets() {
-            if(!appData.currentUser) return openModal('loginModal');
-            
-            const my = appData.tickets.filter(t => t.owner === appData.currentUser.email);
-            
-            const reserved = my.filter(t => t.state === 'reserved').map(t => {
-                let timeInfo = '';
-                if(t.reservedAt) {
-                    const reservedDate = new Date(t.reservedAt).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'});
-                    timeInfo = ` (Reservado: ${reservedDate})`;
-                }
-                return t.num + timeInfo;
-            }).join(', ');
-            
-            const paid = my.filter(t => t.state === 'paid').map(t => t.num).join(', ');
-            
-            let msg = `🎉 ¡Hola, ${appData.currentUser.name}!\n\n`;
-            msg += `🎟️ Boletas Totales a tu nombre: ${my.length}\n\n`;
-            msg += `⏳ RESERVADAS (PAGO PENDIENTE):\n${reserved || 'Ninguna'}\n\n`;
-            msg += `✅ PAGADAS (ASEGURADAS):\n${paid || 'Ninguna'}`;
-            
-            alert(my.length ? msg : "Aún no tienes números reservados o comprados. ¡Es tu momento!");
-        }
-
-        function openModal(id) { document.getElementById(id).classList.add('open'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
+        // --- FUNCIONES DE UTILIDAD ---
 
         function toast(msg, type='success') {
             const box = document.createElement('div');
             box.className = `toast ${type}`;
+            // Ajustar color de texto para toast de advertencia si el tema es oscuro
+            if (type === 'warning' && !document.body.classList.contains('light-mode')) {
+                 box.style.color = '#000'; 
+            }
             box.innerHTML = msg; 
             document.getElementById('toast-container').appendChild(box);
             setTimeout(() => {
@@ -1241,15 +522,796 @@
             }, 4000);
         }
 
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('open'); 
+            // Limpiar valores del modal de verificar al cerrar
+            if (id === 'verifyModal') {
+                document.getElementById('verifyNum').value = '';
+                document.getElementById('verifyResult').innerHTML = '<p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>';
+            }
+        }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+
+        function formatNum(num) { 
+            // Asegura que el número sea tratado como entero y luego formateado
+            return parseInt(num).toString().padStart(3, '0'); 
+        }
+        function formatUser(user) { return `${user.name} (${user.phone})`; }
+        function getUserByEmail(email) { return appData.users.find(u => u.email === email); }
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        // --- PERSISTENCIA Y CARGA / LIMPIEZA AUTOMÁTICA ---
+        
+        // Helper para obtener el timestamp del último corte de reservas del Viernes 17:00 que debió ocurrir
+        function getWeeklyCutoffTime() {
+            const now = new Date();
+            let cutoff = new Date(now);
+            cutoff.setHours(RESERVATION_CLEARANCE_HOUR, 0, 0, 0); // Establecer la hora a 17:00
+
+            // 1. Calcular los días que han pasado desde el último Viernes (incluyendo hoy si es Viernes)
+            let daysToRollback = (now.getDay() - WEEKLY_DRAW_DAY + 7) % 7; 
+            cutoff.setDate(now.getDate() - daysToRollback);
+            
+            // 2. Si el tiempo calculado (Viernes 17:00) es posterior a la hora actual,
+            // significa que estamos antes de las 17:00 de hoy Viernes. En ese caso, retrocedemos una semana.
+            if (cutoff.getTime() > now.getTime()) {
+                cutoff.setDate(cutoff.getDate() - 7);
+            }
+            
+            return cutoff.getTime(); // Devuelve un timestamp
+        }
+
+
+        function load() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                appData = JSON.parse(saved);
+                if (!appData.users) appData.users = [];
+                if (!appData.selectedTickets) appData.selectedTickets = [];
+                if (!appData.winners) appData.winners = [];
+            } else {
+                appData.tickets = [];
+                for(let i=0; i<TOTAL_TICKETS; i++) {
+                    appData.tickets.push({ num: formatNum(i), state: 'available', owner: null, reservedAt: null });
+                }
+            }
+            
+            const nowTimestamp = Date.now();
+            
+            // --- 1. Weekly Reservation Clearance (Friday 5 PM) ---
+            const WEEKLY_CLEARANCE_KEY = "last_weekly_clearance_timestamp";
+            let lastWeeklyClearanceTime = localStorage.getItem(WEEKLY_CLEARANCE_KEY);
+            lastWeeklyClearanceTime = lastWeeklyClearanceTime ? parseInt(lastWeeklyClearanceTime) : 0;
+            
+            const requiredCutoffTime = getWeeklyCutoffTime();
+            let weeklyClearanceNeeded = lastWeeklyClearanceTime < requiredCutoffTime;
+
+            if (weeklyClearanceNeeded) {
+                let weeklyClearedCount = 0;
+                appData.tickets.forEach(t => {
+                    if (t.state === 'reserved') {
+                        t.state = 'available';
+                        t.owner = null;
+                        t.reservedAt = null;
+                        weeklyClearedCount++;
+                    }
+                });
+                
+                if (weeklyClearedCount > 0) {
+                    toast(`¡Corte Semanal! ${weeklyClearedCount} reservas liberadas (Viernes 5 PM).`, 'accent');
+                }
+                
+                // Si se realizó la limpieza semanal, se establece el nuevo timestamp de corte.
+                localStorage.setItem(WEEKLY_CLEARANCE_KEY, nowTimestamp.toString()); 
+                appData.selectedTickets = []; // Limpiar la selección actual del usuario
+            }
+            
+            // --- 2. Standard 24-Hour Expiration Check ---
+            let reservationsExpired = 0;
+            appData.tickets.forEach(t => {
+                // Solo expira si no está afectado por el corte semanal (es decir, fue reservado DESPUÉS del último corte)
+                if (t.state === 'reserved' && t.reservedAt && (nowTimestamp - t.reservedAt > RESERVATION_DURATION_MS)) {
+                    t.state = 'available';
+                    t.owner = null;
+                    t.reservedAt = null;
+                    reservationsExpired++;
+                }
+            });
+            
+            if (reservationsExpired > 0) {
+                 toast(`Se liberaron ${reservationsExpired} reservas expiradas por tiempo (24h).`, 'warning');
+            }
+            
+            // Actualizar la grilla y la UI inmediatamente
+            renderGrid();
+            updateUI();
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            updateUI(); 
+        }
+
         function refreshData() {
             load(); 
             toast("Datos y contadores actualizados", 'success');
         }
+        
+        // --- CONTADOR Y FECHAS (Hora corregida a 10 PM) ---
 
-        // Event Listeners Inputs
-        document.getElementById('searchInput').addEventListener('input', renderGrid);
-        document.getElementById('filterSelect').addEventListener('change', renderGrid);
+        function getNextWeeklyDrawDate() {
+            const today = new Date();
+            const nowTime = today.getTime();
+            
+            // 1. Verificar si el gran sorteo final ya pasó
+            if (nowTime >= FINAL_RAFFLE_DATE.getTime()) {
+                return new Date(0); // Fecha en el pasado para indicar que terminó
+            }
 
+            // 2. Verificar si ya pasamos la fecha del último sorteo semanal
+            if (nowTime > LAST_WEEKLY_DRAW) {
+                return FINAL_RAFFLE_DATE; // Saltar directamente al sorteo final
+            }
+            
+            let nextDraw = new Date(today);
+            
+            // Calcular días para el próximo Viernes (WEEKLY_DRAW_DAY = 5)
+            let daysToAdd = (WEEKLY_DRAW_DAY + 7 - today.getDay()) % 7;
+
+            // Si es hoy (Viernes) y la hora ya pasó (>= 10 PM), saltar al próximo Viernes.
+            if (daysToAdd === 0 && today.getHours() >= WEEKLY_DRAW_HOUR) {
+                daysToAdd = 7;
+            }
+            
+            nextDraw.setDate(today.getDate() + daysToAdd);
+            
+            // Establecer la hora a las 10:00 PM (22:00:00)
+            nextDraw.setHours(WEEKLY_DRAW_HOUR, 0, 0, 0);
+            
+            return nextDraw;
+        }
+
+        function startCountdown() {
+            // Se ejecuta cada segundo para mantener la cuenta regresiva en tiempo real
+            const timer = setInterval(function() {
+                const now = new Date().getTime();
+                
+                // --- Contador Semanal ---
+                const nextDrawDate = getNextWeeklyDrawDate();
+                const nextDrawTime = nextDrawDate.getTime();
+                let distance = nextDrawTime - now;
+
+                if (distance > 0 && nextDrawTime < FINAL_RAFFLE_DATE.getTime()) {
+                    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    const s = Math.floor((distance % (1000 * 60)) / (1000)).toString().padStart(2, '0');
+                    
+                    document.getElementById("nextDrawTime").innerHTML = `${d}D ${h}:${m}:${s}`;
+                } else if (nextDrawTime < FINAL_RAFFLE_DATE.getTime()) {
+                    // Si la hora es el mismo viernes a las 10 PM
+                    document.getElementById("nextDrawTime").innerHTML = "¡HOY, A LAS 10 PM!";
+                } else {
+                    document.getElementById("nextDrawTime").innerHTML = "FINALIZADO";
+                }
+
+                // --- Contador Final ---
+                distance = FINAL_RAFFLE_DATE.getTime() - now;
+                if (distance > 0) {
+                    const d_final = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h_final = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    const m_final = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    const s_final = Math.floor((distance % (1000 * 60)) / (1000)).toString().padStart(2, '0');
+                    document.getElementById("finalDrawTime").innerHTML = `${d_final}D ${h_final}:${m_final}:${s_final}`;
+                } else {
+                    document.getElementById("finalDrawTime").innerHTML = "¡RIFA TERMINADA!";
+                    clearInterval(timer); 
+                }
+            }, 1000);
+        }
+
+        // --- RENDERIZADO (GRID) y LÓGICA DE SELECCIÓN ---
+        function toggleTicketSelection(num) {
+            if (!appData.currentUser) {
+                toast("Debes identificarte para seleccionar números.", 'error');
+                return openModal('loginModal');
+            }
+
+            const ticket = appData.tickets.find(t => t.num === num);
+            if (!ticket || ticket.state !== 'available') {
+                toast(`El número ${num} no está disponible.`, 'error');
+                return;
+            }
+
+            const index = appData.selectedTickets.indexOf(num);
+            if (index > -1) {
+                appData.selectedTickets.splice(index, 1);
+            } else {
+                // IMPLEMENTACIÓN: Límite de 3 reservas
+                if (appData.selectedTickets.length >= MAX_RESERVATIONS_PER_USER) {
+                    toast(`Solo puedes reservar un máximo de ${MAX_RESERVATIONS_PER_USER} números a la vez.`, 'error');
+                    return;
+                }
+                appData.selectedTickets.push(num);
+            }
+            renderGrid();
+            updateUI();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            const searchInput = document.getElementById('searchInput').value.trim();
+            const filterValue = document.getElementById('filterSelect').value;
+            grid.innerHTML = '';
+            
+            const filteredTickets = appData.tickets.filter(t => {
+                const matchesSearch = searchInput ? t.num.includes(searchInput) : true;
+                const matchesFilter = filterValue === 'all' || t.state === filterValue;
+                return matchesSearch && matchesFilter;
+            });
+
+            filteredTickets.forEach(ticket => {
+                const card = document.createElement('div');
+                card.className = `card ${ticket.state}`;
+                card.innerHTML = `<div class="num">${ticket.num}</div><div class="status-text">${ticket.state.toUpperCase()}</div>`;
+                card.setAttribute('data-num', ticket.num);
+
+                let ownerInfo = "";
+                if (ticket.owner) {
+                    const user = getUserByEmail(ticket.owner);
+                    ownerInfo = user ? `${user.name} (${user.phone})` : `Owner: ${ticket.owner}`;
+                    card.setAttribute('data-owner-info', ownerInfo);
+                }
+
+                if (ticket.state === 'available') {
+                    card.onclick = () => toggleTicketSelection(ticket.num);
+                    if (appData.selectedTickets.includes(ticket.num)) {
+                        card.classList.add('selected');
+                    }
+                } else if (appData.currentUser && ticket.owner === appData.currentUser.email) {
+                    card.classList.add('mine');
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        function updateUI() {
+            // Actualizar Contadores
+            const stats = appData.tickets.reduce((acc, t) => {
+                acc[t.state]++;
+                return acc;
+            }, { available: 0, reserved: 0, paid: 0 });
+
+            document.getElementById('statAvail').textContent = stats.available;
+            document.getElementById('statRes').textContent = stats.reserved;
+            document.getElementById('statPaid').textContent = stats.paid;
+            // Total siempre es 1000, pero se mantiene la línea por si se cambia la configuración.
+            document.getElementById('statTotal').textContent = TOTAL_TICKETS; 
+
+            // Actualizar Botón de Reserva Múltiple
+            const selectedCount = appData.selectedTickets.length;
+            const btn = document.getElementById('multiReserveBtn');
+            document.getElementById('selectedCount').textContent = selectedCount;
+            btn.style.display = selectedCount > 0 ? 'block' : 'none';
+
+            // Actualizar estado de autenticación
+            const btnAuth = document.getElementById('btnAuth');
+            if (appData.currentUser) {
+                btnAuth.textContent = `👋 ${appData.currentUser.name.split(' ')[0]}`;
+                btnAuth.onclick = checkMyTickets;
+            } else {
+                btnAuth.textContent = `Ingresar`;
+                btnAuth.onclick = () => openModal('loginModal');
+            }
+        }
+
+        // --- LÓGICA DE COMPRA Y RESERVA ---
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+
+            let user = getUserByEmail(email);
+            if (!user) {
+                user = { name, email, phone };
+                appData.users.push(user);
+            } else {
+                // Actualizar datos del usuario si ya existe
+                user.name = name;
+                user.phone = phone;
+            }
+            
+            appData.currentUser = user;
+            save();
+            closeModal('loginModal');
+            toast(`Bienvenido, ${name}`, 'success');
+            
+            // Si el usuario tenía números seleccionados, iniciar la confirmación
+            if (appData.selectedTickets.length > 0) {
+                confirmReservation();
+            }
+        }
+
+        function confirmReservation() {
+            if (!appData.currentUser) {
+                return openModal('loginModal');
+            }
+
+            const count = appData.selectedTickets.length;
+            if (count === 0) return toast("Debes seleccionar al menos un número.", 'warning');
+
+            const nums = appData.selectedTickets.join(', ');
+            
+            if (confirm(`¿Confirmas la reserva de ${count} número(s): ${nums} a nombre de ${appData.currentUser.name}? Las reservas vencen en 24 horas si no se pagan.`)) {
+                
+                appData.selectedTickets.forEach(num => {
+                    const ticket = appData.tickets.find(t => t.num === num);
+                    // Solo reservar si sigue disponible (evita problemas de doble clic o multitarea)
+                    if (ticket && ticket.state === 'available') { 
+                        ticket.state = 'reserved';
+                        ticket.owner = appData.currentUser.email;
+                        ticket.reservedAt = Date.now();
+                    }
+                });
+
+                appData.selectedTickets = []; // Limpiar selección
+                save();
+                toast(`¡Reserva exitosa! Tienes 24h para pagar los números: ${nums}`, 'success');
+                showInstructions(); // Muestra las instrucciones de pago
+            }
+            
+            renderGrid(); // Refrescar grid después de la confirmación
+        }
+
+        // IMPLEMENTACIÓN: Compra rápida de 1, 2 o 3 boletas
+        function quickBuy(count) {
+            if (!appData.currentUser) {
+                toast("Debes identificarte para comprar números.", 'error');
+                return openModal('loginModal');
+            }
+
+            // Asegurar que no exceda el límite de MAX_RESERVATIONS_PER_USER
+            if (count > MAX_RESERVATIONS_PER_USER) count = MAX_RESERVATIONS_PER_USER;
+            
+            // 1. Limpiar cualquier selección previa
+            appData.selectedTickets = []; 
+
+            // 2. Encontrar boletas disponibles
+            const availableTickets = appData.tickets.filter(t => t.state === 'available');
+            
+            if (availableTickets.length < count) {
+                toast("No hay suficientes boletas disponibles para tu compra.", 'error');
+                return;
+            }
+            
+            // 3. Seleccionar las primeras 'count' boletas disponibles
+            for (let i = 0; i < count; i++) {
+                appData.selectedTickets.push(availableTickets[i].num);
+            }
+            
+            // 4. Iniciar el flujo de reserva
+            renderGrid();
+            updateUI();
+            
+            // Llama a confirmReservation para finalizar la reserva y mostrar el mensaje
+            confirmReservation();
+        }
+
+        function showInstructions() {
+             alert(`PASOS PARA EL PAGO DE BOLETAS RESERVADAS:\n\n1. Valor: $25.000 COP por boleta.\n2. Realiza el pago por Nequi o Daviplata al número:\n   📞 321 963 7388 (Óscar Fidel Flórez Tami)\n3. Envía el comprobante de pago al WhatsApp del administrador (el botón flotante).\n4. Un administrador verificará tu pago y cambiará el estado de tu(s) boleta(s) a 'Pagada' (Color ROJO).\n\n¡Recuerda, tienes 24 horas para asegurar tus números, o serán liberados el viernes a las 5 PM!`);
+        }
+
+        function checkMyTickets() {
+            if(!appData.currentUser) return openModal('loginModal');
+            
+            const myTickets = appData.tickets.filter(t => t.owner === appData.currentUser.email);
+            if (myTickets.length === 0) {
+                return alert("Aún no tienes números reservados o comprados. ¡Es tu momento!");
+            }
+
+            const reserved = myTickets.filter(t => t.state === 'reserved').map(t => t.num).join(', ') || 'Ninguna';
+            const paid = myTickets.filter(t => t.state === 'paid').map(t => t.num).join(', ') || 'Ninguna';
+            
+            let msg = `TUS BOLETAS REGISTRADAS (${myTickets.length} en total):\n\n`;
+            msg += `⏳ RESERVADAS (PAGO PENDIENTE):\n${reserved}\n\n`;
+            msg += `✅ PAGADAS (ASEGURADAS):\n${paid}`;
+            
+            alert(msg);
+        }
+
+        // --- LÓGICA DE ADMINISTRACIÓN ---
+
+        function openAdminAuth() {
+            const pass = prompt("Ingrese la contraseña de administrador:");
+            if (pass === ADMIN_PASS) {
+                appData.currentUser = { name: 'Admin', email: 'admin@admin.com', phone: 'N/A' }; // Set temporalmente como Admin para UI
+                renderAdminLists();
+                openModal('adminModal');
+            } else if (pass !== null) {
+                toast("Contraseña incorrecta.", 'error');
+            }
+        }
+        
+        function renderAdminLists() {
+            const reservedBody = document.getElementById('reservedTicketListBody');
+            const paidBody = document.getElementById('paidTicketListBody');
+            reservedBody.innerHTML = '';
+            paidBody.innerHTML = '';
+            
+            // Reservados
+            const reserved = appData.tickets.filter(t => t.state === 'reserved');
+            reserved.forEach(t => {
+                const user = getUserByEmail(t.owner);
+                // Calcular tiempo restante o tiempo transcurrido
+                const remainingMs = t.reservedAt + RESERVATION_DURATION_MS - Date.now();
+                const timeText = remainingMs > 0 
+                    ? `(${Math.ceil(remainingMs / (1000 * 60 * 60))}h restantes)`
+                    : `(EXPIRADA)`;
+                
+                const row = reservedBody.insertRow();
+                row.innerHTML = `
+                    <td>${t.num}</td>
+                    <td>${user ? formatUser(user) : t.owner} ${timeText}</td>
+                    <td>
+                        <button onclick="adminSetState('${t.num}', 'paid')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;">Pagar</button>
+                        <button onclick="adminSetState('${t.num}', 'available')" class="btn outline" style="padding: 5px 10px; font-size: 0.7rem;">Liberar</button>
+                    </td>
+                `;
+            });
+
+            // Pagados
+            const paid = appData.tickets.filter(t => t.state === 'paid');
+            paid.forEach(t => {
+                const user = getUserByEmail(t.owner);
+                const row = paidBody.insertRow();
+                row.innerHTML = `
+                    <td>${t.num}</td>
+                    <td>${user ? formatUser(user) : t.owner}</td>
+                    <td>
+                        <button onclick="adminSetState('${t.num}', 'available')" class="btn warning" style="padding: 5px 10px; font-size: 0.7rem;">Liberar</button>
+                    </td>
+                `;
+            });
+            renderUserList();
+            
+            // Mostrar botón de eliminación de historial de ganadores si el admin está logueado
+            document.getElementById('btnAdminDeleteWinner').style.display = appData.currentUser && appData.currentUser.email === 'admin@admin.com' ? 'block' : 'none';
+        }
+        
+        function renderUserList() {
+            const body = document.getElementById('userListBody');
+            const search = document.getElementById('adminUserSearch').value.toLowerCase();
+            body.innerHTML = '';
+
+            const filteredUsers = appData.users.filter(u => 
+                u.name.toLowerCase().includes(search) || u.phone.includes(search)
+            );
+
+            filteredUsers.forEach(user => {
+                const tickets = appData.tickets.filter(t => t.owner === user.email);
+                const status = tickets.length > 0 ? `(${tickets.length} boletas)` : 'Sin boletas';
+                const row = body.insertRow();
+                row.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.phone}</td>
+                    <td>${status}</td>
+                    <td>
+                        <button onclick="adminRemoveUser('${user.email}')" class="btn accent" style="padding: 5px 10px; font-size: 0.7rem;">Eliminar</button>
+                    </td>
+                `;
+            });
+        }
+        
+        function adminRemoveUser(email) {
+            if (confirm(`¿Estás seguro de ELIMINAR al cliente con email ${email}? Sus boletas NO se liberarán automáticamente; asegúrese de liberarlas manualmente en la lista de 'Pagadas'/'Reservadas' primero.`)) {
+                appData.users = appData.users.filter(u => u.email !== email);
+                save();
+                renderAdminLists();
+                toast("Cliente eliminado.", 'warning');
+            }
+        }
+
+        function adminSetState(num, newState) {
+            const ticket = appData.tickets.find(t => t.num === num);
+            if (!ticket) return;
+
+            if (newState === 'available') {
+                // Liberar la boleta
+                ticket.state = 'available';
+                ticket.owner = null;
+                ticket.reservedAt = null;
+            } else if (newState === 'paid') {
+                // Marcar como pagada
+                ticket.state = 'paid';
+                if (!ticket.owner) {
+                    // Si no tiene dueño, requiere asignación manual primero
+                    return toast("Error: Esta boleta no tiene dueño asignado. Use 'Asignar Manual' primero.", 'error');
+                }
+                if (!ticket.reservedAt) ticket.reservedAt = Date.now(); 
+            }
+            
+            save();
+            renderAdminLists(); // Refrescar la vista del admin
+            renderGrid(); // Refrescar la vista pública
+            toast(`Boleta ${num} cambiada a ${newState.toUpperCase()}`, 'success');
+        }
+
+        function openManualAssignModal() {
+            closeModal('adminModal');
+            // Limpiar campos del modal al abrir
+            document.getElementById('manualNum').value = '';
+            document.getElementById('manualName').value = '';
+            document.getElementById('manualPhone').value = '';
+            openModal('manualAssignModal');
+        }
+
+        function handleManualAssign(event, state) {
+            event.preventDefault();
+            const num = document.getElementById('manualNum').value.padStart(3, '0');
+            const name = document.getElementById('manualName').value.trim();
+            const phone = document.getElementById('manualPhone').value.trim();
+            
+            // Usar el número de teléfono como identificador único para el "email" manual
+            const uniqueEmail = `manual_${phone.replace(/\D/g, '')}@riffa.com`; 
+
+            const ticket = appData.tickets.find(t => t.num === num);
+
+            if (!ticket) return toast("Número de boleta inválido.", 'error');
+            if (ticket.state !== 'available') return toast(`El número ${num} ya está ${ticket.state}.`, 'error');
+
+            // Crear o actualizar usuario
+            let user = getUserByEmail(uniqueEmail);
+            if (!user) {
+                user = { name, email: uniqueEmail, phone };
+                appData.users.push(user);
+            } else {
+                 user.name = name; // Asegurar el nombre está actualizado
+            }
+
+
+            ticket.state = state;
+            ticket.owner = uniqueEmail;
+            ticket.reservedAt = Date.now();
+
+            save();
+            closeModal('manualAssignModal');
+            toast(`Asignación manual de ${num} como ${state.toUpperCase()} exitosa.`, 'success');
+            openModal('adminModal'); // Volver al panel de administración
+        }
+
+        // --- GESTIÓN DE SORTEOS ---
+        function previewWinnerInfo() {
+            const numInput = document.getElementById('winnerNum');
+            const num = numInput.value.padStart(3, '0');
+            const info = document.getElementById('winnerInfo');
+            
+            // Obtener variables CSS para usar en JS
+            const primaryColor = getCssVar('--primary');
+            const accentColor = getCssVar('--accent');
+            const warningColor = getCssVar('--warning');
+            
+            if (num.length !== 3) {
+                info.textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
+                return;
+            }
+            
+            const ticket = appData.tickets.find(t => t.num === num);
+            if (!ticket) {
+                info.innerHTML = `⚠️ El número <span style="color: ${accentColor};">${num}</span> no existe.`;
+                return;
+            }
+
+            const status = ticket.state;
+            if (status === 'available') {
+                info.innerHTML = `🚫 El número <span style="color: ${primaryColor};">${num}</span> está **LIBRE**. No hay un ganador pagado.`;
+            } else if (status === 'reserved') {
+                const user = getUserByEmail(ticket.owner);
+                info.innerHTML = `⏳ El número <span style="color: ${warningColor};">${num}</span> está **RESERVADO** por **${user ? user.name : ticket.owner}**. ¡Aún no está PAGADO!`;
+            } else if (status === 'paid') {
+                const user = getUserByEmail(ticket.owner);
+                info.innerHTML = `✅ ¡GANADOR! El número <span style="color: ${accentColor};">${num}</span> está **PAGADO** por **${user ? user.name : ticket.owner}**.`;
+            }
+        }
+        
+        function openWinnerManagement() {
+            closeModal('adminModal');
+            document.getElementById('winnerDate').valueAsDate = new Date();
+            // Asegurarse de que la previsualización funcione al abrir el modal
+            document.getElementById('winnerNum').value = '';
+            document.getElementById('winnerInfo').textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
+            openModal('winnerManagementModal');
+        }
+
+        function checkAndAddWinner() {
+            const num = document.getElementById('winnerNum').value.padStart(3, '0');
+            const date = document.getElementById('winnerDate').value;
+            const type = document.getElementById('winnerType').value;
+            
+            const ticket = appData.tickets.find(t => t.num === num);
+            if (!ticket) return toast("Número ganador inválido (debe ser 3 cifras).", 'error');
+
+            const ownerInfo = ticket.owner ? getUserByEmail(ticket.owner) : null;
+            const winnerName = ownerInfo ? ownerInfo.name : "Nadie (Boleta Libre)";
+            const ownerEmail = ticket.owner || "available";
+
+            if (ticket.state !== 'paid') {
+                if (!confirm(`ADVERTENCIA: El ganador de la lotería es ${num}, pero la boleta está como ${ticket.state.toUpperCase()} (${winnerName}). ¿Desea registrarlo como ganador de todos modos? Esto es solo para fines de registro histórico, no confirma el premio si no está pagado.`)) {
+                    // Si el admin cancela, salir
+                    if (!confirm("Si cancela, el sorteo no se registrará. ¿Desea continuar?")) return;
+                }
+            } else {
+                if (!confirm(`CONFIRMAR: Registrar a ${winnerName} con el número ${num} como ganador del Sorteo ${type.toUpperCase()} del ${date}?`)) {
+                    return;
+                }
+            }
+
+            // Verificar si ya existe un sorteo para esta fecha y tipo
+            const exists = appData.winners.some(w => w.date === date && w.type === type);
+            if (exists && !confirm(`ADVERTENCIA: Ya existe un ganador registrado para el sorteo ${type.toUpperCase()} de la fecha ${date}. ¿Desea registrar este nuevo resultado y duplicar el registro?`)) {
+                return;
+            }
+
+            const newWinner = { date, num, winnerName, type, ownerEmail };
+            appData.winners.unshift(newWinner); 
+
+            // Liberar la boleta si es el sorteo final
+            if (type === 'final' && ticket.state !== 'available') {
+                adminSetState(num, 'available');
+            }
+
+            save();
+            closeModal('winnerManagementModal');
+            toast(`Ganador ${winnerName} registrado para ${num}.`, 'success');
+        }
+
+        function openWinnerHistory() {
+            renderWinnerHistory();
+            openModal('winnerHistoryModal');
+        }
+
+        function renderWinnerHistory() {
+            const body = document.getElementById('winnerListBody');
+            body.innerHTML = '';
+            
+            const totalWeeklyDraws = 18; // Número de semanas entre el inicio estimado y 23/01/2026.
+            const completedWeeklyDraws = appData.winners.filter(w => w.type === 'weekly').length;
+            const weeklyDrawsLeft = Math.max(0, totalWeeklyDraws - completedWeeklyDraws);
+            const finalDrawn = appData.winners.some(w => w.type === 'final');
+
+            appData.winners.forEach(w => {
+                const row = body.insertRow();
+                row.style.color = w.type === 'final' ? getCssVar('--accent') : getCssVar('--warning');
+                row.innerHTML = `
+                    <td>${w.date}</td>
+                    <td>${w.type === 'final' ? 'FINAL' : 'Semanal (1M)'}</td>
+                    <td><strong style="font-size: 1.1rem;">${w.num}</strong></td>
+                    <td>${w.winnerName}</td>
+                `;
+            });
+
+
+            const remainingText = `Sorteos semanales registrados: ${completedWeeklyDraws}. Estimados restantes: ${weeklyDrawsLeft}. Sorteo Final: ${finalDrawn ? 'Realizado' : 'PENDIENTE'}.`;
+            document.getElementById('drawsRemaining').textContent = remainingText;
+        }
+
+        function deleteWinnerHistory() {
+            if (confirm("ADVERTENCIA: ¿Estás seguro de ELIMINAR TODO el historial de ganadores? Esta acción no se puede deshacer.")) {
+                appData.winners = [];
+                save();
+                renderWinnerHistory();
+                toast("Historial de ganadores eliminado.", 'warning');
+            }
+        }
+        
+        // --- OTRAS FUNCIONES DE UTILIDAD ---
+
+        function verifyTicket() {
+            const numInput = document.getElementById('verifyNum');
+            const num = numInput.value.padStart(3, '0');
+            const resultBox = document.getElementById('verifyResult');
+
+            if (num.length !== 3) {
+                resultBox.innerHTML = '<p style="color:var(--text-muted); margin:0;">Escribe un número de 3 dígitos (ej: 045)...</p>';
+                return;
+            }
+
+            const ticket = appData.tickets.find(t => t.num === num);
+
+            if (!ticket) {
+                 resultBox.innerHTML = `<p style="color:var(--accent); margin:0;">El número ${num} no se encontró. Error de datos.</p>`;
+                 return;
+            }
+
+            let statusText;
+            let ownerName = "";
+            let color = getCssVar('--text-muted');
+
+            if (ticket.state === 'available') {
+                statusText = 'DISPONIBLE (CÓMPRALO YA)';
+                color = getCssVar('--primary');
+            } else {
+                const user = getUserByEmail(ticket.owner);
+                ownerName = user ? ` (${user.name})` : ' (Venta manual)';
+                if (ticket.state === 'reserved') {
+                    statusText = 'RESERVADO (PAGO PENDIENTE)';
+                    color = getCssVar('--warning');
+                } else if (ticket.state === 'paid') {
+                    statusText = 'PAGADO (BOLETA ASEGURADA)';
+                    color = getCssVar('--accent');
+                }
+            }
+            
+            resultBox.innerHTML = `<p style="margin:0; font-weight: bold; color: ${color};">Número: ${num} | Estado: ${statusText}${ownerName}</p>`;
+        }
+        
+        // Función para resetear completamente la aplicación (Solo para Admin)
+        function adminResetRaffle() {
+            if (confirm("ADVERTENCIA CRÍTICA: ¿Estás ABSOLUTAMENTE SEGURO de que deseas restablecer la Rifa? Esto eliminará todos los datos de tickets, usuarios, reservas y ganadores de forma permanente.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                // También limpiar el timestamp del corte semanal
+                localStorage.removeItem("last_weekly_clearance_timestamp"); 
+                location.reload();
+            }
+        }
+
+        function exportData(data, filename) {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast(`Exportando ${filename}...`, 'success');
+        }
+
+        function exportAllData() {
+            exportData(appData, `Rifa_Data_Completa_${new Date().toISOString().slice(0, 10)}.json`);
+        }
+
+        function exportPaidTickets() {
+            const paid = appData.tickets.filter(t => t.state === 'paid').map(t => {
+                const user = getUserByEmail(t.owner);
+                return {
+                    numero: t.num,
+                    estado: 'PAGADO',
+                    nombre: user ? user.name : 'N/A',
+                    celular: user ? user.phone : 'N/A',
+                    email: t.owner
+                };
+            });
+            exportData(paid, `Rifa_Boletas_Pagadas_${new Date().toISOString().slice(0, 10)}.json`);
+        }
+
+
+        // --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
+        document.addEventListener('DOMContentLoaded', () => {
+            load();
+            startCountdown();
+            
+            // Asignación de event listeners para el filtrado/búsqueda
+            document.getElementById('searchInput').addEventListener('input', renderGrid);
+            document.getElementById('filterSelect').addEventListener('change', renderGrid);
+
+            // Listener para el input de nombre en el modal de login (para el saludo)
+            const userNameInput = document.getElementById('userName');
+            const loginTitle = document.getElementById('loginTitle');
+            if (userNameInput && loginTitle) {
+                userNameInput.addEventListener('input', () => {
+                    const name = userNameInput.value.trim();
+                    loginTitle.textContent = name.length > 0 ? `👋 Hola, ${name.split(' ')[0]}` : `👤 Identifícate`; 
+                });
+            }
+        });
     </script>
 </body>
 </html>

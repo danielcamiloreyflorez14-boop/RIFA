@@ -17,9 +17,9 @@
         <div class="brand">
             <div class="logo">GR</div>
             <div>
-                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal - Que Esperas</h1>
+                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 125 y 1M Semanal - Que Esperas</h1>
                 <div style="font-size: 0.8rem; color: var(--text-muted);">Sorteo final: 30/01/2026 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. **Lotería Santander 10:00 PM**</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. Lotería Santander 10:00 PM</div>
             </div>
         </div>
         <div class="controls">
@@ -136,14 +136,14 @@
     <div id="loginModal" class="modal">
         <div class="dialog">
             <h3 id="loginTitle">👤 Identifícate</h3> 
-            <p style="color:var(--text-muted)">Necesitamos tus datos para registrar las boletas a tu nombre.</p>
+            <p style="color:var(--text-muted)">Necesitamos tus datos para registrar las boletas a tu nombre. (</p>
             <form onsubmit="handleLogin(event); return false;">
                 <input type="text" id="userName" placeholder="😑 Nombre Completo" required>
-                <input type="email" id="userEmail" placeholder="✉️ Correo Electrónico (Para tracking interno)" required>
+                <input type="email" id="userEmail" placeholder="✉️ Correo Electrónico (Opsional)">
                 <input type="tel" id="userPhone" placeholder="📞 Celular / WhatsApp (ej: 321 963 7388)" required>
                 <button type="submit" class="btn secondary" style="width:100%; margin-top:10px;">Guardar y Continuar 👍</button>
             </form>
-            <button onclick="closeModal('loginModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cancelar</button>
+            <button onclick="closeModal('loginModal')" class="btn outline" style="width:100%; margin-top:10px;">Cancelar 😔</button>
         </div>
     </div>
     
@@ -187,7 +187,7 @@
                 <button onclick="openManualAssignModal()" class="btn secondary" style="font-size: 0.85rem;">📝 Asignar Manual</button>
                 <button onclick="openWinnerManagement()" class="btn warning" style="font-size: 0.85rem;">🏅 Gestión Sorteos</button>
                 <button onclick="exportAllData()" class="btn secondary" style="font-size: 0.85rem;">📥 Descargar Todo</button>
-                <button onclick="adminResetRaffle()" class="btn accent" style="font-size: 0.85rem;">⚠️ Borrar Todo (Reset)</button>
+                <button onclick="adminResetRaffle()" class="btn accent" style="font-size: 0.85rem;">⚠️ Borrar Todo (Reset) Nunca</button>
             </div>
             
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
@@ -276,3 +276,4 @@
     <script defer src="script.js"></script>
 </body>
 </html>
+

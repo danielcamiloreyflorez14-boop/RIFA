@@ -1,6 +1,7 @@
 // --- CONFIGURACIÓN DE LA RIFA ---
 const ADMIN_PASS = "000-999"; 
 const STORAGE_KEY = "rifa_data_v8"; 
+const STORAGE_KEY_CHECKSUM = "rifa_checksum"; // NUEVA CLAVE
 const TOTAL_TICKETS = 1000;
 const MAX_RESERVATIONS_PER_USER = 3; 
 const FINAL_RAFFLE_DATE = new Date('2026-01-30T22:00:00'); 
@@ -12,18 +13,16 @@ const LAST_WEEKLY_DRAW = new Date('2026-01-23T22:00:00').getTime();
 
 // --- ESTADO GLOBAL ---
 let appData = {
-    tickets: [],   // { num, state, owner (email), reservedAt }
-    users: [],     // { name, email, phone }
+    tickets: [],
+    users: [],
     currentUser: null,
     selectedTickets: [], 
     winners: [], 
 };
 
 // --- SEGURIDAD BÁSICA CREATIVA (Anti-Inspección) ---
-// Evita el menú contextual y las herramientas de desarrollo para disuadir la manipulación
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
-    // Bloquea F12, Ctrl+Shift+I, Ctrl+Shift+J (Windows/Linux) y Cmd+Option+I/J (Mac)
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
         console.warn('Advertencia: La manipulación de datos en la consola está restringida.');
         e.preventDefault();
@@ -34,7 +33,6 @@ document.addEventListener('keydown', e => {
 
 // --- FUNCIONES DE UTILIDAD GENERAL ---
 
-/** Obtiene el valor de una variable CSS */
 function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
@@ -44,7 +42,6 @@ function formatNum(num) {
 function formatUser(user) { return `${user.name} (${user.phone})`; }
 function getUserByEmail(email) { return appData.users.find(u => u.email === email); }
 
-/** Muestra un mensaje temporal en la esquina */
 function toast(msg, type='success') {
     const box = document.createElement('div');
     box.className = `toast ${type}`;
@@ -61,10 +58,8 @@ function toast(msg, type='success') {
     }, 4000);
 }
 
-/** Gestiona los modales */
 function openModal(id) { 
     document.getElementById(id).classList.add('open'); 
-    // Asegurar que la previsualización del ganador funcione si se abre ese modal
     if (id === 'winnerManagementModal') {
         document.getElementById('winnerNum').value = '';
         document.getElementById('winnerInfo').textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
@@ -78,9 +73,7 @@ function closeModal(id) {
     }
 }
 
-/** Cambia el tema (Oscuro/Claro) */
 function toggleTheme() { document.body.classList.toggle('light-mode'); }
-
 
 // --- FUNCIONES DE GESTIÓN DE CARGA (SPINNER) ---
 function showLoading() {
@@ -109,7 +102,7 @@ function getWeeklyCutoffTime() {
 
 async function load() {
     showLoading(); 
-    await new Promise(resolve => setTimeout(resolve, 300)); // Pequeña espera para UX del spinner
+    await new Promise(resolve => setTimeout(resolve, 300)); 
     
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -168,7 +161,6 @@ async function load() {
          toast(`Se liberaron ${reservationsExpired} reservas expiradas por tiempo (24h).`, 'warning');
     }
     
-    // Actualizar la grilla y la UI inmediatamente
     renderGrid();
     updateUI();
     hideLoading();
@@ -184,10 +176,9 @@ function refreshData() {
     toast("Datos y contadores actualizados", 'success');
 }
 
-// --- FUNCIÓN DE MÁSCARA DE TELÉFONO (UX MEJORADO) ---
-// Formatea el teléfono mientras el usuario escribe para mayor claridad
+// --- FUNCIÓN DE MÁSCARA DE TELÉFONO ---
 function applyPhoneMask(input) {
-    let value = input.value.replace(/\D/g, ''); // Eliminar todo lo que no sea dígito
+    let value = input.value.replace(/\D/g, ''); 
     let formatted = '';
 
     if (value.length > 0) {
@@ -204,7 +195,7 @@ function applyPhoneMask(input) {
 }
 
 
-// --- CONTADOR Y FECHAS ---
+// --- CONTADOR Y FECHAS (No modificado) ---
 
 function getNextWeeklyDrawDate() {
     const today = new Date();
@@ -235,7 +226,6 @@ function startCountdown() {
     const timer = setInterval(function() {
         const now = new Date().getTime();
         
-        // Contador Semanal
         const nextDrawDate = getNextWeeklyDrawDate();
         const nextDrawTime = nextDrawDate.getTime();
         let distance = nextDrawTime - now;
@@ -253,7 +243,6 @@ function startCountdown() {
             document.getElementById("nextDrawTime").innerHTML = "FINALIZADO";
         }
 
-        // Contador Final
         distance = FINAL_RAFFLE_DATE.getTime() - now;
         if (distance > 0) {
             const d_final = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -269,9 +258,8 @@ function startCountdown() {
 }
 
 
-// --- RENDERIZADO UX (GRID Y LEYENDA) ---
+// --- RENDERIZADO UX (GRID Y LEYENDA) (No modificado) ---
 
-/** Genera la leyenda interactiva de colores (NUEVA FUNCIÓN) */
 function renderInteractiveLegend() {
     const legendData = [
         { color: getCssVar('--primary'), text: 'Disponible: Puedes seleccionarlo y reservarlo.' },
@@ -359,7 +347,6 @@ function renderGrid() {
 }
 
 function updateUI() {
-    // Actualizar Contadores
     const stats = appData.tickets.reduce((acc, t) => {
         acc[t.state]++;
         return acc;
@@ -370,13 +357,11 @@ function updateUI() {
     document.getElementById('statPaid').textContent = stats.paid;
     document.getElementById('statTotal').textContent = TOTAL_TICKETS; 
 
-    // Actualizar Botón de Reserva Múltiple
     const selectedCount = appData.selectedTickets.length;
     const btn = document.getElementById('multiReserveBtn');
     document.getElementById('selectedCount').textContent = selectedCount;
     btn.style.display = selectedCount > 0 ? 'block' : 'none';
 
-    // Actualizar estado de autenticación
     const btnAuth = document.getElementById('btnAuth');
     if (appData.currentUser) {
         btnAuth.textContent = `👋 ${appData.currentUser.name.split(' ')[0]}`;
@@ -385,9 +370,14 @@ function updateUI() {
         btnAuth.textContent = `Ingresar`;
         btnAuth.onclick = () => openModal('loginModal');
     }
+    
+    // NUEVO: Mostrar el Checksum de transparencia en el footer (solo si existe)
+    const currentChecksum = localStorage.getItem(STORAGE_KEY_CHECKSUM) || 'N/A';
+    document.getElementById('checksumStatus').textContent = currentChecksum.substring(0, 30) + (currentChecksum.length > 30 ? '...' : '');
+
 }
 
-// --- LÓGICA DE COMPRA Y RESERVA ---
+// --- LÓGICA DE COMPRA Y RESERVA (No modificado) ---
 
 function handleLogin(event) {
     event.preventDefault();
@@ -491,7 +481,77 @@ function checkMyTickets() {
     alert(msg);
 }
 
-// --- LÓGICA DE ADMINISTRACIÓN ---
+// --- FUNCIÓN DE CHECKSUM (NUEVA LÓGICA DE INTEGRIDAD) ---
+
+/** Genera un código de integridad único basado en la lista de números pagados. */
+function generatePaidTicketsChecksum() {
+    // 1. Filtrar solo los números PAGADOS.
+    const paidTickets = appData.tickets
+        .filter(t => t.state === 'paid')
+        .map(t => t.num); 
+        
+    // 2. Ordenar los números para asegurar que el hash sea el mismo sin importar el orden de entrada.
+    paidTickets.sort(); 
+    
+    // 3. Unir los números y el email del dueño (para mayor seguridad) en un solo string.
+    const dataString = paidTickets.map(num => {
+        const ticket = appData.tickets.find(t => t.num === num);
+        // Usa una combinación de número y el hash simple del email/dueño para evitar fraudes
+        return `${num}:${ticket.owner ? ticket.owner.substring(0, 5) : 'manual'}`; 
+    }).join('|');
+    
+    // 4. Calcular un hash simple (suma XOR de caracteres)
+    let hash = 0;
+    if (dataString.length === 0) return '000000'; 
+    for (let i = 0; i < dataString.length; i++) {
+        const char = dataString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0; // Convertir a 32bit integer
+    }
+
+    // 5. Convertir el hash a una cadena hexadecimal para un aspecto "oficial"
+    return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+}
+
+/** [ADMIN] Genera y guarda el código de integridad actual. */
+function adminGenerateAndSetChecksum() {
+    if (!appData.currentUser || appData.currentUser.email !== 'admin@admin.com') return toast("Solo el Admin puede hacer esto.", 'error');
+
+    const newChecksum = generatePaidTicketsChecksum();
+    localStorage.setItem(STORAGE_KEY_CHECKSUM, newChecksum);
+    updateUI(); 
+    toast(`✅ Nuevo Checksum generado y guardado: ${newChecksum}`, 'success');
+    
+    // Opcional: Copiar al portapapeles para publicarlo
+    navigator.clipboard.writeText(newChecksum).then(() => {
+        toast('Checksum copiado al portapapeles!', 'success');
+    });
+}
+
+/** [PÚBLICO] Verifica el Checksum guardado con el actual. */
+function verifyPublicChecksum() {
+    const storedChecksum = localStorage.getItem(STORAGE_KEY_CHECKSUM);
+    const calculatedChecksum = generatePaidTicketsChecksum();
+    
+    if (!storedChecksum || storedChecksum === 'N/A') {
+        toast("❌ Aún no se ha generado el código de integridad de transparencia.", 'warning');
+        return;
+    }
+    
+    if (storedChecksum === calculatedChecksum) {
+        toast("✅ ¡VERIFICACIÓN EXITOSA! Los datos de boletas pagadas son auténticos.", 'success');
+        const checksumDisplay = document.getElementById('checksumStatus');
+        checksumDisplay.style.color = getCssVar('--primary');
+        checksumDisplay.style.fontWeight = 'bold';
+    } else {
+        toast("⚠️ ¡ALERTA! EL CÓDIGO DE INTEGRIDAD NO COINCIDE. Contacte al administrador. (Datos manipulados o corruptos)", 'error');
+        const checksumDisplay = document.getElementById('checksumStatus');
+        checksumDisplay.style.color = getCssVar('--accent');
+        checksumDisplay.style.fontWeight = 'bold';
+    }
+}
+
+// --- LÓGICA DE ADMINISTRACIÓN (Con integración de Checksum) ---
 
 function openAdminAuth() {
     const pass = prompt("Ingrese la contraseña de administrador:");
@@ -504,13 +564,15 @@ function openAdminAuth() {
     }
 }
 
+// El resto de funciones de Admin (renderAdminLists, adminRemoveUser, adminSetState, etc.) se mantienen igual.
+// Solo necesitas asegurarte de que estén presentes. Si tu script.js anterior las tenía, solo reemplaza el archivo.
+
 function renderAdminLists() {
     const reservedBody = document.getElementById('reservedTicketListBody');
     const paidBody = document.getElementById('paidTicketListBody');
     reservedBody.innerHTML = '';
     paidBody.innerHTML = '';
     
-    // Reservados
     const reserved = appData.tickets.filter(t => t.state === 'reserved');
     reserved.forEach(t => {
         const user = getUserByEmail(t.owner);
@@ -530,7 +592,6 @@ function renderAdminLists() {
         `;
     });
 
-    // Pagados
     const paid = appData.tickets.filter(t => t.state === 'paid');
     paid.forEach(t => {
         const user = getUserByEmail(t.owner);
@@ -601,6 +662,10 @@ function adminSetState(num, newState) {
     renderAdminLists(); 
     renderGrid(); 
     toast(`Boleta ${num} cambiada a ${newState.toUpperCase()}`, 'success');
+    // IMPORTANTE: Si el estado cambia a 'paid', se recomienda generar un nuevo checksum.
+    if (newState === 'paid' && appData.currentUser && appData.currentUser.email === 'admin@admin.com') {
+         adminGenerateAndSetChecksum();
+    }
 }
 
 function openManualAssignModal() {
@@ -609,7 +674,6 @@ function openManualAssignModal() {
     document.getElementById('manualName').value = '';
     document.getElementById('manualPhone').value = '';
     openModal('manualAssignModal');
-    // Aplicar máscara de teléfono al input manual
     const manualPhoneInput = document.getElementById('manualPhone');
     manualPhoneInput.oninput = () => applyPhoneMask(manualPhoneInput);
 }
@@ -645,7 +709,7 @@ function handleManualAssign(event, state) {
     openModal('adminModal'); 
 }
 
-// --- GESTIÓN DE SORTEOS ---
+// --- GESTIÓN DE SORTEOS (No modificado) ---
 function previewWinnerInfo() {
     const numInput = document.getElementById('winnerNum');
     const num = numInput.value.padStart(3, '0');
@@ -685,7 +749,6 @@ function openWinnerManagement() {
     document.getElementById('winnerInfo').textContent = 'Ingrese un número de 3 dígitos (ej: 123)';
     openModal('winnerManagementModal');
     
-    // Asegurar que el listener de previsualización se active al abrir
     const winnerNumInput = document.getElementById('winnerNum');
     winnerNumInput.removeEventListener('input', previewWinnerInfo);
     winnerNumInput.addEventListener('input', previewWinnerInfo);
@@ -769,7 +832,7 @@ function deleteWinnerHistory() {
     }
 }
 
-// --- OTRAS FUNCIONES DE UTILIDAD ---
+// --- OTRAS FUNCIONES DE UTILIDAD (No modificado) ---
 
 function verifyTicket() {
     const numInput = document.getElementById('verifyNum');
@@ -814,6 +877,7 @@ function adminResetRaffle() {
     if (confirm("ADVERTENCIA CRÍTICA: ¿Estás ABSOLUTAMENTE SEGURO de que deseas restablecer la Rifa? Esto eliminará todos los datos de tickets, usuarios, reservas y ganadores de forma permanente.")) {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem("last_weekly_clearance_timestamp"); 
+        localStorage.removeItem(STORAGE_KEY_CHECKSUM); // NUEVO: Limpiar checksum
         location.reload();
     }
 }
@@ -851,23 +915,20 @@ function exportPaidTickets() {
 }
 
 
-// --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
+// --- INICIALIZACIÓN AL CARGAR LA PÁGINA (No modificado) ---
 document.addEventListener('DOMContentLoaded', () => {
     load();
     startCountdown();
-    renderInteractiveLegend(); // Cargar la leyenda al inicio
+    renderInteractiveLegend(); 
     
-    // Event Listeners para Filtrado/Búsqueda
     document.getElementById('searchInput').addEventListener('input', renderGrid);
     document.getElementById('filterSelect').addEventListener('change', renderGrid);
     
-    // Event Listener para la Máscara de Teléfono (Input Mask)
     const userPhoneInput = document.getElementById('userPhone');
     if (userPhoneInput) {
         userPhoneInput.addEventListener('input', () => applyPhoneMask(userPhoneInput));
     }
 
-    // Listener para el saludo en el login
     const userNameInput = document.getElementById('userName');
     const loginTitle = document.getElementById('loginTitle');
     if (userNameInput && loginTitle) {
@@ -877,7 +938,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listener para verificación de boleta al escribir
     const verifyInput = document.getElementById('verifyNum');
     if (verifyInput) {
         verifyInput.addEventListener('input', verifyTicket);

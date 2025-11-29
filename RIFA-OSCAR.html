@@ -17,8 +17,22 @@
         });
     </script>
     <style>
-        /* --- TEMA OSCURO (NATIVO Y FIXED) --- */
+        /* --- TEMA CLARO (EL LOOK "ANTES" - Restaurado) --- */
         :root {
+            --primary: #2ecc71; /* Verde (Disponible) */
+            --secondary: #2d9cdb; /* Azul (Selección/Botón) */
+            --accent: #e74c3c; /* Rojo (Pagado/Importante) */
+            --warning: #f1c40f; /* Amarillo (Reservado) */
+            --bg-body: #f7f8fa; /* Fondo Muy Claro */
+            --bg-card: #ffffff; /* Fondo Tarjeta Blanco */
+            --text-main: #111;
+            --text-muted: #666;
+            --border: #ddd;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- TEMA OSCURO (Mantenido como opción) --- */
+        .dark-mode {
             --primary: #00ff84; /* Verde Neón */
             --secondary: #004bce; /* Azul Eléctrico */
             --accent: #ff0033; /* Rojo Intenso */
@@ -31,36 +45,25 @@
             --shadow: 0 0 20px rgba(0,0,0,0.7);
         }
 
-        /* --- TEMA CLARO (OPCIONAL) --- */
-        .light-mode {
-            --primary: #2ecc71;
-            --secondary: #2d9cdb;
-            --accent: #e74c3c;
-            --warning: #f1c40f;
-            --bg-body: #f7f8fa;
-            --bg-card: #ffffff;
-            --text-main: #111;
-            --text-muted: #666;
-            --border: #ddd;
-            --shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
         /* Base */
         *{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
         body{margin:0;background:var(--bg-body);color:var(--text-main);transition:background .3s, color .3s; min-height: 100vh;}
         
         /* Header y Botones */
         header{padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:var(--bg-card); box-shadow: var(--shadow);}
-        header h1{font-size:1.5rem;margin:0;color:var(--primary);}
+        header h1{font-size:1.5rem;margin:0;color:var(--accent);}
         .actions{display:flex;gap:10px;align-items:center}
         .btn{padding:8px 15px;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:background .3s, color .3s, border-color .3s; display: flex; align-items: center; gap: 5px; justify-content: center;}
         .btn:hover{filter:brightness(1.1)}
         
-        .btn.primary{background:var(--primary);color:var(--bg-body)}
+        .btn.primary{background:var(--primary);color:var(--bg-card)}
         .btn.secondary{background:var(--secondary);color:#fff}
         .btn.accent{background:var(--accent);color:#fff}
         .btn.warning{background:var(--warning);color:#111}
         .btn.outline{background:transparent;border:2px solid var(--border);color:var(--text-main)}
+        
+        /* Logo color adjustment for light theme */
+        body:not(.dark-mode) header h1 { color: var(--secondary); }
 
         /* Stats y Contadores */
         .stats{display:flex;justify-content:space-around;padding:15px 10px;background:var(--bg-card);box-shadow:var(--shadow);border-radius:10px;margin:20px 0}
@@ -70,7 +73,7 @@
 
         /* Cronómetro */
         .countdown{text-align:center;padding:15px 0;background:var(--bg-card);border-radius:10px;box-shadow:var(--shadow);margin-bottom:20px}
-        .countdown h2{margin:5px 0 10px;font-size:1.2rem;color:var(--accent)}
+        .countdown h2{margin:5px 0 10px;font-size:1.2rem;color:var(--secondary)}
         .countdown p{font-size:2.5rem;font-weight:700;margin:0;color:var(--primary)}
         
         /* Contenedor Principal */
@@ -88,7 +91,7 @@
         .card .status-text{font-size:0.6rem;opacity:0.8; margin-top: -2px;}
 
         /* Estados de Boletas */
-        .card.available{background:var(--primary);color:var(--bg-body)}
+        .card.available{background:var(--primary);color:var(--bg-card)}
         .card.reserved{background:var(--warning);color:#111}
         .card.paid{background:var(--accent);color:#fff}
         
@@ -100,6 +103,11 @@
             0%, 100% {opacity: 1; box-shadow: 0 0 10px var(--secondary);}
             50% {opacity: 0.8; box-shadow: none;}
         }
+
+        /* Leyenda */
+        #interactiveLegend { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
+        .legend-item { display: flex; align-items: center; font-size: 0.9rem; color: var(--text-muted); }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; border: 1px solid var(--border); }
 
         /* Botón de Reserva Flotante */
         #multiReserveBtn{position:fixed;bottom:80px;right:20px;z-index:90;padding:15px 25px;font-size:1.1rem;box-shadow:0 5px 20px rgba(0,0,0,0.8); display:none}
@@ -120,10 +128,10 @@
         .modal.open{display:flex;align-items:center;justify-content:center}
         .modal-content{background:var(--bg-card);padding:30px;border-radius:10px;box-shadow:var(--shadow);width:90%;max-width:500px;position:relative}
         .close-btn{color:var(--text-main);float:right;font-size:28px;font-weight:bold;cursor:pointer;position:absolute;top:10px;right:20px}
-        .modal-content h2{color:var(--primary);margin-top:0}
+        .modal-content h2{color:var(--secondary);margin-top:0}
         .modal-content input, .modal-content select{width:100%;padding:10px;margin:10px 0 20px 0;border:1px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text-main)}
 
-        /* Listas de Admin */
+        /* Admin Styles */
         .admin-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:0.9rem}
         .admin-table th,.admin-table td{padding:10px;border:1px solid var(--border);text-align:left}
         .admin-table th{background:var(--secondary);color:#fff}
@@ -133,17 +141,6 @@
         #videoModal .modal-content { max-width: 800px; }
         #videoContainer { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; }
         #videoContainer video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
-        /* Social/Chat Modal */
-        #chatContent {max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px;}
-        .chat-message { border-bottom: 1px dotted var(--border); padding: 8px 0; }
-        .chat-message strong { color: var(--secondary); }
-        .chat-message small { color: var(--text-muted); display: block; font-size: 0.75rem;}
-        .chat-message .rating i { color: var(--warning); margin-right: 5px; }
-
-        .star-rating i { cursor: pointer; color: var(--text-muted); transition: color 0.2s;}
-        .star-rating i.selected { color: var(--warning); }
-        .star-rating { font-size: 1.5rem; margin-bottom: 10px; }
         
         /* Loading Spinner */
         #loading-spinner{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;transition:opacity .3s}
@@ -152,8 +149,8 @@
         @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
     </style>
 </head>
-<body>
-    <div id="loading-spinner"><div class="spinner"></div></div>
+<body onload="load()">
+    <div id="loading-spinner" class="hidden"><div class="spinner"></div></div>
     <div id="toast-container"></div>
     <a href="https://wa.me/3219637388" target="_blank" class="btn primary" style="position:fixed;bottom:20px;right:20px;z-index:100;padding:15px;border-radius:50%;box-shadow:0 5px 20px var(--primary); font-size: 1.5rem;">
         <i class="fab fa-whatsapp"></i>
@@ -162,16 +159,16 @@
     <header>
         <h1>🏆 Rifa Épica <span style="color: var(--accent); font-size: 1rem;">| Moto CR4</span></h1>
         <div class="actions">
-            <button onclick="openModal('socialModal')" class="btn outline secondary" title="Opiniones y Chat">
-                <i class="fas fa-comments"></i> Chat
-            </button>
             <button onclick="openModal('videoModal')" class="btn accent" title="Video de Ganadores">
                 <i class="fas fa-video"></i> Video
             </button>
-            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">
-                <i class="fas fa-sun"></i>
+            <button onclick="checkMyTickets()" class="btn secondary" title="Ver Mis Boletas">
+                <i class="fas fa-ticket-alt"></i> Mis Boletas
             </button>
-            <button id="btnAuth" class="btn primary">Ingresar</button>
+            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="btnAuth" onclick="openModal('loginModal')" class="btn primary">Ingresar</button>
             <button onclick="openAdminAuth()" class="btn secondary" title="Panel de Administración">
                 <i class="fas fa-lock"></i>
             </button>
@@ -197,7 +194,7 @@
         <div class="countdown">
             <h2>Próximo Sorteo Semanal (1M COP)</h2>
             <p id="nextDrawTime">Cargando...</p>
-            <h2 style="color: var(--secondary); margin-top: 15px;">Sorteo Final (Moto CR4)</h2>
+            <h2 style="color: var(--accent); margin-top: 15px;">Sorteo Final (Moto CR4)</h2>
             <p id="finalDrawTime" style="color: var(--secondary);">Cargando...</p>
         </div>
 
@@ -215,6 +212,9 @@
             </select>
             <button onclick="openModal('verifyModal')" class="btn outline secondary">
                 <i class="fas fa-search"></i> Verificar Boleta
+            </button>
+            <button onclick="refreshData()" class="btn outline primary">
+                <i class="fas fa-sync"></i> Refrescar Datos
             </button>
         </div>
 
@@ -266,22 +266,19 @@
     <div id="adminModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
             <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
-            <h2 style="color: var(--secondary);">Panel de Administración 🛡️</h2>
+            <h2 style="color: var(--accent);">Panel de Administración 🛡️</h2>
             
             <button onclick="renderAdminLists()" class="btn primary" style="width: 100%; margin-bottom: 15px;">
                 <i class="fas fa-sync"></i> Refrescar Listas
             </button>
             <button onclick="openNotificationModal()" class="btn accent" style="width: 100%; margin-bottom: 15px;">
-                <i class="fas fa-bell"></i> Revisar Reservas por Vencer (Notificación)
+                <i class="fas fa-bell"></i> Revisar Reservas por Vencer (Automatización)
             </button>
             <button onclick="openManualAssignModal()" class="btn warning" style="width: 100%; margin-bottom: 15px;">
                 <i class="fas fa-hand-pointer"></i> Asignar Boleta Manual
             </button>
             <button onclick="openWinnerManagement()" class="btn secondary" style="width: 100%; margin-bottom: 15px;">
                 <i class="fas fa-trophy"></i> Registrar Ganador Lotería
-            </button>
-            <button onclick="openWinnerHistory()" class="btn outline secondary" style="width: 100%; margin-bottom: 15px;">
-                <i class="fas fa-history"></i> Historial de Sorteos
             </button>
 
             <h3>Reservadas (Pendientes de Pago)</h3>
@@ -319,7 +316,7 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('verifyModal')">&times;</span>
             <h2>Verificar Boleta</h2>
-            <input type="number" id="verifyNum" placeholder="Número de 3 dígitos (Ej: 045)" min="0" max="999">
+            <input type="number" id="verifyNum" placeholder="Número de 3 dígitos (Ej: 045)" min="0" max="999" oninput="verifyTicketStatus()">
             <div id="verifyResult">
                 <p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>
             </div>
@@ -354,21 +351,6 @@
             <button onclick="checkAndAddWinner()" class="btn primary" style="width: 100%;">Confirmar y Registrar Ganador</button>
         </div>
     </div>
-
-    <div id="winnerHistoryModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close-btn" onclick="closeModal('winnerHistoryModal')">&times;</span>
-            <h2>Historial de Sorteos</h2>
-            <p id="drawsRemaining" style="color: var(--text-muted); font-style: italic;"></p>
-            <div class="admin-list-container">
-                <table class="admin-table">
-                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Número</th><th>Ganador</th></tr></thead>
-                    <tbody id="winnerListBody"></tbody>
-                </table>
-            </div>
-            <button onclick="deleteWinnerHistory()" class="btn accent" style="width: 100%; margin-top: 10px;">Eliminar Historial</button>
-        </div>
-    </div>
     
     <div id="notificationModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
@@ -382,6 +364,8 @@
                         <tr>
                             <th>Cliente</th>
                             <th>Teléfono</th>
+                            <th>Boletas</th>
+                            <th>Expira en</th>
                             <th>Acción</th>
                         </tr>
                     </thead>
@@ -399,7 +383,7 @@
             <span class="close-btn" onclick="closeModal('videoModal')">&times;</span>
             <h2 style="color: var(--accent); margin-bottom: 15px;">🎥 Video de Ganadores (ganadores.mp4)</h2>
             <div id="videoContainer">
-                <video controls autoplay muted style="width: 100%; height: auto;">
+                <video controls style="width: 100%; height: auto;">
                     <source src="ganadores.mp4" type="video/mp4">
                     Tu navegador no soporta el video.
                 </video>
@@ -407,40 +391,7 @@
             <p style="text-align: center; margin-top: 15px; color: var(--text-muted);">Revive la emoción de los sorteos anteriores.</p>
         </div>
     </div>
-    
-    <div id="socialModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close-btn" onclick="closeModal('socialModal')">&times;</span>
-            <h2 style="color: var(--primary);">⭐ Califica y Deja tu Opinión</h2>
-            
-            <form onsubmit="handleRatingSubmit(event)">
-                <label style="display: block; margin-bottom: 5px;">Tu Nombre:</label>
-                <input type="text" id="chatName" placeholder="Tu Nombre o Alias" required>
-                
-                <label style="display: block; margin-bottom: 5px;">Tu Opinión:</label>
-                <input type="text" id="chatMessage" placeholder="Escribe un mensaje o comentario" required>
-                
-                <label style="display: block; margin-bottom: 10px;">Califica la Página:</label>
-                <div id="starRating" class="star-rating">
-                    <i class="fas fa-star" data-rating="1"></i>
-                    <i class="fas fa-star" data-rating="2"></i>
-                    <i class="fas fa-star" data-rating="3"></i>
-                    <i class="fas fa-star" data-rating="4"></i>
-                    <i class="fas fa-star" data-rating="5"></i>
-                </div>
-                
-                <button type="submit" class="btn secondary" style="width: 100%; margin-top: 10px;">Enviar Mensaje y Calificación</button>
-            </form>
-            
-            <h3 style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 15px;">Comentarios de Usuarios</h3>
-            <div id="chatContent">
-                </div>
-        </div>
-    </div>
-
 
     <script defer src="script.js"></script>
-    <script defer src="admin.js"></script>
-    <script defer src="social.js"></script>
 </body>
 </html>

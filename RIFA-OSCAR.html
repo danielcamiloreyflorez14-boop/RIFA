@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Gran Rifa – Moto CR4 Repotenciada Y 1M semanal</title>
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+    <style>
+        /* --- TEMA OSCURO (NATIVO Y FIXED) --- */
+        :root {
+            --primary: #00ff84; /* Verde Neón */
+            --secondary: #004bce; /* Azul Eléctrico */
+            --accent: #ff0033; /* Rojo Intenso */
+            --warning: #ffea00; /* Amarillo Brillante */
+            --bg-body: #050505; /* Negro Puro */
+            --bg-card: #141414; /* Gris Muy Oscuro */
+            --text-main: #9ddbff;
+            --text-muted: #968f8f;
+            --border: #7e5c5c;
+            --shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+
+        /* --- TEMA CLARO (OPCIONAL) --- */
+        .light-mode {
+            --primary: #2ecc71;
+            --secondary: #2d9cdb;
+            --accent: #e74c3c;
+            --warning: #f1c40f;
+            --bg-body: #f4f6f8;
+            --bg-card: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border: #ecf0f1;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* --- ESTILOS BASE --- */
+        * { box-sizing: border-box; font-family: 'Segoe UI', Inter, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg-body); color: var(--text-main); transition: background 0.3s, color 0.3s; padding-bottom: 80px; }
+
+        /* HEADER */
+        header {
+            padding: 15px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;
+            box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .logo {
+            width: 45px; height: 45px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--warning));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 900; font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.5);
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse { to { box-shadow: 0 0 25px rgba(255, 23, 68, 0.8); transform: scale(1.05); } }
+        
+        .controls { display: flex; gap: 10px; align-items: center; }
+
+        /* BOTONES */
+        button, .btn {
+            cursor: pointer; padding: 10px 18px; border-radius: 8px; border: 0;
+            background: var(--secondary); color: #fff; font-weight: 700; font-size: 0.95rem;
+            transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button:hover, .btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button:active { transform: scale(0.98); }
+        .btn.accent { background: var(--accent); }
+        .btn.outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
+        .btn.warning { background: var(--warning); color: var(--bg-body) !important; }
+        
+        main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+        /* IMAGEN / BANNER */
+        .raffle-banner {
+            width: 100%; border-radius: 16px; overflow: hidden;
+            box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border);
+            position: relative;
+        }
+        .raffle-banner img { width: 100%; height: auto; max-height: 400px; object-fit: cover; display: block; }
+        
+        /* CONTADOR */
+        .countdown-box {
+            display: flex; justify-content: space-around; background: var(--bg-card); 
+            padding: 15px; border-radius: 16px; margin-bottom: 25px;
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .countdown-item { padding: 5px 10px; border-radius: 6px; }
+        .countdown-val { font-size: 2rem; font-weight: 900; color: var(--accent); }
+        .countdown-label { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); }
+
+        /* ESTRUCTURA */
+        .hero { display: grid; grid-template-columns: 1fr 340px; gap: 25px; }
+        @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--bg-card); padding: 20px; border-radius: 16px;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
+        }
+
+        /* GRID DE BOLETAS */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .search-input {
+            flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg-body); color: var(--text-main); font-weight: 600;
+        }
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); 
+            gap: 8px; max-height: 600px; overflow-y: auto; padding: 5px;
+        }
+        .card {
+            background: var(--bg-body); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 5px; text-align: center;
+            cursor: pointer; position: relative; transition: all 0.2s;
+        }
+        .card:hover { transform: scale(1.1); z-index: 10; border-color: var(--text-main); }
+        
+        /* Tooltip de Info del Dueño */
+        .card:hover::after {
+            content: attr(data-owner-info);
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            background: var(--bg-body); color: var(--primary); padding: 5px 10px;
+            border-radius: 5px; white-space: nowrap; font-size: 0.7rem;
+            border: 1px solid var(--primary); z-index: 11;
+            display: block; opacity: 1;
+        }
+        .card[data-owner-info=""]::after { display: none; }
+
+        .num { font-weight: 900; font-size: 1.2rem; letter-spacing: 1px; }
+        .status-text { font-size: 0.6rem; text-transform: uppercase; margin-top: 4px; font-weight: 700; }
+
+        /* ESTADOS DE BOLETA */
+        .card.available { border-color: var(--primary); color: var(--text-main); }
+        .card.available .num { color: var(--primary); }
+        .card.available.selected { background: var(--primary); color: var(--bg-body) !important; transform: scale(1.1); }
+        .card.available.selected .num { color: var(--bg-body); }
+        .card.available:hover { background: var(--primary); color: #000 !important; }
+        .card.available:hover .num { color: #000; }
+
+        .card.reserved { border-color: var(--warning); background: rgba(255, 234, 0, 0.15); opacity: 0.8; }
+        .card.reserved .num { color: var(--warning); }
+        .card.reserved.mine { border-color: var(--secondary); animation: blink-res 1s infinite alternate; }
+        @keyframes blink-res { from { opacity: 0.9; } to { opacity: 0.6; } }
+        
+        .card.paid { border-color: var(--accent); background: rgba(255, 23, 68, 0.15); opacity: 0.7; }
+        .card.paid .num { color: var(--accent); text-decoration: none; }
+
+        /* SIDEBAR / INFO */
+        .cta-box { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .cta-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-item { background: var(--bg-body); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+        .stat-val { font-size: 1.4rem; font-weight: 800; display: block; }
+        
+        /* FOOTER */
+        footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; margin-top: 30px; border-top: 1px solid var(--border); }
+
+        /* MODALES */
+        .modal {
+            position: fixed; inset: 0; z-index: 2000;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .modal.open { display: flex; opacity: 1; }
+        .dialog {
+            background: var(--bg-card); padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 450px; border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            transform: scale(0.9); transition: transform 0.3s;
+        }
+        .modal.open .dialog { transform: scale(1); }
+        .dialog h3 { margin-top: 0; color: var(--secondary); font-size: 1.5rem; }
+        .dialog input, .dialog select { width: 100%; padding: 12px; margin: 10px 0; background: var(--bg-body); border: 1px solid var(--border); color: #fff; border-radius: 8px; }
+
+        /* ESTILOS ESPECÍFICOS ADMIN MODAL (Compacto y Scrollable) */
+        #adminModal .dialog { 
+            max-width: 700px; /* Ancho profesional */
+            max-height: 90vh; /* Altura máxima para caber en pantalla */
+            overflow-y: auto; /* Scroll si el contenido es demasiado alto */
+            padding-bottom: 10px;
+        }
+        .admin-list-container {
+            background:var(--bg-body); 
+            height: 200px; /* Altura fija para el scroll interno */
+            overflow-y: auto; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 5px; 
+            margin-bottom: 15px;
+        }
+        .admin-table { width:100%; font-size: 0.8rem; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 5px; text-align: left;}
+
+
+        /* ANIMACIÓN PARA EL MODAL DE GANADORES */
+        #winnerHistoryModal.open .dialog {
+            animation: fadeInScale 0.5s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+
+        /* WHATSAPP FLOTANTE */
+        .float-wa {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1500;
+            background: #25D366; color: white; padding: 12px 20px;
+            border-radius: 50px; font-weight: bold; text-decoration: none;
+            box-shadow: 0 0 20px rgba(37, 211, 102, 0.6);
+            display: flex; align-items: center; gap: 10px; transition: transform 0.3s;
+        }
+        .float-wa:hover { transform: scale(1.1); }
+
+        /* TOAST */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
+        .toast {
+            background: var(--bg-card); color: #fff; padding: 15px 20px;
+            margin-bottom: 10px; border-radius: 8px; border-left: 5px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s;
+        }
+        .toast.success { border-left-color: var(--primary); }
+        .toast.warning { border-left-color: var(--warning); color: var(--bg-body); }
+        .toast.error { border-left-color: var(--accent); }
+        
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="logo">GR</div>
+            <div>
+                <h1 style="color: var(--text-main);">Gran Rifa - Moto CR4 150 y 1M Semanal - Que Esperas</h1>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Sorteo final: 30/01/2026 </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Cada Viernes se Rifa 1M hasta el 23/01/2026. Gran Sorteo 30/01/2026. </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button onclick="openWinnerHistory()" class="btn secondary" style="font-size: 0.8rem; padding: 8px 12px;">🏆 Ganadores</button>
+            <button onclick="toggleTheme()" class="btn outline" title="Cambiar Tema">🌗</button>
+            <button id="btnAuth" onclick="openModal('loginModal')" class="btn secondary">Ingresar</button>
+            <button id="btnAdmin" onclick="openAdminAuth()" class="btn accent">Admin</button> </div>
+    </header>
+
+    <main>
+        <div class="raffle-banner">
+            <img src="Rifa.jpg" alt="Rifa Moto CR4" onerror="this.src='https://via.placeholder.com/1200x400/121212/e74c3c?text=IMAGEN+NO+ENCONTRADA+(Rifa.jpg)';">
+        </div>
+        
+        <div class="countdown-box">
+            <div style="text-align: center; flex: 1; border-right: 1px solid var(--border);">
+                <div style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">PRÓXIMO SORTEO SEMANAL</div>
+                <div class="countdown-item">
+                    <span id="nextDrawTime" class="countdown-val" style="color:var(--warning);">--:--:--</span>
+                    <div class="countdown-label">Tiempo Restante</div>
+                </div>
+            </div>
+            <div style="text-align: center; flex: 1;">
+                <div style="font-weight: 800; color: var(--accent); margin-bottom: 5px;">GRAN SORTEO FINAL (Moto)</div>
+                <div class="countdown-item">
+                    <span id="finalDrawTime" class="countdown-val">--:--:--</span>
+                    <div class="countdown-label">Tiempo Restante</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="panel">
+                <div class="toolbar">
+                    <h2 style="margin:0; flex:1; color: var(--secondary);">Selecciona tu(s) Número(s)</h2>
+                    <button onclick="refreshData()" class="btn outline" style="padding: 5px 10px; font-size: 0.8rem;">🔄 Actualizar</button>
+                </div>
+                <div class="toolbar">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar número (000 - 999)...">
+                    <select id="filterSelect" class="search-input" style="flex: 0 0 140px;">
+                        <option value="all">Todos</option>
+                        <option value="available">Disponibles</option>
+                        <option value="reserved">Reservados</option>
+                        <option value="paid">Pagados</option>
+                    </select>
+                </div>
+                
+                <div id="grid" class="grid"></div>
+            </div>
+
+            <div class="panel">
+                <div class="cta-box">
+                    <div class="cta-title">📊 Estadísticas</div>
+                    <div class="stats-grid">
+                        <div class="stat-item"><span id="statAvail" class="stat-val" style="color:var(--primary)">0</span><span style="font-size:0.7rem">LIBRES</span></div>
+                        <div class="stat-item"><span id="statRes" class="stat-val" style="color:var(--warning)">0</span><span style="font-size:0.7rem">RESERVADOS</span></div>
+                        <div class="stat-item"><span id="statPaid" class="stat-val" style="color:var(--accent)">0</span><span style="font-size:0.7rem">PAGADOS</span></div>
+                        <div class="stat-item"><span id="statTotal" class="stat-val">1000</span><span style="font-size:0.7rem">TOTAL</span></div>
+                    </div>
+                </div>
+
+                <div class="cta-box">
+                    <div class="cta-title">💰 Compra tu Boleta</div>
+                    <div style="background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 15px;">
+                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--primary); text-align: center;">$25.000 COP</div>
+                        <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">Valor por boleta</div>
+                    </div>
+                    
+                    <button id="multiReserveBtn" onclick="confirmReservation()" class="btn accent" style="width:100%; margin-bottom:10px; display: none;">
+                        ✅ Reservar (<span id="selectedCount">0</span>) Números
+                    </button>
+                    
+                    <button onclick="showInstructions()" class="btn secondary" style="width:100%; margin-bottom:10px;">📄 ¿Cómo pagar?</button>
+                    <button onclick="checkMyTickets()" class="btn outline" style="width:100%">🎟️ Ver Mis Boletas</button>
+                    <button onclick="openModal('verifyModal')" class="btn secondary" style="width:100%; margin-top:10px;">🔍 Verificar Boleta</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Responsable: <strong>Óscar Fidel Flórez Tami</strong> | 📞 321 963 7388</p>
+        <p>Entre mas te demores menos oportunidades, haslo ya para mas oportunidades</p>
+        <button onclick="exportPaidTickets()" class="btn outline" style="font-size: 0.8rem; padding: 5px 10px; margin-top: 10px;">Descargar Listado de Boletas Pagadas (Transparencia)</button>
+    </footer>
+
+    <a href="https://wa.me/573219637388" class="float-wa" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M13.6 2.3A7.9 7.9 0 0 0 8 0a7.9 7.9 0 0 0-7.9 7.9c0 1.4.4 2.8 1 4L0 16l4.2-1.1a7.9 7.9 0 0 0 3.8 1h.1a7.9 7.9 0 0 0 7.9-7.9A7.9 7.9 0 0 0 13.6 2.3zM8 14.5a6.6 6.6 0 0 1-3.4-.9l-.2-.1-2.5.7.7-2.4-.2-.3a6.6 6.6 0 0 1 1-3.5A6.6 6.6 0 0 1 8 1.4a6.6 6.6 0 0 1 6.6 6.6 6.6 6.6 0 0 1-6.6 6.5z"/></svg>
+        Contactar Administrador
+    </a>
+
+    <div id="toast-container"></div>
+
+    <div id="loginModal" class="modal">
+        <div class="dialog">
+            <h3 id="loginTitle">👤 Identifícate</h3> 
+            <p style="color:var(--text-muted)">Necesitamos tus datos para registrar las boletas a tu nombre.</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="text" id="userName" placeholder="😑 Nombre Completo" required>
+                <input type="email" id="userEmail" placeholder="✉️ Correo Electrónico (Para tracking interno)" required>
+                <input type="tel" id="userPhone" placeholder="📞 Celular / WhatsApp" required>
+                <button type="submit" class="btn secondary" style="width:100%; margin-top:10px;">Guardar y Continuar 👍</button>
+            </form>
+            <button onclick="closeModal('loginModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cancelar</button>
+        </div>
+    </div>
+    
+    <div id="verifyModal" class="modal">
+        <div class="dialog">
+            <h3>🔍 Verificar Estado de Boleta</h3>
+            <p style="color:var(--text-muted)">Ingresa el número de 3 dígitos para ver su estado actual (transparencia).</p>
+            <form onsubmit="return false;">
+                <input type="text" id="verifyNum" placeholder="Número (ej: 045)" pattern="\d{3}" maxlength="3" required>
+                <div id="verifyResult" style="margin-top: 15px; padding: 10px; background: var(--bg-body); border-radius: 8px; border: 1px solid var(--border); min-height: 50px;">
+                    <p style="color:var(--text-muted); margin:0;">Escribe un número para verificar...</p>
+                </div>
+            </form>
+            <button onclick="closeModal('verifyModal')" class="btn outline" style="width:100%; margin-top:15px;">✖️ Cerrar</button>
+        </div>
+    </div>
+
+    
+    <div id="winnerHistoryModal" class="modal">
+        <div class="dialog" style="max-width: 600px;">
+            <h3 style="color:var(--warning);">🏆 Historial de Sorteos</h3>
+            <p id="drawsRemaining" style="color:var(--text-muted); font-weight: bold;"></p>
+            <div style="background:var(--bg-body); max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+                <table class="admin-table">
+                    <thead style="text-align:left; color: var(--primary); position: sticky; top: -10px; background: var(--bg-body); z-index: 5;">
+                        <tr><th>Fecha</th><th>Sorteo</th><th>Número</th><th>Ganador</th></tr>
+                    </thead>
+                    <tbody id="winnerListBody"></tbody>
+                </table>
+            </div>
+            <button id="btnAdminDeleteWinner" onclick="deleteWinnerHistory()" class="btn accent" style="font-size: 0.8rem; padding: 8px 12px; margin-top: 15px; display: none;">🗑️ Eliminar Historial de Ganadores</button>
+            <button onclick="closeModal('winnerHistoryModal')" class="btn outline" style="width:100%; margin-top:15px;">✖️ Cerrar</button>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="dialog">
+            <h3>🛡️ Panel de Administrador</h3>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button onclick="openManualAssignModal()" class="btn secondary" style="font-size: 0.85rem;">📝 Asignar Manual</button>
+                <button onclick="openWinnerManagement()" class="btn warning" style="font-size: 0.85rem;">🏅 Gestión Sorteos</button>
+                <button onclick="exportAllData()" class="btn secondary" style="font-size: 0.85rem;">📥 Descargar Todo</button>
+                <button onclick="adminResetRaffle()" class="btn accent" style="font-size: 0.85rem;">⚠️ Borrar Todo (Reset)</button>
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <h4>📋 Reservadas (Pendientes)</h4>
+                    <div class="admin-list-container">
+                        <table class="admin-table">
+                            <thead style="text-align:left; color: var(--secondary);">
+                                <tr><th>Num</th><th style="width:60%">Reservado por (Fecha)</th><th>Acción</th></tr>
+                            </thead>
+                            <tbody id="reservedTicketListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px;">
+                    <h4>🔴 Pagadas (Gestión)</h4>
+                    <div class="admin-list-container">
+                        <table class="admin-table">
+                            <thead style="text-align:left; color: var(--secondary);">
+                                <tr><th>Num</th><th>Dueño</th><th>Acción</th></tr>
+                            </thead>
+                            <tbody id="paidTicketListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <h4>👥 Historial de Clientes</h4>
+            <input type="text" id="adminUserSearch" placeholder="🔍 Buscar cliente por nombre o teléfono..." oninput="renderUserList()" style="width:100%; margin-bottom: 10px;">
+            <div class="admin-list-container" style="height: 150px;">
+                <table class="admin-table">
+                    <thead style="text-align:left; color: var(--secondary);">
+                        <tr><th>Nombre</th><th>Celular</th><th>Estado</th><th>Acción</th></tr>
+                    </thead>
+                    <tbody id="userListBody"></tbody>
+                </table>
+            </div>
+
+            <button onclick="closeModal('adminModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cerrar Panel</button>
+        </div>
+    </div>
+
+    <div id="manualAssignModal" class="modal">
+        <div class="dialog">
+            <h3>📝 Asignar Boleta Manualmente</h3>
+            <p style="color:var(--text-muted)">Para ventas directas, se requiere el número, nombre y celular.</p>
+            <form onsubmit="return false;">
+                <input type="text" id="manualNum" placeholder="Número de Boleta (ej: 045)" pattern="\d{3}" maxlength="3" required>
+                <input type="text" id="manualName" placeholder="Nombre Completo del Cliente" required>
+                <input type="tel" id="manualPhone" placeholder="Celular / WhatsApp" required>
+                
+                <button onclick="handleManualAssign(event, 'paid')" type="button" class="btn accent" style="width:100%; margin-top:15px;">
+                    Asignar y Marcar como Pagada ✅
+                </button>
+                
+                <button onclick="handleManualAssign(event, 'reserved')" type="button" class="btn warning" style="width:100%; margin-top:10px;">
+                    Asignar y Marcar como Reservada ⏳
+                </button>
+            </form>
+            <button onclick="closeModal('manualAssignModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cancelar</button>
+        </div>
+    </div>
+    
+    <div id="winnerManagementModal" class="modal">
+        <div class="dialog">
+            <h3>🏅 Registrar Ganador de Sorteo</h3>
+            <p style="color:var(--text-muted)">Registre manualmente el resultado del sorteo de Lotería.</p>
+            <form onsubmit="return false;">
+                <input type="date" id="winnerDate" required>
+                <input type="text" id="winnerNum" placeholder="Número Ganador (ej: 123)" pattern="\d{3}" maxlength="3" required>
+                <select id="winnerType" style="margin-bottom: 0;">
+                    <option value="weekly">Sorteo Semanal (1M)</option>
+                    <option value="final">Gran Sorteo Final (Moto)</option>
+                </select>
+                <p id="winnerInfo" style="font-size: 0.9rem; color: var(--text-main); margin: 5px 0 15px 0;"></p>
+
+                <button onclick="checkAndAddWinner()" type="button" class="btn secondary" style="width:100%;">
+                    Registrar Ganador 🎉
+                </button>
+            </form>
+            <button onclick="closeModal('winnerManagementModal')" class="btn outline" style="width:100%; margin-top:10px;">✖️ Cerrar</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const ADMIN_PASS = "123"; // 🔑 ¡Contraseña cambiada a '123' según tu solicitud!
+        const STORAGE_KEY = "rifa_data_v8"; 
+        const TOTAL_TICKETS = 1000;
+        const FINAL_RAFFLE_DATE = new Date('2026-01-30T20:00:00'); // 30 de enero de 2026, 8 PM
+        const WEEKLY_DRAW_DAY = 5; // 0=Domingo, 5=Viernes
+
+        // --- ESTADO INICIAL ---
+        let appData = {
+            tickets: [], 
+            users: [],   
+            currentUser: null,
+            selectedTickets: [], 
+            winners: [], // { date, num, winnerName, type, ownerEmail }
+            blacklist: [], 
+        };
+
+        // --- INICIALIZACIÓN ---
+        window.onload = () => {
+            load();
+            startCountdown();
+            
+            const userNameInput = document.getElementById('userName');
+            const loginTitle = document.getElementById('loginTitle');
+            if (userNameInput && loginTitle) {
+                userNameInput.addEventListener('input', () => {
+                    const name = userNameInput.value.trim();
+                    loginTitle.textContent = name.length > 0 ? `👋 Hola, ${name}` : `👤 Identifícate`; 
+                });
+            }
+            document.getElementById('winnerNum').addEventListener('input', previewWinnerInfo);
+            document.getElementById('verifyNum').addEventListener('input', verifyTicket);
+        };
+        
+        function load() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                appData = JSON.parse(saved);
+            } else {
+                for(let i=0; i<TOTAL_TICKETS; i++) {
+                    appData.tickets.push({ num: i.toString().padStart(3,'0'), state: 'available', owner: null, reservedAt: null });
+                }
+            }
+            if (!appData.selectedTickets) appData.selectedTickets = [];
+            if (!appData.blacklist) appData.blacklist = [];
+            if (!appData.winners) appData.winners = [];
+
+            // Limpieza de datos (Asegurar que las reservas manuales tengan timestamp)
+            appData.tickets.forEach(t => {
+                if (t.state === 'reserved' && t.reservedAt === null) {
+                    t.reservedAt = Date.now(); // Asignar un timestamp para gestión manual
+                }
+            });
+            
+            renderGrid();
+            updateUI();
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            updateUI(); 
+        }
+        
+        // --- CONTADOR Y FECHAS --- (Sin cambios)
+        function getNextWeeklyDrawDate() {
+            const today = new Date();
+            let nextFriday = new Date(today);
+            nextFriday.setDate(today.getDate() + (WEEKLY_DRAW_DAY + 7 - today.getDay()) % 7);
+            
+            if (nextFriday.getDay() === WEEKLY_DRAW_DAY && today.getHours() >= 20) { 
+                 nextFriday.setDate(nextFriday.getDate() + 7);
+            }
+            
+            nextFriday.setHours(20, 0, 0, 0); 
+            
+            const lastWeeklyDraw = new Date('2026-01-23T20:00:00');
+            if (nextFriday.getTime() > lastWeeklyDraw.getTime()) {
+                return FINAL_RAFFLE_DATE; 
+            }
+            
+            return nextFriday;
+        }
+
+        function startCountdown() {
+            const timer = setInterval(function() {
+                const now = new Date().getTime();
+                
+                // Contador Semanal
+                const nextDraw = getNextWeeklyDrawDate().getTime();
+                let distance = nextDraw - now;
+                
+                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                const s = Math.floor((distance % (1000 * 60)) / (1000)).toString().padStart(2, '0');
+                
+                if (distance > 0 && nextDraw < FINAL_RAFFLE_DATE.getTime()) {
+                    document.getElementById("nextDrawTime").innerHTML = `${d}D ${h}:${m}:${s}`;
+                } else if (nextDraw < FINAL_RAFFLE_DATE.getTime()) {
+                     document.getElementById("nextDrawTime").innerHTML = "¡HOY, A LAS 8 PM!";
+                } else {
+                     document.getElementById("nextDrawTime").innerHTML = "FINALIZADO";
+                }
+
+                // Contador Final
+                distance = FINAL_RAFFLE_DATE.getTime() - now;
+                if (distance > 0) {
+                    const d_final = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const h_final = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    const m_final = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    document.getElementById("finalDrawTime").innerHTML = `${d_final}D ${h_final}H ${m_final}M`;
+                } else {
+                    document.getElementById("finalDrawTime").innerHTML = "¡FINALIZADO!";
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
+
+        // --- RENDERIZADO (GRID) y LÓGICA DE SELECCIÓN ---
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            const filter = document.getElementById('filterSelect').value;
+            const search = document.getElementById('searchInput').value;
+            
+            grid.innerHTML = '';
+            const selectedSet = new Set(appData.selectedTickets);
+
+            appData.tickets.forEach(t => {
+                if(filter !== 'all' && t.state !== filter) return;
+                if(search && !t.num.includes(search)) return;
+                
+                const card = document.createElement('div');
+                let className = `card ${t.state}`;
+                let ownerInfo = '';
+                
+                if (t.state === 'available' && selectedSet.has(t.num)) {
+                    className += ' selected';
+                }
+
+                // Check if it's the current user's reserved ticket (for blinking effect)
+                if(t.state === 'reserved' && appData.currentUser && t.owner === appData.currentUser.email) {
+                    className += ' mine';
+                }
+
+                if (t.state !== 'available' && t.owner) {
+                    const user = getOwnerInfo(t.owner);
+                    if (user) {
+                        // Muestra solo el primer nombre y la inicial del segundo (por privacidad)
+                        const nameParts = user.name.split(' ');
+                        const firstName = nameParts[0];
+                        const secondInitial = nameParts.length > 1 ? nameParts[1].charAt(0) + '.' : '';
+                        ownerInfo = `Dueño: ${firstName} ${secondInitial}`;
+                    }
+                }
+
+                card.className = className;
+                card.setAttribute('data-owner-info', ownerInfo);
+                
+                if(t.state !== 'available' && appData.currentUser && t.owner === appData.currentUser.email) {
+                    card.style.borderColor = 'var(--secondary)';
+                    card.style.boxShadow = '0 0 10px var(--secondary)';
+                }
+
+                card.innerHTML = `
+                    <div class="num">${t.num}</div>
+                    <div class="status-text">${t.state === 'available' ? (selectedSet.has(t.num) ? 'SELECCIONADO' : 'LIBRE') : t.state === 'paid' ? 'PAGADO' : 'RESERVADO'}</div>
+                `;
+                
+                card.onclick = () => clickTicket(t);
+                grid.appendChild(card);
+            });
+            
+            const count = appData.selectedTickets.length;
+            document.getElementById('selectedCount').textContent = count;
+            document.getElementById('multiReserveBtn').style.display = count > 0 ? 'block' : 'none';
+        }
+        
+        function clickTicket(ticket) {
+            if (!appData.currentUser) {
+                toast("⚠️ Debes iniciar sesión para seleccionar.", 'warning');
+                openModal('loginModal');
+                return;
+            }
+            if (appData.blacklist.includes(appData.currentUser.email)) {
+                toast("⛔ Tu cuenta ha sido bloqueada. Contacta al administrador.", 'error');
+                return;
+            }
+
+            if (ticket.state === 'available') {
+                const index = appData.selectedTickets.indexOf(ticket.num);
+                if (index > -1) {
+                    appData.selectedTickets.splice(index, 1);
+                    toast(`Número ${ticket.num} deseleccionado.`, 'warning');
+                } else {
+                    appData.selectedTickets.push(ticket.num);
+                    toast(`Número ${ticket.num} seleccionado.`, 'success');
+                }
+                renderGrid();
+            } else if (ticket.owner === appData.currentUser.email) {
+                if(ticket.state === 'reserved') {
+                    alert(`Este es tu número reservado (${ticket.num}). Paga pronto para asegurarlo. Sigue las instrucciones de '¿Cómo pagar?'.`);
+                } else {
+                    alert(`¡Felicidades! El número ${ticket.num} ya es tuyo y está PAGADO.`);
+                }
+            } else {
+                toast("⛔ Este número ya está ocupado.", 'error');
+            }
+        }
+        
+        function confirmReservation() {
+            if (appData.selectedTickets.length === 0) return;
+            
+            const count = appData.selectedTickets.length;
+            const numsReserved = appData.selectedTickets.join(', ');
+            
+            if(!confirm(`¿Confirmas la RESERVA de ${count} número(s) [${numsReserved}]? Por favor, paga lo antes posible.`)) return;
+
+            const userEmail = appData.currentUser.email;
+            const reservationTime = Date.now(); 
+            
+            appData.selectedTickets.forEach(num => {
+                const ticket = appData.tickets.find(t => t.num === num);
+                if (ticket && ticket.state === 'available') {
+                    ticket.state = 'reserved';
+                    ticket.owner = userEmail;
+                    ticket.reservedAt = reservationTime; 
+                }
+            });
+
+            appData.selectedTickets = []; 
+            save();
+            toast(`¡Reserva exitosa de ${count} números! Revisa las instrucciones de pago.`, 'success');
+            renderGrid();
+        }
+
+        // --- VERIFICACIÓN DE BOLETA (NUEVA FUNCIÓN) ---
+        function verifyTicket() {
+            const num = document.getElementById('verifyNum').value.padStart(3, '0');
+            const resultEl = document.getElementById('verifyResult');
+            const ticket = appData.tickets.find(t => t.num === num);
+            
+            if (num.length !== 3) {
+                 resultEl.innerHTML = `<p style="color:var(--text-muted); margin:0;">Escribe un número de 3 dígitos (000-999).</p>`;
+                 return;
+            }
+
+            if (!ticket) {
+                 resultEl.innerHTML = `<p style="color:var(--accent); font-weight: bold; margin:0;">Error: Número ${num} no válido en la rifa.</p>`;
+                 return;
+            }
+
+            let statusText = '';
+            let ownerInfo = '';
+            let statusColor = '';
+
+            if (ticket.state === 'available') {
+                statusText = '¡DISPONIBLE!';
+                statusColor = 'var(--primary)';
+                ownerInfo = 'Puedes reservarlo ahora mismo.';
+            } else {
+                const user = getOwnerInfo(ticket.owner);
+                const nameParts = user.name.split(' ');
+                const firstName = nameParts[0];
+                const secondInitial = nameParts.length > 1 ? nameParts[1].charAt(0) + '.' : '';
+                
+                if (ticket.state === 'reserved') {
+                    statusText = 'RESERVADO';
+                    statusColor = 'var(--warning)';
+                    ownerInfo = `Reservado por: **${firstName} ${secondInitial}**.`;
+                } else if (ticket.state === 'paid') {
+                    statusText = 'PAGADO';
+                    statusColor = 'var(--accent)';
+                    ownerInfo = `Comprado por: **${firstName} ${secondInitial}**. ¡Participación asegurada!`;
+                }
+            }
+            
+            resultEl.innerHTML = `
+                <div style="font-size: 1.2rem; font-weight: 800; color: ${statusColor}; margin-bottom: 5px;">Boleta ${num}: ${statusText}</div>
+                <p style="font-size: 0.9rem; margin: 0; color: var(--text-main);">${ownerInfo}</p>
+            `;
+        }
+
+
+        // --- AUTENTICACIÓN Y UI ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const phone = document.getElementById('userPhone').value;
+
+            if (appData.blacklist.includes(email)) {
+                 toast("⛔ Esta cuenta está bloqueada. No se puede iniciar sesión.", 'error');
+                 return;
+            }
+
+            const user = { name, email, phone, date: new Date().toLocaleString() };
+            appData.currentUser = user;
+            
+            const exists = appData.users.find(u => u.email === email);
+            if(!exists) appData.users.push(user);
+
+            save();
+            closeModal('loginModal');
+            toast(`Bienvenido, ${name}`, 'success');
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('btnAuth');
+            if (appData.currentUser) {
+                btn.textContent = "Salir";
+                btn.onclick = () => {
+                    if(confirm("¿Cerrar sesión?")) {
+                        appData.currentUser = null;
+                        appData.selectedTickets = []; 
+                        save();
+                        window.location.reload();
+                    }
+                };
+            } else {
+                btn.textContent = "Ingresar";
+                btn.onclick = () => openModal('loginModal');
+            }
+
+            const counts = { available: 0, reserved: 0, paid: 0 };
+            appData.tickets.forEach(t => counts[t.state]++);
+            document.getElementById('statAvail').textContent = counts.available;
+            document.getElementById('statRes').textContent = counts.reserved;
+            document.getElementById('statPaid').textContent = counts.paid;
+        }
+
+        function getOwnerInfo(email) {
+            return appData.users.find(u => u.email === email) || { name: 'Desconocido', phone: 'N/A', email: email };
+        }
+
+        // --- ADMINISTRACIÓN ---
+        function openAdminAuth() {
+            const pass = prompt("🔑 Ingrese Contraseña de Administrador:");
+            if (pass === ADMIN_PASS) {
+                // Registrar que el admin está logueado en esta sesión para botones de gestión
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                renderUserList();
+                renderReservedTicketsList();
+                renderPaidTicketsList();
+                openModal('adminModal');
+            } else {
+                sessionStorage.removeItem('isAdminLoggedIn');
+                toast("⛔ Contraseña Incorrecta", 'error');
+            }
+        }
+        
+        function renderReservedTicketsList() {
+            const tbody = document.getElementById('reservedTicketListBody');
+            tbody.innerHTML = ''; 
+            const reservedTickets = appData.tickets.filter(t => t.state === 'reserved');
+            
+            reservedTickets.sort((a, b) => a.reservedAt - b.reservedAt).forEach(t => {
+                const user = getOwnerInfo(t.owner);
+                
+                // Mostrar la hora de reserva para gestión manual
+                const reservedTimeStr = t.reservedAt 
+                    ? new Date(t.reservedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) + ' ' +
+                      new Date(t.reservedAt).toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }) 
+                    : 'N/A';
+                
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px dotted #333';
+                row.innerHTML = `
+                    <td style="padding:5px; font-weight: bold;">${t.num}</td>
+                    <td style="padding:5px; font-size: 0.8rem;">
+                        ${user.name} (${user.phone})<br>
+                        <span style="color:var(--warning);">Reserva: ${reservedTimeStr}</span>
+                    </td>
+                    <td style="padding:5px; white-space: nowrap;">
+                        <button onclick="markAsPaid('${t.num}')" class="btn accent" style="padding: 5px 8px; font-size: 0.7rem;">PAGADO</button>
+                        <button onclick="revertTicket('${t.num}')" class="btn warning" style="padding: 5px 8px; font-size: 0.7rem; margin-left: 5px;">LIBERAR</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function renderPaidTicketsList() {
+            const tbody = document.getElementById('paidTicketListBody');
+            tbody.innerHTML = ''; 
+            const paidTickets = appData.tickets.filter(t => t.state === 'paid');
+            
+            paidTickets.forEach(t => {
+                const user = getOwnerInfo(t.owner);
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px dotted #333';
+                row.innerHTML = `
+                    <td style="padding:5px; font-weight: bold;">${t.num}</td>
+                    <td style="padding:5px;">${user.name}</td>
+                    <td style="padding:5px; white-space: nowrap;">
+                        <button onclick="revertTicket('${t.num}')" class="btn warning" style="padding: 5px 8px; font-size: 0.7rem;">LIBERAR</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function renderUserList() {
+            const tbody = document.getElementById('userListBody');
+            const searchVal = document.getElementById('adminUserSearch').value.toLowerCase();
+            tbody.innerHTML = '';
+            
+            appData.users.forEach(u => {
+                if (searchVal && !u.name.toLowerCase().includes(searchVal) && !u.phone.includes(searchVal)) {
+                    return; 
+                }
+                
+                const isBlocked = appData.blacklist.includes(u.email);
+                const statusText = isBlocked 
+                    ? `<span style="color:var(--accent); font-weight: bold;">🔴 Bloqueado</span>` 
+                    : `<span style="color:var(--primary);">🟢 Activo</span>`;
+                const actionBtn = isBlocked 
+                    ? `<button onclick="toggleBlockUser('${u.email}')" class="btn secondary" style="padding: 5px 8px; font-size: 0.7rem;">Desbloquear</button>`
+                    : `<button onclick="toggleBlockUser('${u.email}')" class="btn accent" style="padding: 5px 8px; font-size: 0.7rem;">Bloquear</button>`;
+                
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px dotted #333';
+                row.innerHTML = `
+                    <td style="padding:5px;">${u.name}</td>
+                    <td style="padding:5px;">${u.phone}</td>
+                    <td style="padding:5px;">${statusText}</td>
+                    <td style="padding:5px; white-space: nowrap;">${actionBtn}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function markAsPaid(ticketNum) {
+            const ticket = appData.tickets.find(t => t.num === ticketNum);
+            if (ticket && (ticket.state === 'reserved' || ticket.state === 'available')) {
+                ticket.state = 'paid';
+                ticket.reservedAt = null; // Clean up timestamp
+                save();
+                toast(`Boleta ${ticketNum} marcada como PAGADA.`, 'success');
+                renderGrid(); 
+                renderReservedTicketsList(); 
+                renderPaidTicketsList();
+            } else {
+                toast(`Error: Boleta ${ticketNum} no encontrada.`, 'error');
+            }
+        }
+        
+        function revertTicket(ticketNum) {
+            if (!confirm(`¿Estás seguro de LIBERAR la boleta ${ticketNum}? Volverá a estar DISPONIBLE.`)) return;
+            const ticket = appData.tickets.find(t => t.num === ticketNum);
+            
+            if (ticket) {
+                const prevState = ticket.state;
+                ticket.state = 'available';
+                ticket.owner = null;
+                ticket.reservedAt = null; // Clean up timestamp
+                save();
+                toast(`Boleta ${ticketNum} (${prevState.toUpperCase()}) liberada.`, 'warning');
+                renderGrid(); 
+                renderReservedTicketsList();
+                renderPaidTicketsList();
+            } else {
+                toast(`Error: Boleta ${ticketNum} no encontrada.`, 'error');
+            }
+        }
+        
+        function toggleBlockUser(email) {
+            const index = appData.blacklist.indexOf(email);
+            if (index > -1) {
+                appData.blacklist.splice(index, 1);
+                toast(`Usuario ${email} desbloqueado.`, 'success');
+            } else {
+                appData.blacklist.push(email);
+                toast(`Usuario ${email} bloqueado. No podrá reservar.`, 'error');
+            }
+            save();
+            renderUserList(); 
+        }
+
+        // Asignación Manual
+        function openManualAssignModal() {
+            document.getElementById('manualNum').value = '';
+            document.getElementById('manualName').value = '';
+            document.getElementById('manualPhone').value = '';
+            closeModal('adminModal');
+            openModal('manualAssignModal');
+        }
+
+        function handleManualAssign(e, status) {
+            e.preventDefault();
+            const numEl = document.getElementById('manualNum');
+            const nameEl = document.getElementById('manualName');
+            const phoneEl = document.getElementById('manualPhone');
+            
+            if (!numEl.value || !nameEl.value || !phoneEl.value) {
+                return toast('Por favor, rellena todos los campos.', 'error');
+            }
+
+            const num = numEl.value.padStart(3, '0');
+            const name = nameEl.value;
+            const phone = phoneEl.value;
+            const ticket = appData.tickets.find(t => t.num === num);
+
+            if (!ticket) { return toast(`Error: Boleta ${num} no existe.`, 'error'); }
+            if (ticket.state !== 'available') { return toast(`Error: Boleta ${num} ya está ${ticket.state.toUpperCase()}.`, 'error'); }
+
+            const email = `manual_${phone}@manual.com`; // Email interno para tracking
+            
+            ticket.state = status;
+            ticket.owner = email;
+            if (status === 'reserved') {
+                ticket.reservedAt = Date.now(); // Set timestamp for manual reservation
+            } else {
+                ticket.reservedAt = null;
+            }
+
+            const exists = appData.users.find(u => u.email === email);
+            if (!exists) {
+                appData.users.push({ name, email, phone, date: new Date().toLocaleString(), type: 'Manual' });
+            }
+
+            save();
+            closeModal('manualAssignModal');
+            openAdminAuth(); // Reabrir el panel admin
+            
+            toast(`Boleta ${num} asignada y ${status.toUpperCase()} a ${name}.`, status === 'paid' ? 'success' : 'warning');
+            renderGrid();
+        }
+
+        // --- GESTIÓN DE SORTEOS (WINNERS) ---
+        function openWinnerManagement() {
+            closeModal('adminModal');
+            openModal('winnerManagementModal');
+            document.getElementById('winnerDate').valueAsDate = new Date(); 
+            previewWinnerInfo();
+        }
+        
+        function previewWinnerInfo() {
+            const num = document.getElementById('winnerNum').value.padStart(3, '0');
+            const infoEl = document.getElementById('winnerInfo');
+            const ticket = appData.tickets.find(t => t.num === num);
+            
+            if (ticket && ticket.owner) { // Si tiene dueño (reservado o pagado)
+                const user = getOwnerInfo(ticket.owner);
+                infoEl.innerHTML = `Boleta **${num}** está **${ticket.state.toUpperCase()}** a nombre de **${user.name}**.`;
+                infoEl.style.color = 'var(--primary)';
+            } else if (ticket) { // Si está disponible
+                infoEl.innerHTML = `Boleta **${num}** está **DISPONIBLE**. Si este número cae, el premio se declara DESIERTO.`;
+                infoEl.style.color = 'var(--warning)';
+            } else {
+                infoEl.innerHTML = `Ingrese un número de 3 dígitos (000-999).`;
+                infoEl.style.color = 'var(--text-muted)';
+            }
+        }
+
+        function checkAndAddWinner() {
+            const dateStr = document.getElementById('winnerDate').value;
+            const num = document.getElementById('winnerNum').value.padStart(3, '0');
+            const type = document.getElementById('winnerType').value;
+            
+            if (!dateStr || num.length !== 3) {
+                return toast('Por favor, ingresa la fecha y el número ganador.', 'error');
+            }
+            
+            const ticket = appData.tickets.find(t => t.num === num);
+            let ownerName = 'PREMIO DESIERTO (No Vendido)';
+            let ownerEmail = null;
+            let winnerStatus = 'DESIERTO';
+            
+            if (ticket && ticket.owner) {
+                const user = getOwnerInfo(ticket.owner);
+                ownerName = user.name;
+                ownerEmail = user.email;
+                winnerStatus = ticket.state.toUpperCase();
+            }
+
+            if (confirm(`¿Confirmar registro de sorteo?\nFecha: ${dateStr}\nNúmero Ganador: ${num}\nTipo: ${type.toUpperCase()}\nEstado: ${winnerStatus}\nGanador: ${ownerName}`)) {
+                appData.winners.push({
+                    date: dateStr,
+                    num: num,
+                    winnerName: ownerName,
+                    type: type,
+                    ownerEmail: ownerEmail,
+                    status: winnerStatus 
+                });
+                save();
+                closeModal('winnerManagementModal');
+                toast(`Ganador de ${type.toUpperCase()} registrado.`, 'success');
+                openWinnerHistory();
+            }
+        }
+        
+        function deleteWinnerHistory() {
+            // Verificar si el admin está logueado en la sesión
+            if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
+                return toast("⛔ Acceso Denegado. Solo el Admin puede realizar esta acción.", 'error');
+            }
+            
+            if (confirm("⚠️ ¿Estás seguro de que deseas ELIMINAR todo el historial de ganadores? Esta acción es irreversible.")) {
+                appData.winners = [];
+                save();
+                toast('Historial de ganadores eliminado.', 'error');
+                closeModal('winnerHistoryModal');
+            }
+        }
+
+        function openWinnerHistory() {
+            const tbody = document.getElementById('winnerListBody');
+            tbody.innerHTML = '';
+            
+            const totalWeeklyDraws = 9; // Hardcoded max from previous logic
+            const pastWeeklyDraws = appData.winners.filter(w => w.type === 'weekly').length;
+            const remainingWeekly = Math.max(0, totalWeeklyDraws - pastWeeklyDraws);
+            
+            const finalDrawRegistered = appData.winners.some(w => w.type === 'final');
+            const finalStatusText = finalDrawRegistered ? '✅ Realizado' : '⏳ Pendiente';
+
+            let remainingText = `Sorteos Semanales de 1M restantes: **${remainingWeekly}** de **${totalWeeklyDraws}**.<br>`;
+            remainingText += `Gran Sorteo Final (Moto): **${finalStatusText}**.`;
+            document.getElementById('drawsRemaining').innerHTML = remainingText;
+            
+            // Mostrar botón de eliminar si el admin está logueado en la sesión
+            const isAdmin = sessionStorage.getItem('isAdminLoggedIn') === 'true'; 
+            document.getElementById('btnAdminDeleteWinner').style.display = isAdmin ? 'block' : 'none';
+
+            
+            if (appData.winners.length === 0) {
+                 tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-muted);">Aún no hay ganadores registrados.</td></tr>`;
+            } else {
+                appData.winners.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(w => {
+                    const row = document.createElement('tr');
+                    const color = w.type === 'final' ? 'var(--accent)' : 'var(--warning)';
+                    const winnerText = w.status === 'DESIERTO' 
+                        ? `<span style="color:var(--accent); font-weight: bold;">PREMIO DESIERTO</span>` 
+                        : w.winnerName;
+
+                    row.style.borderBottom = '1px dotted #222';
+                    row.innerHTML = `
+                        <td style="padding:8px 5px;">${w.date}</td>
+                        <td style="padding:8px 5px; color:${color};">${w.type === 'final' ? 'FINAL (MOTO)' : 'SEMANAL (1M)'}</td>
+                        <td style="padding:8px 5px; font-weight: 900; color: ${color};">${w.num}</td>
+                        <td style="padding:8px 5px;">${winnerText}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            openModal('winnerHistoryModal');
+        }
+
+        // --- EXPORTACIÓN Y RESET ---
+        function exportPaidTickets() {
+            let csv = "Numero,Estado,Nombre,Telefono,Email,FechaReserva\n";
+            const paidAndReserved = appData.tickets.filter(t => t.state === 'paid' || t.state === 'reserved');
+            
+            paidAndReserved.forEach(t => {
+                if (t.owner) {
+                    const u = getOwnerInfo(t.owner);
+                    const stateText = t.state === 'paid' ? 'PAGADO' : 'RESERVADO';
+                    const resDate = t.reservedAt ? new Date(t.reservedAt).toLocaleString('es-CO') : '';
+                    csv += `${t.num},${stateText},"${u.name}","${u.phone}","${u.email}","${resDate}"\n`;
+                }
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'Boletas_Pagadas_y_Reservadas.csv'; a.click();
+            toast("Listado de boletas PAGADAS y RESERVADAS descargado.", 'success');
+        }
+        
+        function exportAllData() {
+            let csv = "TIPO,VALOR,ESTADO/DETALLE,NOMBRE,CONTACTO,FECHA\n";
+            csv += "\n--- USUARIOS ---\n";
+            appData.users.forEach(u => {
+                const isBlocked = appData.blacklist.includes(u.email) ? 'BLOQUEADO' : 'ACTIVO';
+                csv += `CLIENTE,"${u.name}",${isBlocked},"${u.phone}","${u.email}","${u.date}"\n`;
+            });
+            csv += "\n--- BOLETAS ---\n";
+            appData.tickets.forEach(t => {
+                const owner = t.owner ? appData.users.find(u => u.email === t.owner)?.name || 'Manual' : 'N/A';
+                const reservedAt = t.reservedAt ? new Date(t.reservedAt).toLocaleString('es-CO') : 'N/A';
+                csv += `BOLETA,${t.num},${t.state.toUpperCase()},"${owner}","${t.owner || 'N/A'}","${reservedAt}"\n`;
+            });
+            csv += "\n--- GANADORES ---\n";
+            appData.winners.forEach(w => {
+                csv += `GANADOR,${w.date},${w.type.toUpperCase()},${w.num},"${w.winnerName}","${w.status}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'Datos_Completos_Rifa.csv'; a.click();
+            toast("Datos completos de la rifa descargados.", 'success');
+        }
+
+        function adminResetRaffle() {
+            if(sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
+                return toast("⛔ Acceso Denegado. Debes estar en modo Admin.", 'error');
+            }
+
+            if(confirm("⚠️ ¿ESTÁS SEGURO?\nSe borrarán TODOS los datos (reservas, pagos, usuarios, historial de ganadores).\nEsta acción no se puede deshacer.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                sessionStorage.removeItem('isAdminLoggedIn');
+                window.location.reload();
+            }
+        }
+
+        // --- UTILIDADES ---
+        function showInstructions() {
+            alert(`
+            ✅ PASOS PARA OBTENER TU BOLETA (${TOTAL_TICKETS} OPORTUNIDADES):
+
+            1.  **SELECCIONA:** Elige uno o varios números disponibles (color verde) en el tablero. Haz clic en "Reservar" para ponerlos en estado Reservado (color amarillo). 
+            
+            2.  **PAGA:** Envía el valor de tus boletas ($25.000 COP por cada una) a nuestro medio de pago oficial:
+                💰 **Nequi: 321 963 7388**
+            
+            3.  **CONFIRMA:** Envía el comprobante de pago al WhatsApp del administrador junto con tu nombre y el número(s) reservado(s).
+            
+            4.  **LISTO:** El administrador verificará y cambiará el estado de tu boleta a **PAGADO** (color rojo). ¡Tu participación estará asegurada para todos los sorteos!
+            `);
+        }
+
+        function checkMyTickets() {
+            if(!appData.currentUser) return openModal('loginModal');
+            
+            const my = appData.tickets.filter(t => t.owner === appData.currentUser.email);
+            
+            const reserved = my.filter(t => t.state === 'reserved').map(t => {
+                let timeInfo = '';
+                if(t.reservedAt) {
+                    const reservedDate = new Date(t.reservedAt).toLocaleDateString('es-CO', {day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'});
+                    timeInfo = ` (Reservado: ${reservedDate})`;
+                }
+                return t.num + timeInfo;
+            }).join(', ');
+            
+            const paid = my.filter(t => t.state === 'paid').map(t => t.num).join(', ');
+            
+            let msg = `🎉 ¡Hola, ${appData.currentUser.name}!\n\n`;
+            msg += `🎟️ Boletas Totales a tu nombre: ${my.length}\n\n`;
+            msg += `⏳ RESERVADAS (PAGO PENDIENTE):\n${reserved || 'Ninguna'}\n\n`;
+            msg += `✅ PAGADAS (ASEGURADAS):\n${paid || 'Ninguna'}`;
+            
+            alert(my.length ? msg : "Aún no tienes números reservados o comprados. ¡Es tu momento!");
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        function toast(msg, type='success') {
+            const box = document.createElement('div');
+            box.className = `toast ${type}`;
+            box.innerHTML = msg; 
+            document.getElementById('toast-container').appendChild(box);
+            setTimeout(() => {
+                box.style.transition='opacity .4s, transform .4s'; 
+                box.style.opacity='0'; 
+                box.style.transform='translateX(8px)'; 
+                setTimeout(()=>box.remove(),450);
+            }, 4000);
+        }
+
+        function refreshData() {
+            load(); 
+            toast("Datos y contadores actualizados", 'success');
+        }
+
+        // Event Listeners Inputs
+        document.getElementById('searchInput').addEventListener('input', renderGrid);
+        document.getElementById('filterSelect').addEventListener('change', renderGrid);
+
+    </script>
+</body>
+</html>

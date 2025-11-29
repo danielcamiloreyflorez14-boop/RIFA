@@ -1,15 +1,20 @@
-// --- CONFIGURACIÓN DE LA RIFA ---
-const ADMIN_PASS = "000-999"; 
-const STORAGE_KEY = "rifa_data_v8"; 
+// --- CONFIGURACIÓN DE LA NUBE (JSONBIN) ---
+// ⚠️ ¡Pega tus códigos de JSONBin aquí!
+const BIN_ID = "692b393543b1c97be9cd23f8"; // Ejemplo: 65a4b7...
+const API_KEY = "$2a$10$8BmVxOkDSJmJEDTG5PYYTeujtG0EbyETsW5eHF3Ji6X7KrmVrzGLu";   // Ejemplo: $2b$10...
+
+// --- CONFIGURACIÓN GLOBAL ---
+// Nota: 'STORAGE_KEY' ya no es necesaria y fue eliminada.
+const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; // Contraseña "000-999" codificada
 const TOTAL_TICKETS = 1000;
 const MAX_RESERVATIONS_PER_USER = 3; 
 const FINAL_RAFFLE_DATE = new Date('2026-01-30T22:00:00'); 
 const WEEKLY_DRAW_DAY = 5; // 0=Domingo, 5=Viernes
 const WEEKLY_DRAW_HOUR = 22; // 10 PM (22:00)
-const RESERVATION_CLEARANCE_HOUR = 17; // 5 PM (17:00) Viernes para la liberación semanal
+const RESERVATION_CLEARANCE_HOUR = 17; // 5 PM (17:00) Viernes
 const RESERVATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 Horas
 const LAST_WEEKLY_DRAW = new Date('2026-01-23T22:00:00').getTime(); 
-
+ 
 // --- ESTADO GLOBAL ---
 let appData = {
     tickets: [],   // { num, state, owner (email), reservedAt }
@@ -883,3 +888,4 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyInput.addEventListener('input', verifyTicket);
     }
 });
+

@@ -39,37 +39,37 @@ let newUsers = [];              // Guarda los usuarios que solo existen localmen
 // ==============================================================================
 
 /** Carga los datos desde SheetDB y configura la aplicación */
+/** Carga los datos desde Google Apps Script y configura la aplicación */
 async function load() {
     showLoading(); 
-    
+
     // Cargar Tema Local
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-    // 1. CARGAR DATOS DE LA NUBE (SHEETDB)
+    // 1. CARGAR DATOS DE LA NUBE (APPS SCRIPT)
     try {
-        const [ticketsResponse, usersResponse, winnersResponse] = await Promise.all([
-            fetch(`${API_URL}/tickets`),
-            fetch(`${API_URL}/users`),
-            fetch(`${API_URL}/winners`)
-        ]);
-
-        if (!ticketsResponse.ok || !usersResponse.ok || !winnersResponse.ok) {
-            throw new Error("Error cargando datos de SheetDB.");
+        // Solo llamamos una vez para obtener el estado de los tickets de Hoja1
+        const ticketsResponse = await fetch(`${API_URL}?format=json&sheet=Hoja1`);
+        
+        if (!ticketsResponse.ok) {
+            throw new Error("Error cargando datos de Apps Script.");
         }
 
         const ticketsData = await ticketsResponse.json();
-        const usersData = await usersResponse.json();
-        const winnersData = await winnersResponse.json();
 
+        // ⚠️ Advertencia: En este nuevo modelo, las hojas 'users' y 'winners' no se cargan automáticamente.
+        // Asumimos que la lista de usuarios y ganadores se manejará manualmente o con una solución Apps Script más compleja.
+        
         // 2. Proceso de Inicialización
-        appData.users = Array.isArray(usersData) ? usersData : [];
-        appData.winners = Array.isArray(winnersData) ? winnersData : [];
+        // appData.users y appData.winners se inicializan como arrays vacíos
+        appData.users = []; 
+        appData.winners = []; 
         initializeTickets(Array.isArray(ticketsData) ? ticketsData : []); 
 
     } catch (error) {
         console.error("Error cargando:", error);
-        toast("⚠️ Error grave al conectar con la base de datos (SheetDB). Usando datos de respaldo.", 'error');
+        toast("⚠️ Error grave al conectar con la base de datos (Apps Script). Usando datos de respaldo.", 'error');
         // Fallback: Intentar cargar lo local si falla la nube
         const savedLocal = localStorage.getItem(STORAGE_KEY_BACKUP);
         if(savedLocal) appData = JSON.parse(savedLocal);
@@ -85,7 +85,6 @@ async function load() {
     setupListeners();
     hideLoading();
 }
-
 /** 🌟 FUNCIÓN OPTIMIZADA: Solo guarda los tickets y usuarios que cambiaron 🌟 */
 async function save() {
     updateUI();
@@ -1100,6 +1099,7 @@ function setupListeners() {
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', load);
+
 
 
 

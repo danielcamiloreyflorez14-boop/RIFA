@@ -4,7 +4,7 @@
 
 // --- CONFIGURACIÓN DE LA NUBE (SHEETDB.IO) ---
 // ⚠️ ¡Esta es la URL que usaste en el mensaje anterior y está correcta!
-const API_URL = "https://sheetdb.io/api/v1/4iz7axnvdm7dz";
+const API_URL = "https://sheetdb.io/api/v1/7ti8a0070bn1g";
 
 // --- CONFIGURACIÓN GLOBAL ---
 const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; // Contraseña "000-999" codificada
@@ -1062,3 +1062,4 @@ function setupListeners() {
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', load);
+

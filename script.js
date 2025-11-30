@@ -290,29 +290,22 @@ function confirmReservation() {
     renderGrid(); 
 }
 
-// ... (RESTO DE TU CÓDIGO A CONTINUACIÓN) ...
-
-
 // ==============================================================================
-// === LÓGICA DE ADMINISTRACIÓN (AJUSTES) ===
-// ==============================================================================
-
-/** Cambia el estado de un ticket y lo marca para guardar en la nube */
-// ==============================================================================
-// === FUNCIÓN DE RESETEO (NUEVA) ===
+// === FUNCIÓN DE RESETEO TOTAL ===
 // ==============================================================================
 
 /** Resetea todos los datos de la aplicación y guía para el reseteo de la nube */
-function adminResetData() {
+function adminResetRaffle() { 
+    // Chequeo de seguridad de administrador (asumiendo que el admin es 'admin@admin.com')
     if (!appData.currentUser || appData.currentUser.email !== 'admin@admin.com') {
         return toast("Acceso denegado. Solo el administrador puede usar esta función.", 'error');
     }
 
-    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: ESTO BORRARÁ TODAS LAS RESERVAS, PAGOS Y USUARIOS DE LA APLICACIÓN. ¿ESTÁS SEGURO?")) {
+    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: ESTO BORRARÁ TODOS LOS DATOS (RESERVAS, PAGOS, USUARIOS) DE LA APLICACIÓN. ESTA ACCIÓN ES IRREVERSIBLE. ¿ESTÁS SEGURO?")) {
         return;
     }
 
-    // 1. Resetear el estado global de la aplicación
+    // 1. Resetear el estado global de la aplicación (Memoria)
     appData.tickets = [];
     appData.users = [];
     appData.selectedTickets = [];
@@ -320,12 +313,10 @@ function adminResetData() {
     appData.currentUser = null;
 
     // 2. Reinicializar los 1000 tickets disponibles (solo localmente)
-    initializeTickets(); 
+    initializeTickets(); // Asumo que esta función ya existe en tu script
 
-    // 3. Limpiar el almacenamiento local
-    localStorage.removeItem(STORAGE_KEY_BACKUP);
-    changedTickets.clear();
-    newUsers = [];
+    // 3. Limpiar el almacenamiento local (Backup)
+    localStorage.removeItem(STORAGE_KEY_BACKUP); // Limpia el backup local
     
     // 4. Actualizar la interfaz
     renderGrid();
@@ -334,12 +325,12 @@ function adminResetData() {
 
     toast("✅ ¡Reseteo local completado! La aplicación está como nueva.", 'success');
     
-    // 5. Instrucciones para el reseteo en la nube (SheetDB)
+    // 5. Instrucciones para el reseteo en la nube (Google Sheets)
     alert("⚠️ PASO CRÍTICO: RESETEO EN LA NUBE (GOOGLE SHEETS) ⚠️\n\n" +
-          "El reseteo local fue exitoso, pero **DEBES** borrar los datos en tu Hoja de Cálculo de Google Sheets manualmente:\n\n" +
-          "1. **Ve a la hoja 'tickets'**: Borra TODAS las filas que tengan números de boletas (deja solo la fila de encabezados: num, state, owner, reservedAt).\n" +
-          "2. **Ve a la hoja 'users'**: Borra TODAS las filas de usuarios (deja solo la fila de encabezados: name, email, phone).\n" +
-          "3. **Ve a la hoja 'winners'**: Borra TODAS las filas de ganadores (deja solo la fila de encabezados: date, num, winnerName, type, ownerEmail).\n\n" +
+          "El reseteo local fue exitoso, pero **DEBES** borrar los datos en tu Hoja de Cálculo de Google Sheets manualmente para completar el reseteo:\n\n" +
+          "1. **Ve a la hoja 'tickets'**: Borra TODAS las filas que tengan números de boletas (deja solo la fila de encabezados).\n" +
+          "2. **Ve a la hoja 'users'**: Borra TODAS las filas de usuarios (deja solo la fila de encabezados).\n" +
+          "3. **Ve a la hoja 'winners'**: Borra TODAS las filas de ganadores (deja solo la fila de encabezados).\n\n" +
           "4. **Vuelve a cargar la página.** El script detectará que 'tickets' está vacío y volverá a crear las 1000 boletas limpias en SheetDB.");
 }
 
@@ -1107,5 +1098,6 @@ function setupListeners() {
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', load);
+
 
 

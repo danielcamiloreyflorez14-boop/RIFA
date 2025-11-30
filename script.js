@@ -2,9 +2,10 @@
 // === CONFIGURACIÓN GLOBAL Y DE LA NUBE ===
 // ==============================================================================
 
-// --- CONFIGURACIÓN DE LA NUBE (SHEETDB.IO) ---
-// ⚠️ ¡Esta es la URL que usaste en el mensaje anterior y está correcta!
-const API_URL = "https://sheetdb.io/api/v1/7ti8a0070bn1g";
+// --- CONFIGURACIÓN DE LA NUBE ---
+// DEBES USAR LA URL COMPLETA CON LOS PARÁMETROS PARA LA LECTURA (GET)
+
+const API_URL = "https://script.google.com/macros/s/AKfycbxNnFoh0YsR-ueK9nRqmLb-EzBprpa1GGUhl6P3kGW3tX3Z2p2m2SuNyrLfabdJ8xa9mg/exec?format=json&sheet=Hoja1";
 
 // --- CONFIGURACIÓN GLOBAL ---
 const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; // Contraseña "000-999" codificada
@@ -1098,6 +1099,7 @@ function setupListeners() {
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', load);
+
 
 
 

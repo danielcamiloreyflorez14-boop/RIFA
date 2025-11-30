@@ -298,6 +298,51 @@ function confirmReservation() {
 // ==============================================================================
 
 /** Cambia el estado de un ticket y lo marca para guardar en la nube */
+// ==============================================================================
+// === FUNCIÓN DE RESETEO (NUEVA) ===
+// ==============================================================================
+
+/** Resetea todos los datos de la aplicación y guía para el reseteo de la nube */
+function adminResetData() {
+    if (!appData.currentUser || appData.currentUser.email !== 'admin@admin.com') {
+        return toast("Acceso denegado. Solo el administrador puede usar esta función.", 'error');
+    }
+
+    if (!confirm("⚠️ ADVERTENCIA CRÍTICA: ESTO BORRARÁ TODAS LAS RESERVAS, PAGOS Y USUARIOS DE LA APLICACIÓN. ¿ESTÁS SEGURO?")) {
+        return;
+    }
+
+    // 1. Resetear el estado global de la aplicación
+    appData.tickets = [];
+    appData.users = [];
+    appData.selectedTickets = [];
+    appData.winners = [];
+    appData.currentUser = null;
+
+    // 2. Reinicializar los 1000 tickets disponibles (solo localmente)
+    initializeTickets(); 
+
+    // 3. Limpiar el almacenamiento local
+    localStorage.removeItem(STORAGE_KEY_BACKUP);
+    changedTickets.clear();
+    newUsers = [];
+    
+    // 4. Actualizar la interfaz
+    renderGrid();
+    updateUI();
+    closeModal('adminModal');
+
+    toast("✅ ¡Reseteo local completado! La aplicación está como nueva.", 'success');
+    
+    // 5. Instrucciones para el reseteo en la nube (SheetDB)
+    alert("⚠️ PASO CRÍTICO: RESETEO EN LA NUBE (GOOGLE SHEETS) ⚠️\n\n" +
+          "El reseteo local fue exitoso, pero **DEBES** borrar los datos en tu Hoja de Cálculo de Google Sheets manualmente:\n\n" +
+          "1. **Ve a la hoja 'tickets'**: Borra TODAS las filas que tengan números de boletas (deja solo la fila de encabezados: num, state, owner, reservedAt).\n" +
+          "2. **Ve a la hoja 'users'**: Borra TODAS las filas de usuarios (deja solo la fila de encabezados: name, email, phone).\n" +
+          "3. **Ve a la hoja 'winners'**: Borra TODAS las filas de ganadores (deja solo la fila de encabezados: date, num, winnerName, type, ownerEmail).\n\n" +
+          "4. **Vuelve a cargar la página.** El script detectará que 'tickets' está vacío y volverá a crear las 1000 boletas limpias en SheetDB.");
+}
+
 function adminSetState(num, newState) {
     const ticket = appData.tickets.find(t => t.num === num);
     if (!ticket) return;
@@ -1062,4 +1107,5 @@ function setupListeners() {
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', load);
+
 

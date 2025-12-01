@@ -307,8 +307,10 @@ function adminResetRaffle() {
     appData.winners = [];
     appData.currentUser = null;
 
-    // 2. Reinicializar los 1000 tickets disponibles (solo localmente)
-    initializeTickets(); // Asumo que esta función ya existe en tu script
+    if (initialTicketsToPost.length > 0) {
+    console.warn("Inicialización de boletas bloqueada para evitar lentitud.");
+    }
+
 
     // 3. Limpiar el almacenamiento local (Backup)
     localStorage.removeItem(STORAGE_KEY_BACKUP); // Limpia el backup local
@@ -1166,5 +1168,6 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 

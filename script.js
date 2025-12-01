@@ -157,9 +157,7 @@ function initializeTickets(existingTickets = []) {
     
     // Si la hoja estaba vacía, se inicializa la tabla en SheetDB con todas las boletas
     if (initialTicketsToPost.length > 0) {
-        toast("Inicializando 1000 boletas en SheetDB. Esto puede tardar unos segundos...", 'warning');
-        postInitialTickets(initialTicketsToPost);
-    }
+  console.warn("Inicialización de boletas bloqueada para evitar lentitud.");
 }
 
 /** Envía los 1000 tickets iniciales a SheetDB la primera vez */
@@ -1168,4 +1166,5 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 

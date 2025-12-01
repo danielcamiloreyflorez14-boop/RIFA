@@ -1,10 +1,9 @@
 import { db, auth, storage } from "./firebase.js";
-
-
 // LÍNEA 10 - URL BASE DE APPS SCRIPT
-const API_URL = "https://script.google.com/macros/s/AKfycbxNnFoh0YsR-ueK9nRqmLb-EzBprpa1GGUhl6P3kGW3tX3Z2p2m2SuNyrLfabdJ8xa9mg/exec";
 
+const API_URL = "https://script.google.com/macros/s/AKfycbxNnFoh0YsR-ueK9nRqmLb-EzBprpa1GGUhl6P3kGW3tX3Z2p2m2SuNyrLfabdJ8xa9mg/exec";
 // --- CONFIGURACIÓN GLOBAL ---
+
 const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; // Contraseña "000-999" codificada
 const TOTAL_TICKETS = 1000;
 const MAX_RESERVATIONS_PER_USER = 3; 
@@ -37,7 +36,8 @@ let newUsers = [];              // Guarda los usuarios que solo existen localmen
 /** Carga los datos desde SheetDB y configura la aplicación */
 /** Carga los datos desde Google Apps Script y configura la aplicación */
 async function load() {
-    showLoading(); 
+    showLoading();
+    hideLoading();
 
     // Cargar Tema Local
     const savedTheme = localStorage.getItem('theme');
@@ -74,13 +74,15 @@ async function load() {
     
     // Lógica de limpieza y renderizado
     checkExpirations();
-    renderGrid();
-    updateUI();
-    startCountdown();
-    renderInteractiveLegend();
-    setupListeners();
+renderGrid();
+updateUI();
+startCountdown();
+renderInteractiveLegend();
+setupListeners();
+} finally {
     hideLoading();
 }
+
 /** 🌟 FUNCIÓN OPTIMIZADA: Solo guarda los tickets y usuarios que cambiaron 🌟 */
 async function save() {
     updateUI();
@@ -582,31 +584,35 @@ function toggleTicketSelection(num) {
 function renderGrid() {
     const grid = document.getElementById('grid');
     if (!grid) return;
+
     const searchInput = document.getElementById('searchInput').value.trim();
     const filterValue = document.getElementById('filterSelect').value;
-    grid.innerHTML = '';
-    
+
     const filteredTickets = appData.tickets.filter(t => {
         const matchesSearch = searchInput ? t.num.includes(searchInput) : true;
         const matchesFilter = filterValue === 'all' || t.state === filterValue;
         return matchesSearch && matchesFilter;
     });
 
+    const fragment = document.createDocumentFragment(); // 🔥 Optimización grande
+
     filteredTickets.forEach(ticket => {
         const card = document.createElement('div');
         card.className = `card ${ticket.state}`;
-        card.innerHTML = `<div class="num">${ticket.num}</div><div class="status-text">${ticket.state.toUpperCase()}</div>`;
-        card.setAttribute('data-num', ticket.num);
+        card.innerHTML = `
+            <div class="num">${ticket.num}</div>
+            <div class="status-text">${ticket.state.toUpperCase()}</div>
+        `;
+        card.dataset.num = ticket.num;
 
-        let ownerInfo = "";
         if (ticket.owner) {
             const user = getUserByEmail(ticket.owner);
-            ownerInfo = user ? `${user.name} (${user.phone})` : `Owner: ${ticket.owner}`;
-            card.setAttribute('data-owner-info', ownerInfo);
+            const ownerInfo = user ? `${user.name} (${user.phone})` : `Propietario: ${ticket.owner}`;
+            card.dataset.ownerInfo = ownerInfo;
         }
 
         if (ticket.state === 'available') {
-            card.onclick = () => toggleTicketSelection(ticket.num);
+            card.addEventListener("click", () => toggleTicketSelection(ticket.num));
             if (appData.selectedTickets.includes(ticket.num)) {
                 card.classList.add('selected');
             }
@@ -614,8 +620,11 @@ function renderGrid() {
             card.classList.add('mine');
         }
 
-        grid.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    grid.innerHTML = "";
+    grid.appendChild(fragment);
 }
 
 function updateUI() {
@@ -1168,6 +1177,7 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 
 

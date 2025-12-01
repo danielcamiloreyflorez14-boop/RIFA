@@ -1107,7 +1107,11 @@ document.addEventListener('DOMContentLoaded', load);
 
 import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+// 🔥 Esto era solo una prueba. Debe estar completo para no romper el JS
 set(ref(db, "prueba/mensaje"), {
+    texto: "Firebase funcionando correctamente"
+});
+
   texto: "Firebase conectado correctamente"
 });
 
@@ -1177,6 +1181,7 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 
 

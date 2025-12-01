@@ -38,50 +38,42 @@ let newUsers = [];              // Guarda los usuarios que solo existen localmen
 /** Carga los datos desde Google Apps Script y configura la aplicación */
 async function load() {
     showLoading();
-    hideLoading();
 
-    // Cargar Tema Local
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') document.body.classList.add('dark-mode');
-
-    // 1. CARGAR DATOS DE LA NUBE (APPS SCRIPT)
     try {
-        // Solo llamamos una vez para obtener el estado de los tickets de Hoja1
+        // 1. Cargar tema
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') document.body.classList.add('dark-mode');
+
+        // 2. Cargar datos remotos
         const ticketsResponse = await fetch(`${API_URL}?format=json&sheet=Hoja1`);
-        
-        if (!ticketsResponse.ok) {
-            throw new Error("Error cargando datos de Apps Script.");
-        }
+        if (!ticketsResponse.ok) throw new Error("Error cargando datos de Apps Script.");
 
         const ticketsData = await ticketsResponse.json();
 
-        // ⚠️ Advertencia: En este nuevo modelo, las hojas 'users' y 'winners' no se cargan automáticamente.
-        // Asumimos que la lista de usuarios y ganadores se manejará manualmente o con una solución Apps Script más compleja.
-        
-        // 2. Proceso de Inicialización
-        // appData.users y appData.winners se inicializan como arrays vacíos
-        appData.users = []; 
-        appData.winners = []; 
-        initializeTickets(Array.isArray(ticketsData) ? ticketsData : []); 
+        // 3. Inicialización
+        appData.users = [];
+        appData.winners = [];
+        initializeTickets(Array.isArray(ticketsData) ? ticketsData : []);
 
     } catch (error) {
         console.error("Error cargando:", error);
         toast("⚠️ Error grave al conectar con la base de datos (Apps Script). Usando datos de respaldo.", 'error');
-        // Fallback: Intentar cargar lo local si falla la nube
+
         const savedLocal = localStorage.getItem(STORAGE_KEY_BACKUP);
-        if(savedLocal) appData = JSON.parse(savedLocal);
+        if (savedLocal) appData = JSON.parse(savedLocal);
         else initializeTickets();
+    } finally {
+        // SIEMPRE se ejecuta
+        hideLoading();
     }
-    
-    // Lógica de limpieza y renderizado
+
+    // 4. UNA VEZ CARGADO TODO → Render
     checkExpirations();
-renderGrid();
-updateUI();
-startCountdown();
-renderInteractiveLegend();
-setupListeners();
-} finally {
-    hideLoading();
+    renderGrid();
+    updateUI();
+    startCountdown();
+    renderInteractiveLegend();
+    setupListeners();
 }
 
 /** 🌟 FUNCIÓN OPTIMIZADA: Solo guarda los tickets y usuarios que cambiaron 🌟 */
@@ -1180,6 +1172,7 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 
 

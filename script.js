@@ -1,9 +1,6 @@
-// ==============================================================================
-// === CONFIGURACIÓN GLOBAL Y DE LA NUBE ===
-// ==============================================================================
+const db = window.db;
+const auth = window.auth;
 
-// --- CONFIGURACIÓN DE LA NUBE ---
-// DEBES USAR LA URL COMPLETA CON LOS PARÁMETROS PARA LA LECTURA (GET)
 
 // LÍNEA 10 - URL BASE DE APPS SCRIPT
 const API_URL = "https://script.google.com/macros/s/AKfycbxNnFoh0YsR-ueK9nRqmLb-EzBprpa1GGUhl6P3kGW3tX3Z2p2m2SuNyrLfabdJ8xa9mg/exec";
@@ -1100,9 +1097,8 @@ function setupListeners() {
 
 document.addEventListener('DOMContentLoaded', load);
 
+import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-
-
-
-
-
+set(ref(db, "prueba/mensaje"), {
+  texto: "Firebase conectado correctamente"
+});

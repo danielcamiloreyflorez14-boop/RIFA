@@ -1,4 +1,3 @@
-import { db } from "./firebase.js";
 import { db, auth, storage } from "./firebase.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 // LÍNEA 10 - URL BASE DE APPS SCRIPT
@@ -1198,6 +1197,7 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 
 

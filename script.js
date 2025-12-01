@@ -1102,3 +1102,70 @@ import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-da
 set(ref(db, "prueba/mensaje"), {
   texto: "Firebase conectado correctamente"
 });
+
+import { db } from "./firebase.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+async function guardarCompra(numero, nombre, telefono) {
+  try {
+    await addDoc(collection(db, "compras"), {
+      numero: numero,
+      nombre: nombre,
+      telefono: telefono,
+      fecha: new Date()
+    });
+    alert("Compra guardada correctamente.");
+  } catch (e) {
+    console.error("Error guardando:", e);
+    alert("Error al guardar.");
+  }
+}
+
+// EJEMPLO: llamar función al dar clic
+document.getElementById("btnComprar").addEventListener("click", () => {
+  const numero = document.getElementById("inputNumero").value;
+  const nombre = document.getElementById("inputNombre").value;
+  const telefono = document.getElementById("inputTelefono").value;
+
+  guardarCompra(numero, nombre, telefono);
+});
+
+import { storage } from "./firebase.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+async function subirComprobante(archivo) {
+  const nombreArchivo = "comprobantes/" + Date.now() + "_" + archivo.name;
+  const storageRef = ref(storage, nombreArchivo);
+
+  await uploadBytes(storageRef, archivo);
+  return await getDownloadURL(storageRef);
+}
+
+// EJEMPLO: botón subir
+document.getElementById("btnSubirComprobante").addEventListener("click", async () => {
+  const archivo = document.getElementById("inputComprobante").files[0];
+
+  if (!archivo) return alert("Selecciona un archivo");
+
+  const url = await subirComprobante(archivo);
+  alert("Comprobante subido. URL:\n" + url);
+});
+
+import { auth } from "./firebase.js";
+import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// LOGIN
+document.getElementById("btnLogin").addEventListener("click", () => {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPass").value;
+
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(() => alert("Sesión iniciada"))
+    .catch(e => alert("Error: " + e.message));
+});
+
+// LOGOUT
+document.getElementById("btnLogout").addEventListener("click", () => {
+  signOut(auth);
+  alert("Sesión cerrada");
+});

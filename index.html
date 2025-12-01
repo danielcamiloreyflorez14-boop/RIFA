@@ -277,34 +277,10 @@
 
     <script src="script.js"></script>
 
-    <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-  // TU CONFIGURACIÓN (funciona igual)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDytfwKBBo0GKAkMOCJURq62TN1KPWEWLU",
-    authDomain: "rifa-con-firebase.firebaseapp.com",
-    databaseURL: "https://rifa-con-firebase-default-rtdb.firebaseio.com",
-    projectId: "rifa-con-firebase",
-    storageBucket: "rifa-con-firebase.firebasestorage.app",
-    messagingSenderId: "349264117196",
-    appId: "1:349264117196:web:acca4717e4e2f7c721b169",
-    measurementId: "G-RZ9YG8NGVF"
-  };
-
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-
-  // Hacerlos accesibles desde tu archivo .js
-  window.db = db;
-  window.auth = auth;
 </script>
 
 </body>
 </html>
+
 
 

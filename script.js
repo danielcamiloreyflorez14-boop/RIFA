@@ -1,5 +1,4 @@
-const db = window.db;
-const auth = window.auth;
+import { db, auth, storage } from "./firebase.js";
 
 
 // LÍNEA 10 - URL BASE DE APPS SCRIPT
@@ -1169,3 +1168,4 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+

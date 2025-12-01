@@ -40,34 +40,62 @@ async function load() {
     showLoading();
 
     try {
-        // 1. Cargar tema
+        // ================================
+        // 1. CARGAR TEMA LOCAL (Oscuro/Claro)
+        // ================================
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') document.body.classList.add('dark-mode');
 
-        // 2. Cargar datos remotos
+
+        // ================================
+        // 2. CARGAR DATOS DESDE GOOGLE APPS SCRIPT
+        // ================================
         const ticketsResponse = await fetch(`${API_URL}?format=json&sheet=Hoja1`);
-        if (!ticketsResponse.ok) throw new Error("Error cargando datos de Apps Script.");
+
+        if (!ticketsResponse.ok) {
+            throw new Error("Error cargando datos de Apps Script.");
+        }
 
         const ticketsData = await ticketsResponse.json();
 
-        // 3. Inicialización
+
+        // ================================
+        // 3. INICIALIZAR DATOS
+        // ================================
+        // Por ahora users y winners se inicializan vacíos
         appData.users = [];
         appData.winners = [];
+
+        // Cargar tickets (si vienen datos válidos)
         initializeTickets(Array.isArray(ticketsData) ? ticketsData : []);
 
-    } catch (error) {
-        console.error("Error cargando:", error);
-        toast("⚠️ Error grave al conectar con la base de datos (Apps Script). Usando datos de respaldo.", 'error');
 
+    } catch (error) {
+        // ================================
+        // 4. MANEJO DE ERRORES
+        // ================================
+        console.error("Error cargando:", error);
+        toast("⚠️ Error grave al conectar con la base de datos. Usando datos de respaldo.", "error");
+
+        // Intentar usar respaldo local
         const savedLocal = localStorage.getItem(STORAGE_KEY_BACKUP);
-        if (savedLocal) appData = JSON.parse(savedLocal);
-        else initializeTickets();
+        if (savedLocal) {
+            appData = JSON.parse(savedLocal);
+        } else {
+            initializeTickets(); // Si no hay respaldo, crear tickets desde 0
+        }
+
     } finally {
-        // SIEMPRE se ejecuta
+        // ================================
+        // 5. ESTO SIEMPRE SE EJECUTA
+        // ================================
         hideLoading();
     }
 
-    // 4. UNA VEZ CARGADO TODO → Render
+
+    // ================================
+    // 6. RENDERIZAR UI DESPUÉS DE CARGAR
+    // ================================
     checkExpirations();
     renderGrid();
     updateUI();
@@ -1172,6 +1200,7 @@ document.getElementById("btnLogout").addEventListener("click", () => {
   signOut(auth);
   alert("Sesión cerrada");
 });
+
 
 
 

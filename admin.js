@@ -1,14 +1,5 @@
-//
-// =========================================================
-// RIFA CR4 - ADMIN.JS (Versión 6 - Panel de Control con Firebase)
-// =========================================================
-// Funciones: Renderizar Dashboard, Confirmar Pago, Liberar, Asignar Manual, Registrar Ganador, Exportar, Reset.
-//
-
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. REFERENCIAS GLOBALES DE FIREBASE ---
-    // Estas variables asumen que Firebase ya fue inicializado en index.html
     const database = firebase.database();
     const boletasRef = database.ref('boletas');
     const winnersRef = database.ref('rifaWinners');
@@ -21,14 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formWinner = document.getElementById('form-register-winner');
     const tableWinnerHistoryBody = document.querySelector('#table-winner-history tbody');
 
-    // =========================================================
-    // I. DASHBOARD PRINCIPAL Y LECTURA DE DATOS
-    // =========================================================
-
-    /**
-     * Renderiza las tablas de resumen de boletas Pagadas y Reservadas.
-     * Lee directamente de Firebase (lectura única).
-     */
+    
     window.renderAdminDashboard = function() {
         // Obtenemos una captura ÚNICA ('once') de los datos, más eficiente para un dashboard.
         boletasRef.once('value').then(snapshot => {
@@ -332,3 +316,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+

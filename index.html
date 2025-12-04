@@ -12,7 +12,11 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 
     <!-- 
-    Firebase para Realtime Database (database.js)
+        ========================================================================
+        1. CONFIGURACIÓN CRÍTICA DE FIREBASE (Realtime Database)
+        ======================================================================== 
+        Estas líneas cargan el SDK y lo inicializan con tu configuración.
+        NOTA: Usamos el CDN de Firebase para Realtime Database (database.js)
     -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
@@ -41,7 +45,6 @@
 </script>
 
 </head>
-<div id="infoTooltip" class="info-tooltip hidden"></div>
 <body>
 
     <div id="tooltip-reserva" class="tooltip-reserva hidden"></div>
@@ -69,6 +72,19 @@
                 </div>
             </nav>
         </header>
+
+<section class="glass-box" style="margin-top:18px; text-align:center;">
+    <h2 style="margin-bottom:6px;">¿Cómo funciona la página? 🏍️🎟️</h2>
+    <p style="font-size:0.95rem; line-height:1.5; color:var(--muted);">
+        Elige tus números disponibles del <b>000 al 999</b> y resérvalos con un solo clic. 
+        Completa tus datos y confirma la reserva por WhatsApp. 
+        Una vez el pago sea verificado, tu boleta quedará <b>marcada como PAGADA</b> y 
+        participarás automáticamente en los sorteos semanales y el sorteo final de la moto.  
+        <br><br>
+        <b>Colores:</b> 🟩 Libre – 🟨 Reservado – 🔴 Pagado
+    </p>
+</section>
+
 
         <!-- BANNER E INFORMACIÓN PRINCIPAL -->
         <section class="hero-banner fade-in">
@@ -146,27 +162,50 @@
             <h2>Reglas y Premios</h2>
             <div class="glass-box">
                 <details>
-                    <summary>¿Cuál es el premio principal?</summary>
-                    <p>El premio principal es una espectacular motocicleta CR4 125 repotenciada a 150, con todos los papeles al día y SOAT incluido. ¡Lista para rodar!</p>
-                </details>
-                <details>
-                    <summary>¿Cómo sé que la boleta está reservada?</summary>
-                    <p>Una vez que completas el formulario y envías el mensaje por WhatsApp, la boleta cambia a estado RESERVADO (Amarillo) por un plazo de 2 horas. Si no se confirma el pago en ese tiempo, la boleta se libera automáticamente.</p>
-                </details>
-                <details>
-                    <summary>¿Cuántos sorteos hay?</summary>
-                    <p>Tenemos sorteos semanales con premios en efectivo (1 Millon) y el Sorteo Final de la moto CR4 repotenciada. Todos los números comprados participan en todos los sorteos hasta la fecha final.</p>
-                </details>
-                <details>
-                    <summary>Métodos de Pago</summary>
-                    <p>Aceptamos Nequi y pagos en efectivo (contacta al administrador para detalles).</p>
-                </details>
+    <summary>📅 ¿Cuándo es el sorteo final?</summary>
+    <p>El sorteo final será el **[FECHA]** con transmisión en vivo. Todos los números entran automáticamente. 🔥</p>
+</details>
+
+<details>
+    <summary>📌 ¿Necesito estar presente para ganar?</summary>
+    <p>No es necesario. Si ganas te contactamos de inmediato para entregar el premio. 🏆</p>
+</details>
+
+<details>
+    <summary>🧾 ¿Entregan comprobante?</summary>
+    <p>Sí, cada reserva genera un registro digital en el sistema, y los pagos quedan registrados. Todo transparente. ✔</p>
+</details>
+
+<details>
+    <summary>🎫 ¿Puedo comprar varias boletas?</summary>
+    <p>¡Claro! Entre más números tengas, más probabilidades. Puede seleccionar 1, 3, 5 o todas las que quieras. 😎</p>
+</details>
+
+<details>
+    <summary>🟢 ¿Qué significan los colores de los números?</summary>
+    <p>
+        🟢 <b>Libre:</b> Disponible para comprar<br>
+        🟡 <b>Reservado:</b> Alguien lo solicitó, pero aún no pagó<br>
+        🔴 <b>Pagado:</b> Número asegurado para el sorteo
+    </p>
+</details>
+
+<details>
+    <summary>🚚 ¿Cómo entregan la moto si gano?</summary>
+    <p>Coordinamos entrega en persona con documentos y papeles al día. El ganador se lleva la moto legal y asegurada. 🏍💨</p>
+</details>
+
+<details>
+    <summary>⭐ ¿Es confiable y verificable?</summary>
+    <p>Todo el sistema registra automáticamente compras, reservas y pagos. También podrás ver ganadores anteriores. Transparencia 100%. 🔐</p>
+</details>
+
             </div>
         </section>
 
         <!-- PIE DE PÁGINA -->
         <footer>
-            <p>&copy; Rifa CR4. Creditos: Dani.</p>
+            <p>&copy; Rifa CR4. Creditos: Hero.</p>
         </footer>
     </main>
 
@@ -205,8 +244,8 @@
     <div id="modal-admin-panel" class="modal hidden">
         <div class="modal-content glass-box admin-size">
             <button class="btn-close" onclick="toggleModal('modal-admin-panel', false);">&times;</button>
-            <h2 class="neon-glow-red">Panel de Administración</h2>
-            <p>Gestión de boletas. 😎</p>
+            <h2 class="neon-glow-red">Panel de Admin</h2>
+            <p>Gestión de boletas.😎</p>
 
             <div class="admin-actions-grid">
                 <button id="btn-assign-manual" class="btn-admin-action"><i class="fas fa-edit"></i> Asignar Manual</button>
@@ -308,4 +347,3 @@
     <script src="admin.js"></script>
 </body>
 </html>
-

@@ -536,7 +536,7 @@ boletaElement.addEventListener("mouseleave", ()=>{
     tooltip.classList.remove("visible");
 });
 
-// Evento para celulares (click/tap)
+// Evento celulares (click/tap)
 boletaElement.addEventListener("click", ()=>{
     if(estado !== "libre"){
         tooltip.textContent = `Reservado por: ${boletaElement.dataset.nombre}`;

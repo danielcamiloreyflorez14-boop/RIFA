@@ -1,3 +1,40 @@
+body::before{
+  top: var(--y);
+  left: var(--x);
+}
+
+
+/* ===== FONDO ÉPICO ANIMADO ===== */
+body {
+    font-family: var(--font-main);
+    background: linear-gradient(120deg, #0a0a0a, #111, #000);
+    background-size: 400% 400%;
+    animation: bgAnimation 18s infinite alternate ease-in-out;
+    color: var(--color-text-light);
+    overflow-x: hidden;
+}
+/* Animación del degradado */
+@keyframes bgAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ⭐ Efecto de luz que sigue al mouse */
+body::before {
+    content:"";
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,255,140,0.40) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    transition: top .1s linear, left .1s linear;
+}
+
 
 :root {
     /* Paleta de Colores Principal */
@@ -328,26 +365,37 @@ main {
 
 .grid-container {
     display: grid;
-    /* 10 columnas en escritorio, adaptable */
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
-    gap: 8px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,255,100,.2);
+    transition: .3s;
+}
+.grid-container:hover{
+    box-shadow: 0 0 25px rgba(0,255,100,.4);
 }
 
-.boleta {
-    background-color: #333;
-    padding: 8px 0;
-    border-radius: 6px;
-    font-size: 1.1em;
-    font-weight: bold;
-    text-align: center;
-    transition: all 0.2s;
-    position: relative;
-    cursor: pointer;
-    overflow: hidden;
+.boleta{
+    font-size:1.1em;
+    font-weight:800;
+    padding:10px 0;
+    border-radius:8px;
+    background:#222;
+    cursor:pointer;
+    position:relative;
+    transition:.25s;
 }
+
+/* Efecto neon responsive */
+.boleta:hover{
+    transform:scale(1.09);
+    filter:brightness(1.3);
+    box-shadow:0 0 12px var(--color-secondary);
+}
+
 
 .status-text {
     position: absolute;
@@ -733,3 +781,49 @@ footer {
         flex-basis: auto;
     }
 }
+
+@media (max-width:768px){
+    .grid-container{ grid-template-columns:repeat(4,1fr); }
+}
+
+@media (min-width:769px){
+    .grid-container{ grid-template-columns:repeat(7,1fr); }
+}
+
+/* ===== Tooltip de información ===== */
+.tooltip-reserva{
+    position: fixed;
+    background: rgba(0,0,0,0.8);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: .9em;
+    pointer-events: none;
+    z-index: 5000;
+    box-shadow: 0 0 10px var(--color-secondary);
+    border: 1px solid var(--color-secondary);
+    transition: opacity .2s;
+}
+.tooltip-reserva.hidden{
+    opacity: 0;
+}
+.tooltip-reserva.visible{
+    opacity: 1;
+}
+
+.info-tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.85);
+    padding: 10px 15px;
+    border-radius: 10px;
+    color: white;
+    font-size: .9em;
+    z-index: 9999;
+    border: 1px solid var(--color-secondary);
+    box-shadow: 0 0 12px var(--color-secondary);
+    pointer-events: none;
+    transform: translate(-50%, -120%);
+    transition: opacity .2s;
+}
+.info-tooltip.hidden { opacity: 0; }
+.info-tooltip.visible { opacity: 1; }

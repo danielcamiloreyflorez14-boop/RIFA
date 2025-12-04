@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa CR4 - Gana la Moto de tus Sueños</title>
+    <title>Rifa CR4 - 1M Semanal</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -37,15 +37,26 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
     </script>
+    <script>
+        document.addEventListener("mousemove",e=>{
+            document.body.style.setProperty('--x', e.clientX+'px');
+            document.body.style.setProperty('--y', e.clientY+'px');
+    }   );
+</script>
+
 </head>
+<div id="infoTooltip" class="info-tooltip hidden"></div>
 <body>
+
+    <div id="tooltip-reserva" class="tooltip-reserva hidden"></div>
 
     <!-- PANTALLA DE CARGA (SPLASH SCREEN) -->
     <div id="splash-screen" class="splash-screen">
         <div class="intro-content">
             <i class="fas fa-motorcycle intro-icon pulse"></i>
-            <h1 class="neon-glow-red">RIFA CR4</h1>
-            <p>Cargando disponibilidad de boletas en tiempo real...</p>
+            <h1 class="neon-glow-red">Gran Rifa</h1>
+            <p>Cargando boletas...</p>
+            <p>(Por favor espere)</p>
         </div>
     </div>
 
@@ -55,7 +66,7 @@
         <!-- HEADER Y NAVEGACIÓN -->
         <header class="main-header">
             <nav class="nav-bar glass-box">
-                <span class="logo-text">CR4</span>
+                <span class="logo-text">Rifa CR4 - 1 Millon Semanal</span>
                 <div class="nav-buttons">
                     <button id="btn-admin" class="btn-nav"><i class="fas fa-user-lock"></i> Admin</button>
                     <button id="btn-ganadores" class="btn-nav"><i class="fas fa-trophy"></i> Historial</button>
@@ -67,9 +78,9 @@
         <section class="hero-banner fade-in">
             <img src="Rifa.jpg" alt="Imagen de la Moto Honda CR4 de la Rifa" class="banner-img">
             <div class="game-details glass-box slide-up">
-                <h2>¡Gana la increíble CR4!</h2>
-                <p class="price neon-glow-green">$25.000 COP / Boleta</p>
-                <p>Fecha Sorteo Principal: <span class="highlight-text">Enero 30, 2026</span></p>
+                <h2>¡Que oferton 👌!</h2>
+                <p class="price neon-glow-green">$25.000 / Boleta</p>
+                <p>Fecha Sorteo Final: <span class="highlight-text">30/01/2026</span></p>
             </div>
         </section>
 
@@ -77,7 +88,7 @@
         <section class="dashboard-stats glass-box slide-up" style="animation-delay: 1.8s;">
             <h3>Tiempo Restante</h3>
             <div class="timers-grid">
-                <div class="timer-box">
+                <div class="">
                     <p>Sorteo Final</p>
                     <div id="timer-final" class="countdown-timer neon-glow-red"></div>
                 </div>
@@ -87,7 +98,7 @@
                 </div>
             </div>
 
-            <h3 style="margin-top: 20px;">Estado de la Rifa (Real-Time)</h3>
+            <h3 style="margin-top: 20px;">Rifas completas</h3>
             <div class="stats-grid">
                 <div class="stat-item libre">
                     <p id="stat-libre">0</p>
@@ -111,7 +122,7 @@
         <!-- SELECTOR DE BOLETAS -->
         <section class="boletas-selection-section slide-up" style="animation-delay: 2.1s;">
             <div class="glass-box">
-                <h3>Selecciona tus Números (000 al 999)</h3>
+                <h3>Selecciona tus Números (000/999)👍</h3>
                 <p class="leyenda-container">
                     <span class="badge disponible"><i class="fas fa-circle"></i> Libre</span>
                     <span class="badge reservado"><i class="fas fa-circle"></i> Reservado</span>
@@ -140,26 +151,26 @@
             <div class="glass-box">
                 <details>
                     <summary>¿Cuál es el premio principal?</summary>
-                    <p>El premio principal es una espectacular motocicleta Honda CR4 nueva, con todos los papeles al día y SOAT incluido. ¡Lista para rodar!</p>
+                    <p>El premio principal es una espectacular motocicleta CR4 125 repotenciada a 150, con todos los papeles al día y SOAT incluido. ¡Lista para rodar!</p>
                 </details>
                 <details>
                     <summary>¿Cómo sé que la boleta está reservada?</summary>
-                    <p>Una vez que completas el formulario y envías el mensaje por WhatsApp, la boleta cambia a estado **RESERVADO** (Amarillo) por un plazo de 2 horas. Si no se confirma el pago en ese tiempo, la boleta se libera automáticamente.</p>
+                    <p>Una vez que completas el formulario y envías el mensaje por WhatsApp, la boleta cambia a estado RESERVADO (Amarillo) por un plazo de 2 horas. Si no se confirma el pago en ese tiempo, la boleta se libera automáticamente.</p>
                 </details>
                 <details>
                     <summary>¿Cuántos sorteos hay?</summary>
-                    <p>Tenemos sorteos semanales con premios en efectivo (o premios sorpresa) y el Sorteo Final de la moto CR4. Todos los números comprados participan en todos los sorteos hasta la fecha final.</p>
+                    <p>Tenemos sorteos semanales con premios en efectivo (1 Millon) y el Sorteo Final de la moto CR4 repotenciada. Todos los números comprados participan en todos los sorteos hasta la fecha final.</p>
                 </details>
                 <details>
                     <summary>Métodos de Pago</summary>
-                    <p>Aceptamos Nequi, Daviplata, transferencia Bancolombia y pagos en efectivo (contacta al administrador para detalles).</p>
+                    <p>Aceptamos Nequi y pagos en efectivo (contacta al administrador para detalles).</p>
                 </details>
             </div>
         </section>
 
         <!-- PIE DE PÁGINA -->
         <footer>
-            <p>&copy; 2025 Rifa CR4. Desarrollado con Firebase Real-Time.</p>
+            <p>&copy; Rifa CR4. Creditos: Dani.</p>
         </footer>
     </main>
 
@@ -184,7 +195,7 @@
 
             <form id="client-confirm-form">
                 <label for="client-name">Nombre Completo:</label>
-                <input type="text" id="client-name" required placeholder="Ej: Juan Pérez">
+                <input type="text" id="client-name" required placeholder="(Completo, obligatorio)">
 
                 <label for="client-phone">Teléfono de Contacto (WhatsApp):</label>
                 <input type="tel" id="client-phone" required placeholder="Ej: 3219876543">
@@ -199,7 +210,7 @@
         <div class="modal-content glass-box admin-size">
             <button class="btn-close" onclick="toggleModal('modal-admin-panel', false);">&times;</button>
             <h2 class="neon-glow-red">Panel de Administración</h2>
-            <p>Gestión de boletas en tiempo real.</p>
+            <p>Gestión de boletas. 😎</p>
 
             <div class="admin-actions-grid">
                 <button id="btn-assign-manual" class="btn-admin-action"><i class="fas fa-edit"></i> Asignar Manual</button>

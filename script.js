@@ -1,8 +1,3 @@
-function validarTelefono(tel) {
-  const digits = String(tel).replace(/\D/g, '');
-  return /^3\d{9}$/.test(digits) || /^\d{10}$/.test(digits);
-}
-
 //
 // =========================================================
 // RIFA CR4 - SCRIPT.JS (Versión 6 - Lógica REAL-TIME con Firebase y Caducidad)
@@ -17,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SELECCION = 3;
     const WHATSAPP_NUMBER = "573219637388"; // Número de contacto
     
-    // Contraseña codificada (000-999) para el Admin
+    // Contraseña codificada (pango) para el Admin
     const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; 
 
     // Fechas de Sorteo (Ejemplo profesional)
@@ -207,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Genera o refresca la grilla de boletas en el DOM.
      */
-    function generarBoletas(
-    filter = searchInput.value, statusFilter = filterStatus.value) {
+    function generarBoletas(filter = searchInput.value, statusFilter = filterStatus.value) {
         gridContainer.innerHTML = '';
         const fragment = document.createDocumentFragment();
         
@@ -374,8 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     confirmClientForm.addEventListener('submit', (e) => {
         e.preventDefault();
-
-    
+        
         const nombre = document.getElementById('client-name').value.trim();
         const telefono = document.getElementById('client-phone').value.trim();
         
@@ -424,11 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const mensaje = 
                     `*✅ RESERVA DE BOLETAS - RIFA CR4*\n\n` +
-                    `Hola, mi nombre es *${nombre}* y mi número de contacto es ${telefono}. He reservado las siguientes boletas para la rifa de la Moto CR4:\n\n` +
+                    `Hola, mi nombre es *${nombre}* y mi número de contacto es *${telefono}*. He reservado las siguientes boletas para la rifa de la Moto CR4:\n\n` +
                     `*🎫 Números:* ${numeros}\n` +
-                    `*💰 Valor Total:* $${totalFormatted} COP\n\n` +
-                    `*⚠️ Esta reserva vence en 2 horas si no se confirma el pago.*\n\n` +
-                    `Por favor, envíame los detalles de pago para asegurar mi reserva y pasarla a estado PAGADA.`;
+                    `*💰 Valor Total:* $${totalFormatted} COP\n` +
+                    `*⚠️ Esta reserva vence en 2 horas.*\n` +
+                    `Por favor, espere ya le mando el comprobante de Nequi.`;
 
                 const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
                 
@@ -536,7 +529,7 @@ boletaElement.addEventListener("mouseleave", ()=>{
     tooltip.classList.remove("visible");
 });
 
-// Evento celulares (click/tap)
+// Evento para celulares (click/tap)
 boletaElement.addEventListener("click", ()=>{
     if(estado !== "libre"){
         tooltip.textContent = `Reservado por: ${boletaElement.dataset.nombre}`;

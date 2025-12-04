@@ -1,3 +1,8 @@
+function validarTelefono(tel) {
+  const digits = String(tel).replace(/\D/g, '');
+  return /^3\d{9}$/.test(digits) || /^\d{10}$/.test(digits);
+}
+
 //
 // =========================================================
 // RIFA CR4 - SCRIPT.JS (Versión 6 - Lógica REAL-TIME con Firebase y Caducidad)
@@ -202,7 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Genera o refresca la grilla de boletas en el DOM.
      */
-    function generarBoletas(filter = searchInput.value, statusFilter = filterStatus.value) {
+    function generarBoletas(
+    filter = searchInput.value, statusFilter = filterStatus.value) {
         gridContainer.innerHTML = '';
         const fragment = document.createDocumentFragment();
         
@@ -300,50 +306,53 @@ document.addEventListener('DOMContentLoaded', () => {
         statPagado.textContent = (stats['pagado'] || 0).toLocaleString();
     }
     
-    // =========================================================
-    // III. CONTADORES (Tiempo Real)
-    // =========================================================
+   //CUENTA REGRESIVA XD    
+   function startCounters() {
+    const timerFinal = document.getElementById('timer-final');
+    const timerSemanal = document.getElementById('timer-semanal');
 
-    function startCounters() {
-        // ... (código de contadores - sin cambios)
-        const timerFinal = document.getElementById('timer-final');
-        const timerSemanal = document.getElementById('timer-semanal');
+    setInterval(() => {
+        const now = new Date().getTime();
 
-        setInterval(() => {
-            const now = new Date().getTime();
-            
-            // Contador Final
-            const distFinal = FECHA_SORTEO_FINAL - now;
-            if (distFinal > 0) {
-                const d = Math.floor(distFinal / (1000 * 60 * 60 * 24));
-                const h = Math.floor((distFinal % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distFinal % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distFinal % (1000 * 60)) / 1000);
-                timerFinal.innerHTML = `${d}D ${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M ${s.toString().padStart(2, '0')}S`;
-            } else {
-                timerFinal.innerHTML = "¡SORTEO FINALIZADO!";
-            }
+        const FECHA_SORTEO_FINAL = new Date('2026-01-30T22:00:00').getTime();
+        const distFinal = FECHA_SORTEO_FINAL - now;
 
-            // Contador Semanal
-            let proximoSemanal = new Date(FECHA_SORTEO_SEMANAL_BASE);
-            while (proximoSemanal.getDay() !== 5 || proximoSemanal.getTime() < now) {
-                proximoSemanal.setDate(proximoSemanal.getDate() + 1);
-            }
-            proximoSemanal.setHours(22, 0, 0, 0); 
+        if (distFinal > 0) {
+            const d = Math.floor(distFinal / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distFinal % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distFinal % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distFinal % (1000 * 60)) / 1000);
+            timerFinal.innerHTML = `${d}D ${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M ${s.toString().padStart(2, '0')}S`;
+        } else {
+            timerFinal.innerHTML = "¡SORTEO FINALIZADO!";
+        }
 
-            const distSemanal = proximoSemanal.getTime() - now;
-            if (distSemanal > 0) {
-                const d = Math.floor(distSemanal / (1000 * 60 * 60 * 24));
-                const h = Math.floor((distSemanal % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distSemanal % (1000 * 60 * 60)) / (1000 * 60));
-                timerSemanal.innerHTML = `${d}D ${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M`;
-            } else {
-                timerSemanal.innerHTML = "¡SORTEO SEMANAL EN CURSO!";
-            }
+        const FECHA_LIMITE_SEMANAL = new Date('2026-01-23T22:00:00');
+        let proximoSemanal = new Date();
+        proximoSemanal.setHours(22, 0, 0, 0);
 
-        }, 1000);
-    }
-    
+        while (
+            (proximoSemanal.getDay() !== 5 || proximoSemanal.getTime() <= now) &&
+            proximoSemanal <= FECHA_LIMITE_SEMANAL
+        ) {
+            proximoSemanal.setDate(proximoSemanal.getDate() + 1);
+        }
+
+        const distSemanal = proximoSemanal.getTime() - now;
+
+        if (distSemanal > 0) {
+            const d = Math.floor(distSemanal / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distSemanal % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distSemanal % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distSemanal % (1000 * 60)) / 1000);
+            timerSemanal.innerHTML = `${d}D ${h.toString().padStart(2, '0')}H ${m.toString().padStart(2, '0')}M ${s.toString().padStart(2, '0')}S`;
+        } else {
+            timerSemanal.innerHTML = "¡SORTEO SEMANAL EN CURSO!";
+        }
+
+    }, 1000);
+}
+
     // =========================================================
     // IV. PROCESO DE COMPRA Y WHATSAPP (Actualización a Firebase)
     // =========================================================
@@ -365,7 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     confirmClientForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
+    
         const nombre = document.getElementById('client-name').value.trim();
         const telefono = document.getElementById('client-phone').value.trim();
         
@@ -501,4 +511,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("[INIT] Aplicación V6 Real-Time iniciada. Firebase conectado.");
         })
         .catch(e => console.error("Fallo crítico en la inicialización de Firebase:", e));
+});
+
+// Tooltip
+const tooltip = document.getElementById("tooltip-reserva");
+
+// Cuando generes cada boleta agrega esto:
+boletaElement.dataset.nombre = nombrePersona || "Sin nombre"; // <-- debes asignar desde tu BD
+
+// Eventos PC
+boletaElement.addEventListener("mouseenter", (e)=>{
+    if(estado !== "libre"){
+        tooltip.textContent = `Reservado por: ${boletaElement.dataset.nombre}`;
+        tooltip.classList.remove("hidden");
+        tooltip.classList.add("visible");
+    }
+});
+boletaElement.addEventListener("mousemove",(e)=>{
+    tooltip.style.left = (e.pageX + 15) + "px";
+    tooltip.style.top = (e.pageY + 15) + "px";
+});
+boletaElement.addEventListener("mouseleave", ()=>{
+    tooltip.classList.add("hidden");
+    tooltip.classList.remove("visible");
+});
+
+// Evento para celulares (click/tap)
+boletaElement.addEventListener("click", ()=>{
+    if(estado !== "libre"){
+        tooltip.textContent = `Reservado por: ${boletaElement.dataset.nombre}`;
+        tooltip.style.left = "50%";
+        tooltip.style.top = "70%";
+        tooltip.classList.remove("hidden");
+        tooltip.classList.add("visible");
+        setTimeout(()=>tooltip.classList.add("hidden"),2500);
+    }
 });

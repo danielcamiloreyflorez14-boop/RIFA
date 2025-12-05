@@ -1,3 +1,4 @@
+
 //
 // =========================================================
 // RIFA CR4 - SCRIPT.JS (Versión 6 - Lógica REAL-TIME con Firebase y Caducidad)
@@ -540,3 +541,29 @@ boletaElement.addEventListener("click", ()=>{
         setTimeout(()=>tooltip.classList.add("hidden"),2500);
     }
 });
+// =========================================================
+// FUNCIÓN: Liberar una Boleta
+// =========================================================
+window.liberarBoleta = function(boletaId) {
+    if (!confirm(`¿Está seguro de LIBERAR la boleta #${boletaId}? Esto la pondrá como 'libre' y eliminará los datos del cliente.`)) return;
+
+    // 1. Referencia a la boleta específica
+    const boletaRef = boletasRef.child(boletaId);
+
+    // 2. Actualizar a estado 'libre'
+    boletaRef.update({
+        status: 'libre',
+        nombre: null,
+        telefono: null,
+        reservaTimestamp: null,
+        caducaTimestamp: null
+    })
+    .then(() => {
+        alert(`✅ Boleta #${boletaId} liberada con éxito. ¡Refrescando el Panel!`);
+        renderAdminDashboard(); // Vuelve a renderizar el dashboard para reflejar el cambio
+    })
+    .catch(error => {
+        console.error("Error al liberar la boleta:", error);
+        alert("❌ Error al liberar la boleta. Revisa la consola.");
+    });
+}

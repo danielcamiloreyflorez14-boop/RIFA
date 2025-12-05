@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const database = firebase.database();
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.onclick = () => confirmPayment(parseInt(btn.dataset.id));
             });
 
-            document.querySelectorAll('.btn-liberar-boleta').forEach(btn => {
+            document.querySelectorAll('.btn-table-release').forEach(btn => {
                 btn.onclick = () => releaseBoleta(parseInt(btn.dataset.id));
             });
             
@@ -78,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>
                             ${isReserved ? 
                                 `<button class="btn-table-confirm btn-pagar-confirma" data-id="${b.id}">PAGAR</button>` :
-                                `<button class="btn-table-release btn-table-release" data-id="${b.id}">LIBERAR</button>`
+                                `<button class="btn-table-release" data-id="${b.id}">LIBERAR</button>`
                             }
                             ${isReserved ? `<span class="small-text"> (${expiration})</span>` : ''}
                         </td>

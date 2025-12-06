@@ -46,51 +46,69 @@ document.addEventListener('DOMContentLoaded', () => {
      * Genera el HTML de las tablas de Pagados/Reservados.
      */
     function renderTable(tableElement, data, status) {
-        if (!tableElement) return;
-        
-        const isReserved = status === 'reservado';
-        
-        let html = `
-            <thead>
+    if (!tableElement) return;
+    
+    const isReserved = status === 'reservado';
+    
+    // --- Define la fecha y hora de expiración fija (30/01/2026 09:58:00) ---
+    // NOTA: Se define aquí para que esté disponible dentro del forEach.
+    const fixedExpirationDate = new Date('2026-01-30T09:58:00'); 
+
+    let html = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>${isReserved ? 'Vencimiento' : 'Acciones'}</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    if (data.length === 0) {
+        html += `<tr><td colspan="4">No hay boletas ${status}s.</td></tr>`;
+    } else {
+        data.forEach(b => {
+            const numStr = b.num;
+            
+            // --------------------------------------------------------------------------
+            // CAMBIO CLAVE: Usar la fecha fija en lugar del cálculo (timestamp + 2h)
+            // --------------------------------------------------------------------------
+            const expiration = isReserved
+                ? fixedExpirationDate.toLocaleDateString('es-CO', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                  }) + ' ' + fixedExpirationDate.toLocaleTimeString('es-CO', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                  })
+                : 'Pagado';
+            // --------------------------------------------------------------------------
+
+            html += `
                 <tr>
-                    <th>#</th>
-                    <th>Cliente</th>
-                    <th>Teléfono</th>
-                    <th>${isReserved ? 'Vencimiento' : 'Acciones'}</th>
+                    <td>${numStr}</td>
+                    <td>${b.owner || 'N/A'}</td>
+                    <td><a href="https://wa.me/57${b.phone}" target="_blank">${b.phone || 'N/A'}</a></td>
+                    <td>
+                        ${isReserved ? 
+                            // Si está reservado, se muestra el botón PAGAR
+                            `<button class="btn-table-confirm btn-pagar-confirma" data-id="${b.id}">PAGAR</button>` :
+                            // Si no está reservado (estatus diferente), se muestra el botón LIBERAR
+                            `<button class="btn-table-release" data-id="${b.id}">LIBERAR</button>`
+                        }
+                        ${isReserved ? `<span class="small-text"> (${expiration})</span>` : ''}
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-        `;
-
-        if (data.length === 0) {
-            html += `<tr><td colspan="4">No hay boletas ${status}s.</td></tr>`;
-        } else {
-            data.forEach(b => {
-                const numStr = b.num;
-                const expiration = isReserved && b.reservationTimestamp 
-                    ? new Date(b.reservationTimestamp + (2 * 60 * 60 * 1000)).toLocaleTimeString('es-CO')
-                    : 'Pagado';
-
-                html += `
-                    <tr>
-                        <td>${numStr}</td>
-                        <td>${b.owner || 'N/A'}</td>
-                        <td><a href="https://wa.me/57${b.phone}" target="_blank">${b.phone || 'N/A'}</a></td>
-                        <td>
-                            ${isReserved ? 
-                                `<button class="btn-table-confirm btn-pagar-confirma" data-id="${b.id}">PAGAR</button>` :
-                                `<button class="btn-table-release" data-id="${b.id}">LIBERAR</button>`
-                            }
-                            ${isReserved ? `<span class="small-text"> (${expiration})</span>` : ''}
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-        
-        html += '</tbody>';
-        tableElement.innerHTML = html;
+            `;
+        });
     }
+    
+    html += '</tbody>';
+    tableElement.innerHTML = html;
+}
 
     // =========================================================
     // II. ACCIONES DEL ADMINISTRADOR (UPDATE en Firebase)

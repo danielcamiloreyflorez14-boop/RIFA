@@ -896,28 +896,3 @@ footer {
 .tooltip-reserva.visible{
     opacity: 1;
 }
-.responsive-video {
-    /* El video siempre ocupará el 90% del ancho del contenedor */
-    width: 90%; 
-    /* La altura se ajusta automáticamente para mantener la proporción */
-    height: auto; 
-    /* Centra el video */
-    display: block; 
-    margin: 0 auto;
-    /* Borde suave */
-    border-radius: 12px;
-    /* Sombra para que destaque */
-    box-shadow: 0 10px 30px rgba(0, 255, 140, 0.3);
-}
-
-/* Adaptación para pantallas muy pequeñas */
-@media (max-width: 600px) {
-    .responsive-video {
-        /* En móviles, ocupa el 100% del ancho */
-        width: 100%; 
-        border-radius: 0;
-    }
-    #video-promo-container {
-        padding: 30px 0;
-    }
-}

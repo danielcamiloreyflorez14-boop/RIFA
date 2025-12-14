@@ -20,6 +20,9 @@
     -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script> <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script>
         // ESTA ES LA CONFIGURACIÓN QUE ME PROPORCIONASTE
         const firebaseConfig = {
@@ -46,6 +49,23 @@
 
 </head>
 <body>
+
+<div id="modal-admin-login" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-btn" onclick="toggleModal('modal-admin-login', false)">&times;</span>
+        <h2>🔒 Acceso de Administrador</h2>
+        <form id="admin-login-form">
+            <label for="admin-email">Email:</label>
+            <input type="email" id="admin-email" required>
+
+            <label for="admin-password">Contraseña:</label>
+            <input type="password" id="admin-password" required>
+            
+            <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            <p id="login-error-message" class="error-text"></p>
+        </form>
+    </div>
+</div>
 
     <div id="tooltip-reserva" class="tooltip-reserva hidden"></div>
 
@@ -340,41 +360,21 @@
             </div>
         </div>
     </div>
-
-    <section id="video-promo-container">
-        <video width="1920" height="1014" controls autoplay muted loop playsinline class="responsive-video">
-            <source src="edit.mp4" type="video/mp4">
-            Tu navegador no soporta la etiqueta de video.
-        </video>
-    </section>
-    
     <footer class="main-footer">
 
     <footer class="epic-footer">
         <div class="footer-content glass-box">
-            <div class="footer-section">
-                <h3 class="neon-glow-green">Rifa CR4 🏆</h3>
-                <p>¡Participa por la Moto y Gana 1M Semanal!</p>
-                <p class="small">Lleva tu suerte al siguiente nivel.</p>
-            </div>
             
             <div class="footer-section contact-info">
                 <h3>Contacto Directo del Desarrollador</h3>
                 <p><i class="fas fa-user"></i> Daniel Camilo Rey Flórez</p>
-                <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/573227086610" target="_blank">322 708 6610</a></p>
-                <p><i class="fas fa-envelope"></i>danielcamilo.14@outlook.com</p>
+                <p> <a href="https://danielcamiloreyflorez14-boop.github.io/RIFA/creditos.html" target="_blank">Pagina del administraor</a></p>
             </div>
             
             <div class="footer-section">
                 <h3>Legal & Créditos</h3>
                 <p class="credit-text small">
-                    Diseño y Desarrollo de Plataforma: <span class="highlight-text">Daniel Camilo Rey Flórez</span>
-                </p>
-                <p class="credit-text small">
                     © 2025 | Todos los derechos reservados.
-                </p>
-                <p class="credit-text small version">
-                    Creo paginas economicas.
                 </p>
             </div>
         </div>

@@ -1,10 +1,3 @@
-
-//
-// =========================================================
-// RIFA CR4 - SCRIPT.JS (Versión 6 - Lógica REAL-TIME con Firebase y Caducidad)
-// =========================================================
-//
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. CONFIGURACIÓN GLOBAL Y CONSTANTES ---
@@ -13,8 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SELECCION = 3;
     const WHATSAPP_NUMBER = "573219637388"; // Número de contacto
     
-    // Contraseña codificada (pango) para el Admin
-    const ADMIN_PASS_ENCODED = "MDAwLTk5OQ=="; 
+    // Contraseña codificada (pango) para el Admin 
 
     // Fechas de Sorteo (Ejemplo profesional)
     const FECHA_SORTEO_FINAL = new Date("Jan 30, 2026 22:00:00 GMT-0500").getTime(); 
@@ -460,25 +452,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // Listener para el botón de Admin (SEGURIDAD con Contraseña)
-    document.getElementById('btn-admin').addEventListener('click', () => {
-        
-        const passwordAttempt = prompt("🔒 Por favor, introduce la contraseña de administrador:");
-        
-        if (passwordAttempt === null) return;
+    // =========================================================
+// V. LISTENERS ADICIONALES Y SEGURIDAD
+// =========================================================
 
-        const attemptEncoded = btoa(passwordAttempt.trim());
-        
-        if (attemptEncoded === ADMIN_PASS_ENCODED) {
-            window.toggleModal('modal-admin-panel', true);
+// Listener para el botón de Admin (SEGURIDAD con Contraseña)
+document.getElementById('btn-admin').addEventListener('click', () => {
+
+    // ❌ ELIMINAMOS TODA ESTA LÓGICA ANTIGUA (prompt, btoa, etc.)
+    // const passwordAttempt = prompt("🔒 Por favor, introduce la contraseña de administrador:");
+    // ...
+    // if (attemptEncoded === ADMIN_PASS_ENCODED) { ... }
+
+    // ✨ NUEVA LÓGICA: Abrir el modal de login de Firebase Auth ✨
+    window.toggleModal('modal-admin-login', true);
+});
+
+// ✨ AÑADIR NUEVA LÓGICA DE INICIO DE SESIÓN CON FIREBASE AUTH ✨
+document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('admin-email').value;
+    const password = document.getElementById('admin-password').value;
+    const errorMessage = document.getElementById('login-error-message');
+    errorMessage.textContent = ''; // Limpiar errores
+
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // ÉXITO: Usuario autenticado
+            window.toggleModal('modal-admin-login', false); // Cerrar login
+            window.toggleModal('modal-admin-panel', true); // Abrir panel
+
             // Llama a la función de renderizado del dashboard (en admin.js)
             if (typeof renderAdminDashboard === 'function') {
-                 renderAdminDashboard(); 
+                renderAdminDashboard(); 
             }
-        } else {
-            alert("🚫 Contraseña incorrecta. Acceso denegado.");
-        }
-    });
+        })
+        .catch((error) => {
+            // FALLO: Mostrar el error
+            console.error("Error de autenticación:", error.message);
+            errorMessage.textContent = "Error al iniciar sesión. Verifica el email y la contraseña.";
+            document.getElementById('admin-password').value = ''; // Limpiar contraseña
+        });
+});
+// ... (El resto de script.js se mantiene igual)
 
     // Listener para el botón de Ganadores (Renderiza el historial)
     document.getElementById('btn-ganadores').addEventListener('click', () => {
@@ -545,8 +562,11 @@ boletaElement.addEventListener("click", ()=>{
 // FUNCIÓN: Liberar una Boleta
 // =========================================================
 window.liberarBoleta = function(boletaId) {
-    if (!confirm(`¿Está seguro de LIBERAR la boleta #${boletaId}? Esto la pondrá como 'libre' y eliminará los datos del cliente.`)) return;
-
+    if (!isAdminAuthenticated()) {
+        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
+        return;
+    }
+    if (!confirm(`¿Está seguro de marcar la boleta #${boletaId} como 'PAGADA'?`)) return;
     // 1. Referencia a la boleta específica
     const boletaRef = boletasRef.child(boletaId);
 

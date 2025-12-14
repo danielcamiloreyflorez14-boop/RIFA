@@ -291,6 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Exportar Datos a CSV (Utilidad simple)
     document.getElementById('btn-download-data').addEventListener('click', () => {
         boletasRef.once('value').then(snapshot => {
+            if (!isAdminAuthenticated()) { // ✨ AÑADIR COMPROBACIÓN ✨
+        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
+        return;
+    }
             const boletasData = snapshot.val() ? Object.values(snapshot.val()) : [];
             if (boletasData.length === 0) {
                 alert("No hay datos para exportar.");
@@ -322,8 +326,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 2. RESET TOTAL (Elimina todos los datos de Firebase)
     document.getElementById('btn-reset-data').addEventListener('click', () => {
-        if (!confirm('🚨 ADVERTENCIA CRÍTICA: Esta acción eliminará TODA la base de datos de boletas y ganadores de Firebase. ¿Desea continuar?')) return;
-
+        if (!isAdminAuthenticated()) { // ✨ AÑADIR COMPROBACIÓN ✨
+        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
+        return;
+    }
+    if (!confirm('🚨 ADVERTENCIA CRÍTICA: ...')) return;
         // Eliminar ambos nodos de Firebase
         boletasRef.set(null) // Borra todas las boletas
             .then(() => winnersRef.set(null)) // Borra todos los ganadores
@@ -335,4 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
-
+/**
+ * Verifica si el usuario actual es el administrador autenticado.
+ * @returns {boolean} True si hay un usuario autenticado.
+ */
+function isAdminAuthenticated() {
+    return !!firebase.auth().currentUser;
+}

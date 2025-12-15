@@ -1,3 +1,60 @@
+// =========================================================
+// FUNCIÓN: CERRAR SESIÓN (LOGOUT)
+// =========================================================
+window.signOutAdmin = function() {
+    if (confirm('¿Estás seguro de que quieres cerrar la sesión de administrador?')) {
+        firebase.auth().signOut().then(() => {
+            alert('✅ Sesión cerrada con éxito.');
+            window.location.reload(); // Recarga la página para mostrar la vista pública
+        }).catch((error) => {
+            console.error("Error al cerrar sesión:", error);
+            alert('🚫 Error al intentar cerrar sesión. Inténtalo de nuevo.');
+        });
+    }
+}
+
+
+// =========================================================
+// FUNCIÓN CRÍTICA: CONTROL DE VISTA DE ADMINISTRADOR
+// Esta función decide si mostrar o no los botones y el panel
+// =========================================================
+firebase.auth().onAuthStateChanged((user) => {
+    // Referencias a elementos que cambian con el login
+    const adminLink = document.getElementById('admin-link'); // El botón principal 'Admin'
+    const adminPanel = document.getElementById('admin-main-view'); // El contenedor del dashboard
+
+    if (user) {
+        // --- 1. ADMIN AUTENTICADO ---
+        if (adminLink) {
+            adminLink.textContent = '🔒 Admin (Salir)';
+            // Al hacer clic, ahora llama a la función de cerrar sesión
+            adminLink.onclick = window.signOutAdmin; 
+        }
+        
+        // Muestra el panel principal del dashboard
+        if (adminPanel) {
+            adminPanel.style.display = 'block';
+            // Si la función renderAdminDashboard existe (en admin.js), la ejecutamos
+            if (window.renderAdminDashboard) window.renderAdminDashboard();
+        }
+        console.log("[AUTH] Administrador logueado.");
+    } else {
+        // --- 2. USUARIO PÚBLICO ---
+        if (adminLink) {
+            adminLink.textContent = 'Admin';
+            // Al hacer clic, abre el modal de login (asumiendo que tu código ya maneja esto)
+            // No cambiamos el onclick, asumiendo que ya apunta a abrir el modal.
+        }
+        
+        // Oculta el panel principal del dashboard
+        if (adminPanel) {
+            adminPanel.style.display = 'none';
+        }
+        console.log("[AUTH] Usuario público.");
+    }
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. CONFIGURACIÓN GLOBAL Y CONSTANTES ---
@@ -562,11 +619,10 @@ boletaElement.addEventListener("click", ()=>{
 // FUNCIÓN: Liberar una Boleta
 // =========================================================
 window.liberarBoleta = function(boletaId) {
-    if (!isAdminAuthenticated()) {
-        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
-        return;
-    }
-    if (!confirm(`¿Está seguro de marcar la boleta #${boletaId} como 'PAGADA'?`)) return;
+    // 🎉 Ya no se necesita el chequeo de JavaScript. El servidor de Firebase lo hace por nosotros.
+    
+    if (!confirm(`¿Está seguro de marcar la boleta #${boletaId} como 'LIBRE'?`)) return; // Nota: Corregí el texto de 'PAGADA' a 'LIBRE'
+
     // 1. Referencia a la boleta específica
     const boletaRef = boletasRef.child(boletaId);
 
@@ -583,7 +639,8 @@ window.liberarBoleta = function(boletaId) {
         renderAdminDashboard(); // Vuelve a renderizar el dashboard para reflejar el cambio
     })
     .catch(error => {
+        // Importante: Si el usuario NO está logueado, Firebase enviará un error.
         console.error("Error al liberar la boleta:", error);
-        alert("❌ Error al liberar la boleta. Revisa la consola.");
+        alert("❌ Error de Permisos. Asegúrate de haber iniciado sesión como Administrador."); 
     });
 }

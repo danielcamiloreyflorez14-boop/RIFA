@@ -49,10 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tableElement) return;
     
     const isReserved = status === 'reservado';
-    
-    // --- Define la fecha y hora de expiración fija (30/01/2026 09:58:00) ---
-    // NOTA: Se define aquí para que esté disponible dentro del forEach.
-    const fixedExpirationDate = new Date('2026-01-30T09:58:00'); 
 
     let html = `
         <thead>
@@ -72,20 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.forEach(b => {
             const numStr = b.num;
             
-            // --------------------------------------------------------------------------
-            // CAMBIO CLAVE: Usar la fecha fija en lugar del cálculo (timestamp + 2h)
-            // --------------------------------------------------------------------------
-            const expiration = isReserved
-                ? fixedExpirationDate.toLocaleDateString('es-CO', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                  }) + ' ' + fixedExpirationDate.toLocaleTimeString('es-CO', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                  })
-                : 'Pagado';
-            // --------------------------------------------------------------------------
+            <th>${isReserved ? 'Fecha Rifa' : 'Acciones'}</th>
 
             html += `
                 <tr>
@@ -288,13 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // V. HERRAMIENTAS DE MANTENIMIENTO (EXPORTAR Y RESET)
     // =========================================================
 
-    // 1. Exportar Datos a CSV (Utilidad simple)
+// 1. Exportar Datos a CSV (Utilidad simple)
     document.getElementById('btn-download-data').addEventListener('click', () => {
         boletasRef.once('value').then(snapshot => {
-            if (!isAdminAuthenticated()) { // ✨ AÑADIR COMPROBACIÓN ✨
-        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
-        return;
-    }
+            
+            // 🔥 CÓDIGO ELIMINADO:
+            // if (!isAdminAuthenticated()) { ... return; }
+            // Esto se elimina porque el chequeo de JavaScript es inseguro.
+            
             const boletasData = snapshot.val() ? Object.values(snapshot.val()) : [];
             if (boletasData.length === 0) {
                 alert("No hay datos para exportar.");
@@ -306,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Datos
             boletasData.forEach(b => {
+                // Aseguramos que los campos nulos sean cadenas vacías para el CSV
                 csvContent += `${b.num},${b.status},"${b.owner || ''}","${b.phone || ''}",${b.reservationTimestamp || ''}\n`;
             });
 
@@ -321,31 +306,32 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(link);
             
             alert("✅ Datos exportados con éxito.");
+        })
+        .catch(e => {
+            // Este catch es la protección de último recurso si la lectura falla
+            console.error("Error al exportar datos:", e);
+            alert("❌ ERROR DE PERMISOS. Asegúrate de haber iniciado sesión como Administrador.");
         });
-    });
-    
-    // 2. RESET TOTAL (Elimina todos los datos de Firebase)
+    c   
+// 2. RESET TOTAL (Elimina todos los datos de Firebase)
     document.getElementById('btn-reset-data').addEventListener('click', () => {
-        if (!isAdminAuthenticated()) { // ✨ AÑADIR COMPROBACIÓN ✨
-        alert("🚫 Acceso denegado. Por favor, inicia sesión como administrador.");
-        return;
-    }
-    if (!confirm('🚨 ADVERTENCIA CRÍTICA: ...')) return;
-        // Eliminar ambos nodos de Firebase
+        
+        // 1. ELIMINAMOS el chequeo inseguro de JavaScript. La seguridad la da Firebase.
+        
+        if (!confirm('🚨 ADVERTENCIA CRÍTICA: ESTO BORRARÁ TODA LA RIFA. ¿CONFIRMAR ELIMINACIÓN TOTAL?')) return;
+        
+        // 2. Se mantiene la lógica de borrado de la base de datos
         boletasRef.set(null) // Borra todas las boletas
             .then(() => winnersRef.set(null)) // Borra todos los ganadores
             .then(() => {
-                alert('Base de datos completamente borrada. La página se recargará para re-inicializar los 1000 números.');
+                alert('✅ Base de datos completamente borrada. La página se recargará para re-inicializar los 1000 números.');
                 window.location.reload(); // Recargar para forzar la inicialización en script.js
             })
-            .catch(e => console.error("Error al resetear la base de datos:", e));
+            .catch(e => {
+                console.error("Error al resetear la base de datos:", e);
+                // 3. AÑADIMOS un mensaje claro que explica el fallo por falta de login
+                alert("❌ ERROR DE PERMISOS. La operación fue rechazada por Firebase. Asegúrate de haber iniciado sesión con la cuenta de administrador.");
+            });
     });
-
-});
-/**
- * Verifica si el usuario actual es el administrador autenticado.
- * @returns {boolean} True si hay un usuario autenticado.
- */
-function isAdminAuthenticated() {
-    return !!firebase.auth().currentUser;
-}
+    })
+})

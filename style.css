@@ -876,7 +876,7 @@ footer {
     .grid-container{ grid-template-columns:repeat(7,1fr); }
 }
 
-/* ===== Tooltip de información ===== */
+/* ===== Tooltip de informacn ===== */
 .tooltip-reserva{
     position: fixed;
     background: rgba(0,0,0,0.8);
@@ -896,3 +896,4 @@ footer {
 .tooltip-reserva.visible{
     opacity: 1;
 }
+76 
